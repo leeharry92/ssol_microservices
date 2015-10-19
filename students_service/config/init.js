@@ -1,5 +1,7 @@
 'use strict';
 
+var glob = require('glob');
+
 module.exports = function() {
 		glob('./config/env/' + process.env.NODE_ENV + '.js', {
 		sync: true
