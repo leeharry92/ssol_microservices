@@ -3,8 +3,10 @@ var router = express.Router();
 var students = require('./students_controller')
 
 
-router.get('/', students.index);
+router.get('/', students.find);
+router.post('/', students.create);
+
 router.get('/:uni', students.show);
-router.post('');
+
 
 module.exports = router;
