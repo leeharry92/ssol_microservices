@@ -8,9 +8,10 @@ db.Students.insert(
 		"last_name": "Lee",
 		"address": "123 High Street",
 		"class": 2016,
-		"UNI": "hhl2114",
+		"uni": "hhl2114",
 		"majors": ["Computer Science"],
-		"minors":["Entrepreneurship"]
+		"minors":["Entrepreneurship"],
+		"courses": [98054, 63453, 10762, 21107]
 	}
 );
 
@@ -20,9 +21,10 @@ db.Students.insert(
 		"last_name": "Hong",
 		"address": "1230 Cross Street",
 		"class": 2016,
-		"UNI": "hh2473",
+		"uni": "hh2473",
 		"majors": ["Computer Engineering"],
-		"minors": []
+		"minors": [],
+		"courses": [15415, 29215, 14730, 13818]
 	}
 );
 

@@ -2,14 +2,18 @@ var express = require('express');
 var path = require('path');
 var logger = require('morgan');
 var bodyParser = require('body-parser');
-var MongoClient = require('mongodb').MongoClient;
-var Promise = require('bluebird');
 var fs = require('fs');
 var http = require('http');
 
+// Database-related dependencies
+var Promise = require('bluebird');
+var MongoDB = Promise.promisifyAll(require('mongodb'));
+var MongoClient = Promise.promisifyAll(MongoDB.MongoClient);
+
+
 var init = require('./config/init')();
 var config = require('./config/config');
-var routes = require('./routes')
+var routes = require('./routes');
 
 var app = express();
 var server = http.createServer(app);
@@ -54,7 +58,7 @@ app.use(function(req, res, next) {
 if (process.env.NODE_ENV === 'development') {
   app.use(function(err, req, res, next) {
     res.status(err.status || 500);
-    res.render('error', {
+    res.json({
       message: err.message,
       error: err
     });
