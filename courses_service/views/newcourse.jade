@@ -1,0 +1,8 @@
+extends layout
+
+block content
+    h1= title
+    form#formAddUser(name="addcourse",method="post",action="/addcourse")
+        input#inputSubject(type="text", placeholder="subject", name="subject")
+        input#inputLocation(type="text", placeholder="location", name="location")
+        button#btnSubmit(type="submit") submit
