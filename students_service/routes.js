@@ -10,7 +10,8 @@ router.post('/attributes', students.add_attribute);
 router.delete('/attributes', students.remove_attribute);
 
 router.get('/:uni', students.show);
-router.delete('/:uni', students.remove)
+router.delete('/:uni', students.remove);
+router.put('/:uni', students.update);
 router.put('/:uni/add-course', students.add_course);
 router.put('/:uni/remove-course', students.remove_course);
 

@@ -79,7 +79,6 @@ exports.show = function(req, res, next) {
 	var db = req.app.locals.db;
 	var collection = db.collection('Students');
 	var uni_param = req.params.uni;
-	console.log(uni_param)
 	collection.findOneAsync({uni: uni_param})
 	.then(function(content) {
 			if (content == null) {
@@ -202,27 +201,186 @@ exports.add_course = function(req, res, next) {
 	var db = req.app.locals.db;
 	var collection = db.collection('Students');
 	var course = req.body.course;
-	var uni_param = req.body.uni
+	var uni_param = req.params.uni;
 
 	if (course === undefined) {
 		var err = new Error('Must specify course to add');
 		err.status = 400;
 		next(err);
 	} else {
-		collection.findOneAsync({uni: uni_param})
-		.then(function(content) {
-			if (content == null) {
-				var err = new Error('Specified student not found');
-				err.status = 404;
-				next(err);
-			} else {
-				
-			}
+		var callNumber = parseInt(course);
+		if (isNaN(callNumber)) {
+			var err = new Error('Invalid call number');
+			err.status = 400;
+			next(err);
+		} else {
+			collection.findOneAsync({uni: uni_param})
+			.then(function(student) {
+				if (student == null) {
+					var err = new Error('Specified student not found');
+					err.status = 404;
+					next(err);
+				} else {
+					var courseList = student.courses;
+					
+					// If courses list does not exist, initialize empty array
+					if (courseList == null) {
+						courseList = [];
+					}
+
+					if (_.indexOf(courseList, callNumber) != -1) {
+						var err = new Error('Student is already registered for course specified');
+						err.status = 400;
+						next(err);
+					} else {
+						courseList.push(callNumber);
+						collection.updateOne({_id: student._id},
+																 {$set: {courses: courseList}}, 
+																 function(error, result) {
+																 	if (error === null) {
+																		res.sendStatus(200);
+																	} else {
+																		var err = new Error('Database error');
+																		err.status = 500;
+																		next(err);
+																	}
+																 });
+					}
+				}
+			});
+		}
 	}
 };
 
 exports.remove_course = function(req, res, next) {
+	var db = req.app.locals.db;
+	var collection = db.collection('Students');
+	var course = req.body.course;
+	var uni_param = req.params.uni;
 
+	if (course === undefined) {
+		var err = new Error('Must specify course to remove');
+		err.status = 400;
+		next(err);
+	} else {
+		var callNumber = parseInt(course);
+		if (isNaN(callNumber)) {
+			var err = new Error('Invalid call number');
+			err.status = 400;
+			next(err);
+		} else {
+			collection.findOneAsync({uni: uni_param})
+			.then(function(student) {
+				if (student == null) {
+					var err = new Error('Specified student not found');
+					err.status = 404;
+					next(err);
+				} else {
+					var courseList = student.courses;
+					var index;
+					if (courseList == null || 
+							(index = _.indexOf(courseList, callNumber)) == -1) {
+						var err = new Error('Student is not registered for course specified');
+						err.status = 400;
+						next(err);
+					} else {
+						var removed = courseList.splice(index, 1);
+						collection.updateOne({_id: student._id},
+																 {$set: {courses: courseList}}, 
+																 function(error, result) {
+																 	if (error === null) {
+																		res.sendStatus(200);
+																	} else {
+																		var err = new Error('Database error');
+																		err.status = 500;
+																		next(err);
+																	}
+																 });
+					}
+				}
+			});
+		}
+	}
+};
+
+exports.update = function(req, res, next) {
+	var db = req.app.locals.db;
+	var collection = db.collection('Students');
+	var course = req.body.course;
+	var uni_param = req.params.uni;
+	var params = req.body;
+	var param_keys = Object.keys(params);
+
+	collection.findOneAsync({uni: uni_param})
+	.then(function(student) {
+			if (student == null) {
+				var err = new Error('Specified student not found');
+				err.status = 404;
+				next(err);
+			} else {
+					collection.findOneAsync({}).then(function(content) {
+						return Object.keys(content)
+					}).then(function(schema_keys) {
+						var valid = true;
+						var contains_uni = false;
+						_(param_keys).forEach(function(key) {
+							// Disallow changing courses throug this endpoint
+							if (key == "courses" ||  _.indexOf(schema_keys, key) == -1) {
+								valid = false;
+							}
+							if (key == "uni") {
+								contains_uni = true;
+							}
+						});
+
+						if (!valid) {
+							var err = new Error('Specified attribute(s) are not valid');
+							err.status = 400;
+							next(err);
+						} else {
+							var updateContent = {};
+							_(param_keys).forEach(function(key) {
+								updateContent[key] = params[key];
+							});
+
+							if (contains_uni) {
+									collection.findOneAsync({uni: params["uni"]}).then(function(result) {
+											if (result != null && result._id != student._id) {
+												var err = new Error('UNI must be unique');
+												err.status = 400;
+												next(err);
+											} else {
+												collection.updateOne({_id: student._id},
+																						 {$set: updateContent}, 
+																						 function(error, result) {
+																						 	if (error === null) {
+																								res.sendStatus(200);
+																							} else {
+																								var err = new Error('Database error');
+																								err.status = 500;
+																								next(err);
+																							}
+																						 });
+											}
+									});
+								} else {
+									collection.updateOne({_id: student._id},
+																			 {$set: updateContent}, 
+																			 function(error, result) {
+																			 	if (error === null) {
+																					res.sendStatus(200);
+																				} else {
+																					var err = new Error('Database error');
+																					err.status = 500;
+																					next(err);
+																				}
+																			 });
+						}
+					}
+			});
+
+		}
+	});
 };
 
 
