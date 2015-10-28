@@ -1,19 +1,19 @@
 
-========== INSTALL DEPENDENCIES within the 'courses' directory
-	npm install cookie-parser
-	npm install body-parser
-	npm install method-override
-	npm install morgan
-	npm install errorhandler
-	npm install mongoose
+# INSTALL DEPENDENCIES within the 'courses' directory
+npm install cookie-parser
+npm install body-parser
+npm install method-override
+npm install morgan
+npm install errorhandler
+npm install mongoose
 
-To Launch:
-	nodemon app.js
+# To Launch:
+nodemon app.js
 
 
-
-=========== THE COURSES APIs (Command Line Templates) ====================
-
+# ==========================================
+# THE COURSES APIs (Command Line Templates)
+# ==========================================
 From another command line, you can execute the following APIs:
 (Note: in the browser, you can view all courses via http://localhost:3000/courses)
 
