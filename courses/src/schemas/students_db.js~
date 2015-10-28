@@ -1,0 +1,27 @@
+var mongoServer = 'mongodb://localhost/students_db';
+var mongoose = require( 'mongoose' );
+var Schema   = mongoose.Schema;
+
+//module.exports = function() {
+	var students_model = new Schema({
+		user_id    : String,
+		name	   : String,
+		content    : [String],
+		updated_at : Date
+	});
+
+	mongoose.model( 'students_model', students_model ); // model
+	var students_db = mongoose.createConnection(mongoServer);
+	db.on('error', function(err){
+	  if(err) throw err;
+	});
+
+	db.once('open', function callback () {
+	  console.info('Mongo db connected successfully on: '+mongoServer);
+	});
+
+	module.exports = db;
+
+//};
+
+

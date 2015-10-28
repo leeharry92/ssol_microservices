@@ -1,0 +1,306 @@
+var utils    = require( '../../utils' );
+
+// require the database, which has already been connected
+var db = require('../schemas/db.js');
+var test_model = db.model('test_model');
+
+
+var pagetitle = "Students Info";
+var ioLabel = "student"; //used for webpage editing
+var root = '/students/';
+
+
+
+// routes.test handler
+exports.test = function (req,res,next){
+
+	var url = 'localhost';
+	var options = {
+	  host: url,
+	  port: 3000,
+	  path: root+'all',
+	  method: 'GET'
+	};
+
+	require( 'http' ).request(options, function(res) {
+	  console.log('STATUS: ' + res.statusCode);
+	  console.log('HEADERS: ' + JSON.stringify(res.headers));
+	  res.setEncoding('utf8');
+	  res.on('data', function (chunk) {
+		console.log('BODY: ' + chunk + '\n');
+		var object = JSON.parse(chunk);
+		for (var i = 0; i<object.length; i++){
+			console.log(object[i].name);
+		}
+
+	  });
+	}).end();
+
+
+
+	res.redirect( root );
+
+
+
+
+}; // ends exports.index
+
+
+// routes.index handler
+exports.index = function (REST_CALL, io){
+	// need this return syntax because we are passing io from app.js
+	return function(req, res, next ){
+
+
+	  // assign a unique ID
+	  var user_id = req.cookies ?
+		req.cookies.user_id : undefined;
+
+	  test_model.
+		find({ user_id : user_id }).
+		sort( '-updated_at' ).
+		exec( function ( err, test_models ){
+
+			if( err ) return next( err );
+
+			if (REST_CALL){
+
+				res.json(test_models);
+
+			} else{
+
+			console.log("index1");
+				// render the webpage with a title and schema instances
+				res.render( 'index.jade', {
+				  title : pagetitle,
+				  test_models : test_models, //pass the schema instances
+				  path : root,
+				  ioLabel : ioLabel
+				});
+			}
+
+		});
+	}; // ends return
+}; // ends exports.index
+
+
+// routes.create handler
+exports.create = function (io) {
+    return function(req, res, next) {
+        console.log("exports.create1");
+
+	  new test_model({
+		  user_id    : req.cookies.user_id,
+		  name		 : req.body.name,
+		  content    : req.body.contents,//["randcourse1","randcourse2"],
+		  updated_at : Date.now()
+	  }).save( function ( err, test_model, count ){
+	console.log("create1a");
+			if( err ) return next( err );
+			console.log("create1b");
+			io.emit('createStudent', test_model);
+			res.redirect( root );
+			console.log("create1redirect: "+root);
+		
+	  });
+
+
+    };
+};
+
+
+
+
+exports.destroyname = function (REST_CALL, io) {
+    return function(req, res, next) {
+        console.log("exports.destroyname1");
+
+	  test_model.findById( req.params.id, function ( err, test_model ){
+		var user_id = req.cookies ?
+		  req.cookies.user_id : undefined;
+	
+	/*
+		if( test_model.user_id !== user_id ){
+		  return utils.forbidden( res );
+		}
+	*/
+
+		test_model.remove( function ( err, destroy_test_model ){
+		  if( err ) return next( err );
+
+			io.emit('destroyname', destroy_test_model._id);
+
+			if (REST_CALL){
+				console.log("REST");
+				res.json(destroy_test_model);
+			} else {
+			  	res.redirect( root );
+			};
+
+		});
+	  });
+
+
+    };
+};
+
+
+
+
+exports.destroycontent = function (REST_CALL, io) {
+    return function(req, res, next) {
+        console.log("exports.destroycontent1");
+
+	  test_model.findById( req.params.id, function ( err, test_model ){
+		var user_id = req.cookies ?
+		  req.cookies.user_id : undefined;
+	
+	/*
+		if( test_model.user_id !== user_id ){
+		  return utils.forbidden( res );
+		}
+	*/
+
+		// build a new content array, excluding the element removed 
+		console.log(test_model.content);
+		var index2exclude = 1;
+		var newContentArray = [];
+		for (var i = 0; i < test_model.content.length; i++){
+			if (i == index2exclude){
+			} else {
+				newContentArray.push(test_model.content[i]);
+			}
+		}
+		test_model.content = newContentArray;
+
+		// save the new model
+		test_model.save( function ( err, test_model, count ){
+			if( err ) return next( err );
+
+			io.emit('destroycontent', {data: test_model._id, courseindex: index2exclude});
+
+			res.redirect( root );
+		});
+
+
+	  });
+
+
+
+    };
+};
+
+
+
+exports.editname = function( req, res, next ){
+  var user_id = req.cookies ?
+      req.cookies.user_id : undefined;
+
+  var webpage = true; // if rendered via GUI
+
+  test_model.
+    find({ user_id : user_id }).
+    sort( '-updated_at' ).
+    exec( function ( err, test_models ){
+      if( err ) return next( err );
+
+      res.render( 'edit.jade', {
+        title   : pagetitle,
+        test_models   : test_models,
+        current : req.params.id,
+		path : root,
+		ioLabel : ioLabel
+      });
+    });
+};
+
+
+
+exports.edittest = function (REST_CALL) {
+    return function(req, res, next) {
+        console.log("exports.edittest1");
+
+	  var user_id = req.cookies ?
+		  req.cookies.user_id : undefined;
+
+	  // if a REST CALL was rendered, return JSON
+	  if (REST_CALL) {
+		  test_model
+			.findById(req.params.id, function(err, results) {
+				return res.send({
+				  user_id    : results.user_id,
+				  name		 : results.name,
+				  content    : results.content,
+				  updated_at : Date.now()
+				});
+			});
+	  } else {
+		  var webpage = true; // if rendered via GUI
+		  test_model.
+			find({ user_id : user_id }).
+			sort( '-updated_at' ).
+			exec( function ( err, test_models ){
+			  if( err ) return next( err );
+
+			  res.render( 'edit.jade', {
+				title   : pagetitle,
+				test_models   : test_models,
+				current : req.params.id,
+				webpage : webpage,
+				root : root,
+				ioLabel : ioLabel
+			  });
+			});
+
+		}; // ends else
+
+
+    };
+};
+
+
+
+
+exports.update = function( io) {
+
+	return function ( req, res, next ){
+
+	  test_model.findById( req.params.id, function ( err, test_model ){
+		var user_id = req.cookies ?
+		  req.cookies.user_id : undefined;
+
+		if( test_model.user_id !== user_id ){
+		  return utils.forbidden( res );
+		}
+
+		test_model.name    = req.body.name;
+		test_model.content    = req.body.content;
+		test_model.updated_at = Date.now();
+		test_model.save( function ( err, test_model, count ){
+
+			if( err ) return next( err );
+			io.emit('update', "update");
+			res.redirect( root );
+
+		});
+	  });
+
+
+	}
+};
+
+
+// ** express turns the cookie key to lowercase **
+exports.current_user = function ( req, res, next ){
+  var user_id = req.cookies ?
+      req.cookies.user_id : undefined;
+
+  if( !user_id ){
+    res.cookie( 'user_id', utils.uid( 32 ));
+  }
+
+  next();
+};
+
+
+

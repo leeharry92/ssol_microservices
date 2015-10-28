@@ -1,0 +1,18 @@
+var schemas_path = './schemas/';
+var models = ['db.js','db2.js'];
+
+exports.initialize = function() {
+
+
+    var l = models.length;
+    for (var i = 0; i < l; i++) {
+		//var conn = mongoose.createConnection('mongodb://mongoserver/'+models[i]);
+        require(schemas_path+models[i])();
+
+		var mongoose = require("mongeese").create();
+		mongoose.connect('mongodb://localhost/server-name');
+
+
+    }
+
+};
