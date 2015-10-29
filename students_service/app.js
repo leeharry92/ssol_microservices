@@ -5,6 +5,10 @@ var bodyParser = require('body-parser');
 var fs = require('fs');
 var http = require('http');
 
+//Pub Sub dependency
+var redis = require("redis"),
+client = redis.createClient()
+
 // Database-related dependencies
 var Promise = require('bluebird');
 var MongoDB = Promise.promisifyAll(require('mongodb'));
@@ -25,13 +29,13 @@ app.set('showStackError', true);
 
 // Environment dependent middleware
 if (process.env.NODE_ENV === 'development') {
-	// Enable logger (morgan)
-	app.use(logger('dev'));
+  // Enable logger (morgan)
+  app.use(logger('dev'));
 
-	// Disable views cache
-	app.set('view cache', false);
+  // Disable views cache
+  app.set('view cache', false);
 } else if (process.env.NODE_ENV === 'production') {
-	app.locals.cache = 'memory';
+  app.locals.cache = 'memory';
 }
 
 MongoClient.connect(config.db, { promiseLibrary: Promise }, (err, db) => {
@@ -79,4 +83,6 @@ server.listen(config.port);
 module.exports = app;
 console.log('Server has started o port ' + config.port);
 
+// Testing publishing to referential integrity channel:
+client.publish("a nice channel", "I am sending a message from Jonathan.");
 
