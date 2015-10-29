@@ -25,13 +25,13 @@ app.set('showStackError', true);
 
 // Environment dependent middleware
 if (process.env.NODE_ENV === 'development') {
-	// Enable logger (morgan)
-	app.use(logger('dev'));
+  // Enable logger (morgan)
+  app.use(logger('dev'));
 
-	// Disable views cache
-	app.set('view cache', false);
+  // Disable views cache
+  app.set('view cache', false);
 } else if (process.env.NODE_ENV === 'production') {
-	app.locals.cache = 'memory';
+  app.locals.cache = 'memory';
 }
 
 MongoClient.connect(config.db, { promiseLibrary: Promise }, (err, db) => {
@@ -78,5 +78,4 @@ app.use(function(err, req, res, next) {
 server.listen(config.port);
 module.exports = app;
 console.log('Server has started o port ' + config.port);
-
 
