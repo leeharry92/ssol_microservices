@@ -9,6 +9,7 @@ To set up the database:
 
 	mongo students_service setup_db.js
 
+
 Before you run the application:
 run "npm install"
 
