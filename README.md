@@ -5,10 +5,6 @@ To set up the database:
 
 	mongod
 	
-1. run mongod on separate terminal window
-
-	mongo students_service setup_db.js
-	
 2. run mongo
 
 	mongo students_service setup_db.js
