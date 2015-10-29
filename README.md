@@ -2,7 +2,12 @@
 
 To set up the database:
 1. run mongod on separate terminal window
-2. run "mongo students_service setup_db.js"
+
+	mongod
+	
+2. run mongo
+
+	mongo students_service setup_db.js
 
 Before you run the application:
 run "npm install"
