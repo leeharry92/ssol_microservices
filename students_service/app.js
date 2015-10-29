@@ -5,6 +5,10 @@ var bodyParser = require('body-parser');
 var fs = require('fs');
 var http = require('http');
 
+//Pub Sub dependency
+var redis = require("redis"),
+client = redis.createClient()
+
 // Database-related dependencies
 var Promise = require('bluebird');
 var MongoDB = Promise.promisifyAll(require('mongodb'));
@@ -78,4 +82,7 @@ app.use(function(err, req, res, next) {
 server.listen(config.port);
 module.exports = app;
 console.log('Server has started o port ' + config.port);
+
+// Testing publishing to referential integrity channel:
+client.publish("a nice channel", "I am sending a message from Jonathan.");
 
