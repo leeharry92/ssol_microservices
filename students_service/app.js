@@ -42,7 +42,7 @@ if (process.env.NODE_ENV === 'development') {
 
 MongoClient.connect(config.db, { promiseLibrary: Promise }, (err, db) => {
   if (err) {
-    logger.warn(`Failed to connect to the database. ${err.stack}`);
+    logger.warn("Failed to connect to the database. ${err.stack}");
   }
   app.locals.db = db;
 });
