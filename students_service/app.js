@@ -84,34 +84,43 @@ server.listen(config.port);
 module.exports = app;
 console.log('Server has started on port ' + config.port);
 
+
+
+
 // *** Pub Sub Activity ***
+//TEST
 var test = "test"
 var test_message = JSON.stringify({"message": "update student add course", "uni": "jc4267", "course_name": test })
 //client.publish("ri channel", "I am sending a message from Jonathan.");
-client1.publish("ri channel", test_message);
+client1.publish("ri channel", test_message);  // TEST message
 
 client2.on("subscribe", function () {
     console.log("Subscribed to student channel...")
 });
+// END TEST
+
 
 client2.subscribe("student channel");
 
 client2.on("message", function (channel, message) { // Listens for ri channel JSON messgages
 
     console.log("client1 channel " + channel + ": " + message);
-    obj = JSON.parse(message)
-    console.log("event recieved is: " , obj.message)
 
     // Parse the JSON message and publish message to student or course channel
-    if (obj.message == "blah") {
+    obj = JSON.parse(message)
+    console.log("event recieved is: '", obj.message, "' from channel: ", channel)
+
+    if (obj.message == "update student add course") {
         // Parse JSON and do action to database
+        console.log("recieved message: ", obj.message)
+        // add student to course in database
     }
 
-    else if (obj.message == "blah") {
+    else if (obj.message == "update student delete course") {
         
     }
 
-    else if (obj.message == "blah") {
+    else if (obj.message == "delete course") {
         
     }
 

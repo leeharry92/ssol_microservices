@@ -14,10 +14,10 @@ client1.on("subscribe", function (channel, count) {
 });
  
 client1.on("message", function (channel, message) { // Listens for ri channel JSON messgages
-    console.log("client1 channel " + channel + ": " + message);
+    console.log("client1 channel name: " + channel + ": " + message);
     msg_count += 1;
     obj = JSON.parse(message)
-    console.log("event recieved is: " , obj.message)
+    console.log("event recieved is: '", obj.message, "' from channel: ", channel)
 
     /*if (msg_count === 3) {
         client1.unsubscribe();
@@ -31,7 +31,8 @@ client1.on("message", function (channel, message) { // Listens for ri channel JS
         // Changes to courses microservice need to happen, publish to course channel
         case "update student add course":
             var message =JSON.stringify({"message": "update course add student", "uni": "jc4267", "course_name": "blah" })
-            client3.publish("course channel", message)
+            client3.publish("student channel", message)
+            console.log("Just published to course channel...")
         break;
 
         case "update student delete course":
