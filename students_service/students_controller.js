@@ -2,7 +2,7 @@
 
 var redis = require("redis"),
     client = redis.createClient()
-    
+
 var _ = require('lodash');
 var required_keys = ['first_name', 'last_name', 'uni'];
 var no_delete_keys = ['first_name', 'last_name', 'uni', 'courses'];
@@ -242,15 +242,18 @@ exports.add_course = function(req, res, next) {
 																 function(error, result) {
 																 	if (error === null) {
 																		res.sendStatus(200);
+																		//  Publishing to referential integrity channel the event
+																		var event_message = {
+																						message: "update student add course",
+																						course_name: course
+																						};
+																		client.publish("ri channel", "I am sending a message.");
 																	} else {
 																		var err = new Error('Database error');
 																		err.status = 500;
 																		next(err);
 																	}
 																 });
-
-						// Testing publishing to referential integrity channel:
-						client.publish("a nice channel", "I am sending a message.");
 
 					}
 				}

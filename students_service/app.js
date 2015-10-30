@@ -6,8 +6,10 @@ var fs = require('fs');
 var http = require('http');
 
 //Pub Sub dependency
-var redis = require("redis"),
-client = redis.createClient()
+var redis = require("redis")
+
+client1 = redis.createClient() // Publishes to ri channel
+client2 = redis.createClient() // Subscribes to student channel
 
 // Database-related dependencies
 var Promise = require('bluebird');
@@ -56,7 +58,6 @@ app.use(function(req, res, next) {
 
 
 // error handlers
-
 // development error handler
 // will print stacktrace
 if (process.env.NODE_ENV === 'development') {
@@ -81,8 +82,39 @@ app.use(function(err, req, res, next) {
 
 server.listen(config.port);
 module.exports = app;
-console.log('Server has started o port ' + config.port);
+console.log('Server has started on port ' + config.port);
 
-// Testing publishing to referential integrity channel:
-client.publish("a nice channel", "I am sending a message from Jonathan.");
+// *** Pub Sub Activity ***
+var test = "test"
+var test_message = JSON.stringify({"message": "update student add course", "uni": "jc4267", "course_name": test })
+//client.publish("ri channel", "I am sending a message from Jonathan.");
+client1.publish("ri channel", test_message);
+
+client2.on("subscribe", function () {
+    console.log("Subscribed to student channel...")
+});
+
+client2.subscribe("student channel");
+
+client2.on("message", function (channel, message) { // Listens for ri channel JSON messgages
+
+    console.log("client1 channel " + channel + ": " + message);
+    obj = JSON.parse(message)
+    console.log("event recieved is: " , obj.message)
+
+    // Parse the JSON message and publish message to student or course channel
+    if (obj.message == "blah") {
+        // Parse JSON and do action to database
+    }
+
+    else if (obj.message == "blah") {
+        
+    }
+
+    else if (obj.message == "blah") {
+        
+    }
+
+});
+
 
