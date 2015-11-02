@@ -1,7 +1,7 @@
 module.exports = function(app){
 
 	// ROUTING FOR COURSES
-	var create_controller = require('./routes_controllers/create_controller');
+	var schema_controller = require('./routes_controllers/schema_controller');
 	var read_controller = require('./routes_controllers/read_controller');
 	var update_controller = require('./routes_controllers/update_controller');
 	var delete_controller = require('./routes_controllers/delete_controller');
@@ -11,7 +11,7 @@ module.exports = function(app){
 
 
 	// create
-	app.post( root,    								create_controller.createCourse() );
+	app.post( root,    								schema_controller.createCourse() );
 
 	// read
 	app.get(  root,		            				read_controller.returnCourseInfo() );
@@ -28,8 +28,8 @@ module.exports = function(app){
 
 
 	// config - schema changes
-	app.post( '/schema'+root,    					create_controller.addKEY() );
-	app.delete( '/schema'+root,    					create_controller.deleteKEY() );
+	app.post( '/schema'+root,    					schema_controller.addKEY() );
+	app.delete( '/schema'+root,    					schema_controller.deleteKEY() );
 	//app.put( root+'/:course/:attribute',			attributes_controller.updateKeyInAttributes() );
 
 };
