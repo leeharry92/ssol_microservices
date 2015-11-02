@@ -20,39 +20,50 @@
 ```
 
 <br /> 
+
 <br /> 
+
 ### 2. CONFIGURATION
 All configurable parameters are accessible the following JSON file:
    - /courses_service/config/config.json
+
 <br /> 
+
 ##### A. Server Configurables
   -  mongo.host : <host> {type: string}
   -  mongo.port : <port> {type: integer}
+
 <br /> 
+
 ##### B. Schema Configurables
   -  courseAttributes : <key(s)> {type: string array}
   -  Attributes can also be added and removed via API (see Section 4 under 'MODIFY THE SCHEMA')
 
 <br /> 
+
 <br /> 
+
 ### 3. Launch:
 ```sh
   $ nodemon app.js
 ```
 
 <br /> 
+
 <br /> 
+
 ### 4. API Documentation (as Command Line Templates):
 
 From the command line, following APIs can be executed:
 
-##### CREATE A NEW COURSE
+##### A. CREATE A NEW COURSE
 ```sh
 $ curl -H "Content-Type: application/json" -X POST -d '{"name":"<course_name>"}' http://<host>:<port>/courses/
 ```
 
 <br /> 
-##### GET COURSE INFORMATION
+
+##### B. GET COURSE INFORMATION
 
 ###### - ALL COURSES:
 ```sh
@@ -64,32 +75,37 @@ $ curl -H "Content-Type: application/json" -X GET http://<host>:<port>/courses?n
 ```
 
 <br /> 
-##### ADD A STUDENT TO A COURSE
+
+##### C. ADD A STUDENT TO A COURSE
 ```sh
 $ curl -i -X PUT -H 'Content-Type: application/json' -d '{"students":{"lastname":"<lastname>","firstname":"<firstname>"}}' http://<host>:<port>/courses?name=<course_name>
 ```
 
 <br /> 
-##### DELETE A COURSE
+
+##### D. DELETE A COURSE
 ```sh
 $ curl -H "Content-Type: application/json" -X DELETE http://<host>:<port>/courses?name=<course_name>
 ```
 Note: '%20' can be used for one whitespace (i.e. <course_name> = course%204 --> 'course 4')
 
 <br /> 
-##### REMOVE A STUDENT FROM ONE COURSE
+
+##### E. REMOVE A STUDENT FROM ONE COURSE
 ```sh
 $ curl -i -X DELETE -H 'Content-Type: application/json' -d '{"students":{"lastname":"<lastname>","firstname":"<firstname>"}}' http://<host>:<port>/courses/<course_name>
 ```
 
 <br /> 
-##### REMOVE A STUDENT FROM ALL COURSES
+
+##### F. REMOVE A STUDENT FROM ALL COURSES
 ```sh
 $ curl -i -X DELETE -H 'Content-Type: application/json' -d '{"students":{"lastname":"<lastname>","firstname":"<firstname>"}}' http://<host>:<port>/student
 ```
 
 <br /> 
-##### MODIFY THE SCHEMA
+
+##### G. MODIFY THE SCHEMA
 
 ###### -ADD A USER-DEFINED KEY TO THE SCHEMA:
 ```sh
@@ -105,9 +121,13 @@ $ curl -i -X DELETE -H 'Content-Type: application/json' -d '{"key":"<key>"}' htt
 ```
 
 <br /> 
+
 <br /> 
+
 ### 5. Example
+
 <br /> 
+
 ##### A. Set Configuration (/courses_service/config/config.json)
 
 ```json
@@ -123,6 +143,7 @@ $ curl -i -X DELETE -H 'Content-Type: application/json' -d '{"key":"<key>"}' htt
 ```
 
 <br /> 
+
 ##### B. POST a course and PUT a student to that course
 ```sh
 curl -H "Content-Type: application/json" -X POST -d '{"name":"Microservices and APIs"}' http://localhost:3000/courses/
@@ -130,7 +151,6 @@ curl -H "Content-Type: application/json" -X POST -d '{"name":"Microservices and 
 curl -i -X PUT -H 'Content-Type: application/json' -d '{"students":{"lastname":"Burrows","firstname":"Peter"}}' http://localhost:3000/courses?name=microservices%20and%20apis
 ```
 
-##### Resulting Model:
 
 ```json
 [
@@ -152,6 +172,7 @@ curl -i -X PUT -H 'Content-Type: application/json' -d '{"students":{"lastname":"
 ```
 
 <br /> 
+
 ##### C. PUT a value to the user-defined key
 
 Note: The key, "instructor", was previously initialized in the config.json file
@@ -160,7 +181,6 @@ Note: The key, "instructor", was previously initialized in the config.json file
 curl -i -X PUT -H 'Content-Type: application/json' -d '{"instructor":"Don Ferguson"}' http://localhost:3000/courses?name=microservices%20and%20apis
 ```
 
-##### Resulting Model:
 
 ```json
 [
@@ -182,6 +202,7 @@ curl -i -X PUT -H 'Content-Type: application/json' -d '{"instructor":"Don Fergus
 ```
 
 <br /> 
+
 ##### D. POST another user-defined key and PUT a value to the key
 
 ```sh
@@ -190,8 +211,6 @@ curl -i -X POST -H 'Content-Type: application/json' -d '{"key":"ROOM"}' http://l
 curl -i -X PUT -H 'Content-Type: application/json' -d '{"ROOM":"428 Pupin"}' http://localhost:3000/courses?name=microservices%20and%20apis
 ```
 
-
-##### Resulting Model:
 
 ```json
 [
@@ -214,14 +233,13 @@ curl -i -X PUT -H 'Content-Type: application/json' -d '{"ROOM":"428 Pupin"}' htt
 ```
 
 <br /> 
+
 ##### E. DELETE a user-defined key and remove a student from a course
 ```sh
 curl -i -X DELETE -H 'Content-Type: application/json' -d '{"key":"instructor"}' http://localhost:3000/schema/courses
 
 curl -i -X DELETE -H 'Content-Type: application/json' -d '{"students":{"lastname":"Burrows","firstname":"Peter"}}' http://localhost:3000/courses/microservices%20and%20apis
 ```
-
-##### Resulting Model:
 
 ```JSON
 [
@@ -237,7 +255,9 @@ curl -i -X DELETE -H 'Content-Type: application/json' -d '{"students":{"lastname
 ```
 
 <br /> 
+
 <br /> 
+
 ### 6. Known Issues
 
   - Unexpected behavior when adding courses and names with characters that are not letters nor numerals
