@@ -13,7 +13,6 @@
   - mongoose
   - nconf
 
-<br /> 
 ##### Dependencies Installation:
 ```sh
   $ npm install
@@ -55,6 +54,8 @@ All configurable parameters are accessible the following JSON file:
 ### 4. API Documentation (as Command Line Templates):
 
 From the command line, following APIs can be executed:
+
+<br /> 
 
 ##### A. CREATE A NEW COURSE
 ```sh
