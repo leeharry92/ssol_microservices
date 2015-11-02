@@ -7,6 +7,9 @@ var courses_model = requireDB.getModel;
  
 var model = courses_db.model('courses_model');
 
+var redis = require("redis")
+clientRI = redis.createClient() // Publishes to ri channel
+
 
 
 var root = '/courses/';
@@ -75,6 +78,15 @@ exports.updateCourse = function( ) {
 						course_found.save();
 						console.log('-> '+lastname+', '+firstname+' is added to '+name+'.');
 						res.send(true);
+
+						// Publish to to the referential integrity that the course has been updated
+						// with a student
+						students_request["sender"] = 'courses_micro_service';
+						students_request["action"] = 'update student add course';
+						var message =JSON.stringify(students_request)
+
+            			clientRI.publish("referential integrity", message)
+
 
 					};
 			}); // ends model.findOne

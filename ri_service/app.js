@@ -1,68 +1,29 @@
 var redis = require("redis")
 
-client1 = redis.createClient() // Subscribes to ri channel
-client2 = redis.createClient() // Publishes to student channel
-client3 = redis.createClient() // Publishes to course channel
+clientRI = redis.createClient() // Subscribes to ri channel
+clientStudent = redis.createClient()// Publishes to student channel
 
-msg_count = 0;
- 
-client1.on("subscribe", function (channel, count) {
-    console.log("Subscribed to ri channel...")
-    client2.publish("a nice channel", "I am sending a message.");
-    client2.publish("a nice channel", "I am sending a second message.");
-    client2.publish("a nice channel", "I am sending my last message.");
+clientRI.subscribe("referential integrity");
+clientStudent.subscribe("referential integrity");
+
+clientRI.on("subscribe", function (channel, count) {
+    console.log("Subscribed to" + channel + "channel...")
 });
- 
-client1.on("message", function (channel, message) { // Listens for ri channel JSON messgages
-    console.log("client1 channel name: " + channel + ": " + message);
-    msg_count += 1;
+
+clientRI.on("message", function (channel, message) { // Listens for ri channel JSON messgages
+    console.log("Channel name: " + channel);
+    console.log("Message: " + message);
     obj = JSON.parse(message)
-    console.log("event recieved is: '", obj.message, "' from channel: ", channel)
 
-    /*if (msg_count === 3) {
-        client1.unsubscribe();
-        client1.end();
-        client2.end();
-    }*/
-
-    // Parse the JSON message and publish message to student or course channel
-    switch (obj.message) {
-
-        // Changes to courses microservice need to happen, publish to course channel
-        case "update student add course":
-            var message =JSON.stringify({"message": "update course add student", "uni": "jc4267", "course_name": "blah" })
-            client3.publish("student channel", message)
-            console.log("Just published to course channel...")
-        break;
-
-        case "update student delete course":
-            var message =JSON.stringify({"message": "update course delete student", "uni": "jc4267", "course_name": "blah" })
-            client3.publish("course channel", message)
-        break;
-
-        case "delete student":
-            var message =JSON.stringify({"message": "delete student", "uni": "jc4267" })
-            client3.publish("course channel", message)
-        break;
-
-        // Changes to students microservice need to happen, publish to student channel
-        case "update course add student":
-            var message =JSON.stringify({"message": "update student add course", "uni": "jc4267", "course_name": "blah" })
-            client2.publish("student channel", message)
-        break;
-
-        case "update course delete student":
-            var message =JSON.stringify({"message": "update student delete course", "uni": "jc4267", "course_name": "blah" })
-            client2.publish("student channel", message)
-        break;
-
-        case "delete course":
-            var message =JSON.stringify({"message": "delete course", "course_name": "jc4267" })
-            client2.publish("student channel", message)
-        break; 
-
+    // Publish to the students microservice
+    if (obj.sender == "courses_micro_service") {
+        clientStudent.publish("students microservice", message);
+        console.log("Published to students microservice" +  message)
     }
-
+    // Publish to the courses microservice 
+    else if (obj.sender == "students_micro_service") {
+        clientStudent.publish("courses microservice", message);
+        console.log("Published to courses microservice" +  message)
+    }
+    
 });
- 
-client1.subscribe("ri channel");
