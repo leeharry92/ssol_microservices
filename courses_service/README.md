@@ -93,5 +93,86 @@ $ curl -i -X DELETE -H 'Content-Type: application/json' -d '{"key":"<key>"}' htt
 
 ### 5. Examples
 
+##### POST a course and PUT a student to that course
+```sh
+	curl -H "Content-Type: application/json" -X POST -d '{"name":"Microservices and APIs"}' http://localhost:3000/courses/
+```
+```sh
+	curl -i -X PUT -H 'Content-Type: application/json' -d '{"students":{"lastname":"Burrows","firstname":"Peter"}}' http://localhost:3000/courses?name=microservices%20and%20apis
+```
+
+
+```json
+[
+     {
+          "_id": "5636d656d6b7a8e50b8c293d",
+          "name": "MICROSERVICES AND APIS",
+          "updated_at": "2015-11-02T03:19:50.511Z",
+          "instructor": null,
+          "__v": 1,
+          "students": [
+               {
+                    "lastname": "BURROWS",
+                    "firstname": "PETER",
+                    "_id": "5636d662d6b7a8e50b8c293e"
+               }
+          ]
+     }
+]
+'''
+
+##### PUT a value to the user-defined key
+Note: The key, "instructor", was previously initialized in the config.json file
+
+```sh
+curl -i -X PUT -H 'Content-Type: application/json' -d '{"instructor":"Don Ferguson"}' http://localhost:3000/courses?name=microservices%20and%20apis
+```
+
+```json
+[
+     {
+          "_id": "5636d656d6b7a8e50b8c293d",
+          "name": "MICROSERVICES AND APIS",
+          "updated_at": "2015-11-02T03:19:50.511Z",
+          "instructor": "DON FERGUSON",
+          "__v": 1,
+          "students": [
+               {
+                    "lastname": "BURROWS",
+                    "firstname": "PETER",
+                    "_id": "5636d662d6b7a8e50b8c293e"
+               }
+          ]
+     }
+]
+```
+
+##### POST another user-defined key
+curl -i -X POST -H 'Content-Type: application/json' -d '{"key":"ROOM"}' http://localhost:3000/schema/courses
+
+```json
+[
+     {
+          "_id": "5636d951d6b7a8e50b8c2940",
+          "name": "MICROSERVICES AND APIS",
+          "updated_at": "2015-11-02T03:32:33.247Z",
+          "instructor": null,
+          "ROOM": null,
+          "__v": 0,
+          "students": [
+               {
+                    "lastname": "BURROWS",
+                    "firstname": "PETER",
+                    "_id": "5636d662d6b7a8e50b8c293e"
+               }
+          ]
+     }
+]
+```
+
+### 6. Known Issues
+
+  - Unexpected behavior when adding courses and names with characters that are not letters nor numerals
+  - Still fixing a bug when using PUT for the schema config API
 
 
