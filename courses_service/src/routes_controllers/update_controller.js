@@ -128,6 +128,7 @@ exports.updateCourse = function( ) {
 			  var update_exists = {};
 			  update_exists[path] = { $exists : true };
 
+
 			// check if the field exists in the schema
 				model.findOne(update_exists, function (find_err, result){
 

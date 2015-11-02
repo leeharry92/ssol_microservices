@@ -46,16 +46,13 @@ exports.deleteKEY = function( ){
 			if ( result != null ) {
 
 			// search and destroy the attribute from the config file
-			  var newAttributes = [];
-			  var attributes = nconf.get('courseAttributes');
-			  for (var i = 0; i < attributes.length; i++){
-				if (attributes[i] != key){
-					newAttributes.push( attributes[i] );
-				}
-			  }
-			  nconf.set('courseAttributes', newAttributes);
-			  nconf.save(function(err){});
 
+			  var attributes = nconf.get('courseAttributes');
+			  var index = attributes.indexOf(key);
+				if (index > -1){
+					attributes.splice(index,1);							
+					nconf.save(function(er){});
+				}
 
 			// destroy the attribute from the models
 			  model.find({}, function(err, success){
@@ -63,22 +60,28 @@ exports.deleteKEY = function( ){
 
 			  for (var j in success) {
 
-				var attributes = nconf.get('courseAttributes');
-				var keyValues = [req.cookies.user_id, success[j].name, success[j].students, Date.now()];	
-				success[j].remove(function(err, success){});
 
-					  for (var i = 0; i < attributes.length; i++){
-						keyValues.push(null);
-						paths.push( attributes[i] );
+				// preallocate
+					var userKeys = [];
+					var userKeyValues = [];
+
+				// find and return all keys and keyValues within model p
+					getKeysAndValues(success[j],userKeys,userKeyValues);
+
+					//remove the Key value corresponding to the key was deleted 
+						if (index > -1){					
+							userKeyValues.splice(index,1);
+						}
+
+					var keyValues = [req.cookies.user_id, success[j].name, success[j].students, Date.now()];	
 
 
-						// add the attribute to the schema
-						  var path_= attributes[i];
-						  var update = {};
-						  update[path_] = ''; 
-						  courses_model.add( update );
+					keyValues = keyValues.concat(userKeyValues);
+	
+						success[j].remove(function(err, success){});
 
-					  }
+					// add the attributes to the model
+						addAttributesToSchema(attributes,courses_model);
 
 					// go to create course
 					createCourseHandler(model, paths, keyValues);
@@ -97,7 +100,7 @@ exports.deleteKEY = function( ){
 
 
 			} else {
-				console.log('-> '+key+' key cannot be removed from schema because it does not exist');
+				console.log('-> '+key+' key cannot be removed from schema');
 				res.send(false);
 
 			} // ends else
@@ -112,6 +115,8 @@ exports.deleteKEY = function( ){
   }; // ends return
 
 }; // ends exports.updateCourse
+
+
 
 
 
@@ -147,34 +152,37 @@ exports.addKEY = function( ){
 			  attributes.push(key);
 			  nconf.save(function(err){});
 
-
+			// need to find() all models
 			  model.find({}, function(err, success){
 
-			// need to find() then iterate through all of them to add the values
 
+			// iterate through all models to add the keys
 			  for (var j in success){
 
-				var keyValues = [req.cookies.user_id, success[j].name, success[j].students, Date.now()];	
-				success[j].remove(function(err, success){});
+					
+				// preallocate
+					var userKeys = [];
+					var userKeyValues = [];
 
-					  for (var i = 0; i < attributes.length; i++){
-						keyValues.push(null);
-						paths.push( attributes[i] );
+				// find and return all keys and keyValues within model p
+					getKeysAndValues(success[j],userKeys,userKeyValues);
 
+					var keyValues = [req.cookies.user_id, success[j].name, success[j].students, Date.now()];	
+					keyValues = keyValues.concat(userKeyValues);
 
-						// add the attribute to the schema
-						  var path_= attributes[i];
-						  var update = {};
-						  update[path_] = ''; 
-						  courses_model.add( update );
+					//console.log(keyValues);
+					//console.log(userKeys);
 
-					  }
+						success[j].remove(function(err, success){});				
+
+					// add the attributes to the model
+						addAttributesToSchema(attributes,courses_model);
 
 					// go to create course
-					createCourseHandler(model, paths, keyValues);
+						createCourseHandler(model, paths, keyValues);
 
 					// Reset the paths variable for each iteration
-					paths = ["user_id","name", "students", "updated_at"];
+						paths = ["user_id","name", "students", "updated_at"];
 					
 			  } // ends for loop
 
@@ -287,5 +295,48 @@ createCourseHandler = function(model, paths, keyValues){
 
 
 	}); // ends save
+}
+
+
+getKeysAndValues = function(p,userKeys,userKeyValues){
+
+	for (var key1 in p) {
+	  if ( (p.hasOwnProperty(key1)) &&
+		   (key1 == "_doc") ) {
+		  var p2 = p._doc;
+			for (var key2 in p2){
+			// Search for keys that are user defined
+				if ( (p2.hasOwnProperty(key2) ) &&
+					 (key2 != "name") && 
+					 (key2 != "students") && 
+					 (key2 != "updated_at") && 
+					 (key2 != "_id") && 
+					 (key2 != "__v") ) {
+						userKeys.unshift(key2); // unshift -> prepend to array
+						userKeyValues.unshift(p2[key2]);
+				}
+			} // ends inner for
+			break;
+		} // ends if key1 == _doc
+	  }// ends outer for
+
+	// since a key was just created, push a new value
+	userKeyValues.push(null);
+}
+
+
+addAttributesToSchema = function (attributes,courses_model){
+
+	  for (var i = 0; i < attributes.length; i++){
+
+		paths.push( attributes[i] );
+
+		// add the attribute to the schema
+		  var path_= attributes[i];
+		  var update = {};
+		  update[path_] = ''; 
+		  courses_model.add( update );
+
+	  }
 }
 
