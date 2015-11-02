@@ -1,4 +1,9 @@
-var mongoServer = 'mongodb://localhost/courses_host';
+
+var loadconfig = require('../../config/loadconfig.js');
+var defaultOptions = loadconfig.DEFAULTS;
+
+
+var mongoServer = 'mongodb://'+defaultOptions.host;
 var mongoose = require( 'mongoose' );
 var Schema   = mongoose.Schema;
 
