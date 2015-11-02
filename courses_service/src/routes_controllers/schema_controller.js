@@ -46,25 +46,19 @@ exports.deleteKEY = function( ){
 			if ( result != null ) {
 
 			// search and destroy the attribute from the config file
-			  var newAttributes = [];
-			  var attributes = nconf.get('courseAttributes');
-			  for (var i = 0; i < attributes.length; i++){
-				if (attributes[i] != key){
-					newAttributes.push( attributes[i] );
-				}
-			  }
-			  nconf.set('courseAttributes', newAttributes);
-			  nconf.save(function(err){});
 
+			  var attributes = nconf.get('courseAttributes');
+			  var index = attributes.indexOf(key);
+				if (index > -1){
+					attributes.splice(index,1);							
+					nconf.save(function(er){});
+				}
 
 			// destroy the attribute from the models
 			  model.find({}, function(err, success){
 			// need to find() then iterate through all of them to add the values
 
 			  for (var j in success) {
-
-				var attributes = nconf.get('courseAttributes'); // get new attributes
-
 
 
 				// preallocate
@@ -74,7 +68,14 @@ exports.deleteKEY = function( ){
 				// find and return all keys and keyValues within model p
 					getKeysAndValues(success[j],userKeys,userKeyValues);
 
+					//remove the Key value corresponding to the key was deleted 
+						if (index > -1){					
+							userKeyValues.splice(index,1);
+						}
+
 					var keyValues = [req.cookies.user_id, success[j].name, success[j].students, Date.now()];	
+
+
 					keyValues = keyValues.concat(userKeyValues);
 	
 						success[j].remove(function(err, success){});

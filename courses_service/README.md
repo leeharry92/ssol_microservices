@@ -91,7 +91,21 @@ $ curl -i -X PUT -H 'Content-Type: application/json' -d '{"attribute1":<key_valu
 $ curl -i -X DELETE -H 'Content-Type: application/json' -d '{"key":"<key>"}' http://<host>:<port>/schema/courses
 ```
 
-### 5. Examples
+### 5. Example
+##### Configuration (/courses_service/config/config.json)
+
+```json
+{
+  "mongo": {
+    "host": "localhost/test_server",
+    "port": 3000
+  },
+  "courseAttributes": [
+    "instructor"
+  ]
+}
+```
+
 
 ##### POST a course and PUT a student to that course
 ```sh
@@ -102,21 +116,21 @@ curl -H "Content-Type: application/json" -X POST -d '{"name":"Microservices and 
 curl -i -X PUT -H 'Content-Type: application/json' -d '{"students":{"lastname":"Burrows","firstname":"Peter"}}' http://localhost:3000/courses?name=microservices%20and%20apis
 ```
 
-##### Result:
+##### Resulting Model:
 
 ```json
 [
      {
-          "_id": "5636d656d6b7a8e50b8c293d",
+          "_id": "56379ab8fec87c4f1c8dfaed",
           "name": "MICROSERVICES AND APIS",
-          "updated_at": "2015-11-02T03:19:50.511Z",
+          "updated_at": "2015-11-02T17:17:44.293Z",
           "instructor": null,
           "__v": 1,
           "students": [
                {
                     "lastname": "BURROWS",
                     "firstname": "PETER",
-                    "_id": "5636d662d6b7a8e50b8c293e"
+                    "_id": "56379ac3fec87c4f1c8dfaee"
                }
           ]
      }
@@ -131,51 +145,81 @@ Note: The key, "instructor", was previously initialized in the config.json file
 curl -i -X PUT -H 'Content-Type: application/json' -d '{"instructor":"Don Ferguson"}' http://localhost:3000/courses?name=microservices%20and%20apis
 ```
 
-##### Result:
+##### Resulting Model:
 
 ```json
 [
      {
-          "_id": "5636d656d6b7a8e50b8c293d",
+          "_id": "56379ab8fec87c4f1c8dfaed",
           "name": "MICROSERVICES AND APIS",
-          "updated_at": "2015-11-02T03:19:50.511Z",
+          "updated_at": "2015-11-02T17:17:44.293Z",
           "instructor": "DON FERGUSON",
           "__v": 1,
           "students": [
                {
                     "lastname": "BURROWS",
                     "firstname": "PETER",
-                    "_id": "5636d662d6b7a8e50b8c293e"
+                    "_id": "56379ac3fec87c4f1c8dfaee"
                }
           ]
      }
 ]
 ```
 
-##### POST another user-defined key
+##### POST another user-defined key and PUT a value to the key
 
 ```sh
 curl -i -X POST -H 'Content-Type: application/json' -d '{"key":"ROOM"}' http://localhost:3000/schema/courses
 ```
 
-##### Result:
+```sh
+curl -i -X PUT -H 'Content-Type: application/json' -d '{"ROOM":"428 Pupin"}' http://localhost:3000/courses?name=microservices%20and%20apis
+```
+
+
+
+##### Resulting Model:
 
 ```json
 [
      {
-          "_id": "5636d951d6b7a8e50b8c2940",
+          "_id": "56379af9fec87c4f1c8dfaef",
           "name": "MICROSERVICES AND APIS",
-          "updated_at": "2015-11-02T03:32:33.247Z",
-          "instructor": null,
-          "ROOM": null,
+          "updated_at": "2015-11-02T17:18:49.804Z",
+          "instructor": "DON FERGUSON",
+          "ROOM": "428 PUPIN",
           "__v": 0,
           "students": [
                {
                     "lastname": "BURROWS",
                     "firstname": "PETER",
-                    "_id": "5636d662d6b7a8e50b8c293e"
+                    "_id": "56379ac3fec87c4f1c8dfaee"
                }
           ]
+     }
+]
+```
+
+##### DELETE a user-defined key and remove a student from a course
+```sh
+curl -i -X DELETE -H 'Content-Type: application/json' -d '{"key":"instructor"}' http://localhost:3000/schema/courses
+```
+
+```sh
+curl -i -X DELETE -H 'Content-Type: application/json' -d '{"students":{"lastname":"Burrows","firstname":"Peter"}}' http://localhost:3000/courses/microservices%20and%20apis
+```
+
+##### Resulting Model:
+
+```JSON
+[
+     {
+          "_id": "5637a904eed25fa71fa22376",
+          "name": "MICROSERVICES AND APIS",
+          "updated_at": "2015-11-02T18:18:44.319Z",
+          "ROOM": "428 PUPIN",
+          "__v": 0,
+          "students": []
      }
 ]
 ```
@@ -183,6 +227,6 @@ curl -i -X POST -H 'Content-Type: application/json' -d '{"key":"ROOM"}' http://l
 ### 6. Known Issues
 
   - Unexpected behavior when adding courses and names with characters that are not letters nor numerals
-  - Still fixing a bug when using PUT for the schema config API
+
 
 
