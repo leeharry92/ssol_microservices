@@ -3,5 +3,7 @@
     "host": "localhost/test_server",
     "port": 3000
   },
-  "courseAttributes": []
+  "courseAttributes": [
+    "instructor"
+  ]
 }

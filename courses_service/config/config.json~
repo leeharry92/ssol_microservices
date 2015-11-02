@@ -1,7 +1,0 @@
-{
-  "mongo": {
-    "host": "localhost/test",
-    "port": 3000
-  },
-  "courseAttributes": []
-}
