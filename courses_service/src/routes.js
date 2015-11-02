@@ -6,7 +6,6 @@ module.exports = function(app){
 	var update_controller = require('./routes_controllers/update_controller');
 	var delete_controller = require('./routes_controllers/delete_controller');
 
-	var schema_controller = require('./routes_controllers/schema_controller');
 
 	var root = '/courses';
 
@@ -29,6 +28,8 @@ module.exports = function(app){
 
 
 	// config - schema changes
-	//app.post( root+'/schema',    					schema_controller.addKeytoSchema() );
+	app.post( '/schema'+root,    					create_controller.addKEY() );
+	app.delete( '/schema'+root,    					create_controller.deleteKEY() );
+	//app.put( root+'/:course/:attribute',			attributes_controller.updateKeyInAttributes() );
 
 };
