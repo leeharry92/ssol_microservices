@@ -95,12 +95,14 @@ $ curl -i -X DELETE -H 'Content-Type: application/json' -d '{"key":"<key>"}' htt
 
 ##### POST a course and PUT a student to that course
 ```sh
-	curl -H "Content-Type: application/json" -X POST -d '{"name":"Microservices and APIs"}' http://localhost:3000/courses/
-```
-```sh
-	curl -i -X PUT -H 'Content-Type: application/json' -d '{"students":{"lastname":"Burrows","firstname":"Peter"}}' http://localhost:3000/courses?name=microservices%20and%20apis
+curl -H "Content-Type: application/json" -X POST -d '{"name":"Microservices and APIs"}' http://localhost:3000/courses/
 ```
 
+```sh
+curl -i -X PUT -H 'Content-Type: application/json' -d '{"students":{"lastname":"Burrows","firstname":"Peter"}}' http://localhost:3000/courses?name=microservices%20and%20apis
+```
+
+##### Result:
 
 ```json
 [
@@ -119,14 +121,17 @@ $ curl -i -X DELETE -H 'Content-Type: application/json' -d '{"key":"<key>"}' htt
           ]
      }
 ]
-'''
+```
 
 ##### PUT a value to the user-defined key
+
 Note: The key, "instructor", was previously initialized in the config.json file
 
 ```sh
 curl -i -X PUT -H 'Content-Type: application/json' -d '{"instructor":"Don Ferguson"}' http://localhost:3000/courses?name=microservices%20and%20apis
 ```
+
+##### Result:
 
 ```json
 [
@@ -148,7 +153,12 @@ curl -i -X PUT -H 'Content-Type: application/json' -d '{"instructor":"Don Fergus
 ```
 
 ##### POST another user-defined key
+
+```sh
 curl -i -X POST -H 'Content-Type: application/json' -d '{"key":"ROOM"}' http://localhost:3000/schema/courses
+```
+
+##### Result:
 
 ```json
 [
