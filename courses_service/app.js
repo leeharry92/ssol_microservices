@@ -3,8 +3,6 @@
  */
 
 
-
-
 var express        = require( 'express' );
 var http           = require( 'http' );
 var path           = require( 'path' );
@@ -18,11 +16,13 @@ var static         = require( 'serve-static' );
 var app = express();
 
 
-// all environments
-app.set( 'port', process.env.PORT || 3000 );
+// load the config file, get and set the port
+var loadconfig = require('./config/loadconfig.js')
+var defaultOptions = loadconfig.DEFAULTS
+//console.log("Configuration read from the JSON file using nconf is :")
+//console.log(defaultOptions)
+app.set( 'port', defaultOptions.port );
 
-// uncomment for debugging
-//app.use( logger( 'dev' ));
 
 app.use( methodOverride() );
 app.use( cookieParser() );
@@ -35,13 +35,8 @@ app.use( static( path.join( __dirname, 'public' )));
 var server =  http.createServer( app );
 
 // Set the Routes
-require('./src/routes')(app);
+require('./src/routes')( app );
 
-
-// development only
-if( 'development' == app.get( 'env' )){
-  app.use( errorHandler());
-}
 
 // listen on server
 server.listen( app.get( 'port' ), function (){
