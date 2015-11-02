@@ -1,78 +1,96 @@
+http://dillinger.io/
 
-# INSTALL DEPENDENCIES
-Dependencies: <br />
-cookie-parser <br />
-body-parser <br />
-method-override <br />
-morgan <br />
-errorhandler <br />
-mongoose <br />
-<br />
+# Courses Microservice
+(brief description)
 
-To Install Dependencies (saved in package.json):
-<br />
-npm install
-<br />
-To Launch:
-<br />
-nodemon app.js
+### 1. INSTALLING DEPENDENCIES
+##### Dependencies (see package.json for versions):
+  - cookie-parser
+  - body-parser
+  - method-override
+  - morgan
+  - errorhandler
+  - mongoose
+  - nconf
 
+##### Dependencies Installation:
+```sh
+  $ npm install
+```
 
-# THE COURSES APIs (Command Line Templates)
+### 2. CONFIGURATION
+All configurable parameters are accessible the following JSON file:
+   - /courses_service/config/config.json
 
-From another command line, you can execute the following APIs:
-(Note: in the browser, you can view all courses via http://localhost:3000/courses)
-
-
-### API TO CREATE A NEW COURSE ###
-
-	curl -H "Content-Type: application/json" -X POST -d '{"name":"course4"}' http://localhost:3000/courses/
-
-
-### API TO READ COURSES ###
-
-	#--ALL COURSES: 
-	curl -H "Content-Type: application/json" -X GET http://localhost:3000/courses/
-
-	#--ONE COURSE:
-	curl -H "Content-Type: application/json" -X GET http://localhost:3000/courses?name=course4
+##### A. Server Configurables
+  -  mongo.host : <host> {type: string}
+  -  mongo.port : <port> {type: integer}
+##### B. Schema Configurables
+  -  courseAttributes : <key(s)> {type: string array}
+  -  Attributes can also be added and removed via API (see Section 4 under 'MODIFY THE SCHEMA')
+### 3. Launch:
+```sh
+  $ nodemon app.js
+```
 
 
-### API TO ADD A STUDENT TO A COURSE ###
+### 4. API Documentation (as Command Line Templates):
 
-	curl -i -X PUT -H 'Content-Type: application/json' -d '{"students":{"lastname":"Burrows","firstname":"Peter"}}' http://localhost:3000/courses?name=course4
+From the command line, following APIs can be executed:
 
+##### CREATE A NEW COURSE
+```sh
+$ curl -H "Content-Type: application/json" -X POST -d '{"name":"<course_name>"}' http://<host>:<port>/courses/
+```
 
-### API TO DELETE A COURSE ###
+##### GET COURSE INFORMATION
 
-	curl -H "Content-Type: application/json" -X DELETE http://localhost:3000/courses?name=course4
-	curl -H "Content-Type: application/json" -X DELETE http://localhost:3000/courses?name=course%201 # %20 for spaces
+###### - ALL COURSES:
+```sh
+$ curl -H "Content-Type: application/json" -X GET http://localhost:3000/courses/
+```
+###### - ONE COURSE:
+```sh
+$ curl -H "Content-Type: application/json" -X GET http://<host>:<port>/courses?name=<course_name>
+```
 
+##### ADD A STUDENT TO A COURSE
+```sh
+$ curl -i -X PUT -H 'Content-Type: application/json' -d '{"students":{"lastname":"<lastname>","firstname":"<firstname>"}}' http://<host>:<port>/courses?name=<course_name>
+```
 
-### API TO REMOVE STUDENT FROM COURSE ###
+##### DELETE A COURSE
+```sh
+$ curl -H "Content-Type: application/json" -X DELETE http://<host>:<port>/courses?name=<course_name>
+```
+Note: '%20' can be used for one whitespace (i.e. <course_name> = course%204 --> 'course 4')
 
-	curl -i -X DELETE -H 'Content-Type: application/json' -d '{"students":{"lastname":"Burrows","firstname":"Peter"}}' http://localhost:3000/courses/course4
+##### REMOVE A STUDENT FROM ONE COURSE
+```sh
+$ curl -i -X DELETE -H 'Content-Type: application/json' -d '{"students":{"lastname":"<lastname>","firstname":"<firstname>"}}' http://<host>:<port>/courses/<course_name>
+```
 
+##### REMOVE A STUDENT FROM ALL COURSES
+```sh
+$ curl -i -X DELETE -H 'Content-Type: application/json' -d '{"students":{"lastname":"<lastname>","firstname":"<firstname>"}}' http://<host>:<port>/student
+```
 
-### API TO REMOVE A STUDENT FROM ALL COURSES ###
+##### MODIFY THE SCHEMA
 
-	curl -i -X DELETE -H 'Content-Type: application/json' -d '{"students":{"lastname":"Burrows","firstname":"Peter"}}' http://localhost:3000/student
+###### -ADD A USER-DEFINED KEY TO THE SCHEMA:
+```sh
+$ curl -i -X POST -H 'Content-Type: application/json' -d '{"key":"<key>"}' http://<host>:<port>/schema/courses
+```
+###### -UPDATE A USER-DEFINED KEY IN A DOCUMENT:
+```sh
+$ curl -i -X PUT -H 'Content-Type: application/json' -d '{"attribute1":<key_value>}' http://<host>:<port>/courses?name=<course_name>
+```
+###### -DELETE A USER-DEFINED KEY IN THE SCHEMA:
+```sh
+$ curl -i -X DELETE -H 'Content-Type: application/json' -d '{"key":"<key>"}' http://<host>:<port>/schema/courses
+```
 
-
-### API TO MODIFY SCHEMA ###
-
-	#-- ADD A USER-DEFINED KEY TO THE SCHEMA:
-	curl -i -X POST -H 'Content-Type: application/json' -d '{"key":"attribute1"}' http://localhost:3000/schema/courses
-
-	#-- UPDATE A USER-DEFINED KEY IN A DOCUMENT:
-	curl -i -X PUT -H 'Content-Type: application/json' -d '{"attribute1":"test"}' http://localhost:3000/courses?name=course4
-
-	#-- DELETE A USER-DEFINED KEY IN THE SCHEMA:
-	curl -i -X DELETE -H 'Content-Type: application/json' -d '{"key":"attribute1"}' http://localhost:3000/schema/courses
-
-### MANUAL CONFIGURATION FOR SCHEMA ###
-
-
+### 5. Examples
 
 
 
