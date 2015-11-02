@@ -92,7 +92,7 @@ $ curl -i -X DELETE -H 'Content-Type: application/json' -d '{"key":"<key>"}' htt
 ```
 
 ### 5. Example
-##### Configuration (/courses_service/config/config.json)
+##### A. Set Configuration (/courses_service/config/config.json)
 
 ```json
 {
@@ -107,12 +107,10 @@ $ curl -i -X DELETE -H 'Content-Type: application/json' -d '{"key":"<key>"}' htt
 ```
 
 
-##### POST a course and PUT a student to that course
+##### B. POST a course and PUT a student to that course
 ```sh
 curl -H "Content-Type: application/json" -X POST -d '{"name":"Microservices and APIs"}' http://localhost:3000/courses/
-```
 
-```sh
 curl -i -X PUT -H 'Content-Type: application/json' -d '{"students":{"lastname":"Burrows","firstname":"Peter"}}' http://localhost:3000/courses?name=microservices%20and%20apis
 ```
 
@@ -137,7 +135,7 @@ curl -i -X PUT -H 'Content-Type: application/json' -d '{"students":{"lastname":"
 ]
 ```
 
-##### PUT a value to the user-defined key
+##### C. PUT a value to the user-defined key
 
 Note: The key, "instructor", was previously initialized in the config.json file
 
@@ -166,13 +164,11 @@ curl -i -X PUT -H 'Content-Type: application/json' -d '{"instructor":"Don Fergus
 ]
 ```
 
-##### POST another user-defined key and PUT a value to the key
+##### D. POST another user-defined key and PUT a value to the key
 
 ```sh
 curl -i -X POST -H 'Content-Type: application/json' -d '{"key":"ROOM"}' http://localhost:3000/schema/courses
-```
 
-```sh
 curl -i -X PUT -H 'Content-Type: application/json' -d '{"ROOM":"428 Pupin"}' http://localhost:3000/courses?name=microservices%20and%20apis
 ```
 
@@ -200,12 +196,10 @@ curl -i -X PUT -H 'Content-Type: application/json' -d '{"ROOM":"428 Pupin"}' htt
 ]
 ```
 
-##### DELETE a user-defined key and remove a student from a course
+##### E. DELETE a user-defined key and remove a student from a course
 ```sh
 curl -i -X DELETE -H 'Content-Type: application/json' -d '{"key":"instructor"}' http://localhost:3000/schema/courses
-```
 
-```sh
 curl -i -X DELETE -H 'Content-Type: application/json' -d '{"students":{"lastname":"Burrows","firstname":"Peter"}}' http://localhost:3000/courses/microservices%20and%20apis
 ```
 
