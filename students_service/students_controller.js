@@ -90,7 +90,7 @@ exports.show = function(req, res, next) {
 	collection.findOneAsync({uni: uni_param})
 	.then(function(content) {
 			if (content == null) {
-				var err = new Error('Specified student not found');
+				var err = new Error('Specified student not found. Uni: ' + JSON.stringify(req.params));
 				err.status = 404;
 				next(err);
 			} else {
@@ -253,7 +253,7 @@ var add_course = function(req, res, next) {
 																			'action' : 'update course add student',
 																			'course_name': course,
 																			'uni': uni_param}
-																		clientRIPub.publish("referential integrity", event_message);
+																		clientRIPub.publish("referential integrity", JSON.stringify(event_message));
 																	} else {
 																		var err = new Error('Database error');
 																		err.status = 500;
