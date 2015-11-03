@@ -1,7 +1,12 @@
 'use strict';
 
-var redis = require("redis"),
-    client = redis.createClient()
+var redis = require("redis")
+var http = require('http');
+
+clientRISub = redis.createClient()	// Subscribes to ri channel
+clientRIPub = redis.createClient() // Publishes to ri channel
+
+clientRISub.subscribe("students microservice");
 
 var _ = require('lodash');
 var required_keys = ['first_name', 'last_name', 'uni'];
@@ -200,7 +205,7 @@ exports.remove_attribute = function(req, res, next) {
 };
 
 
-exports.add_course = function(req, res, next) {
+var add_course = function(req, res, next) {
 	var db = req.app.locals.db;
 	var collection = db.collection('Students');
 	var course = req.body.course;
@@ -244,10 +249,11 @@ exports.add_course = function(req, res, next) {
 																		res.sendStatus(200);
 																		//  Publishing to referential integrity channel the event
 																		var event_message = {
-																						message: "update student add course",
-																						course_name: course
-																						};
-																		client.publish("ri channel", "I am sending a message.");
+																			'sender' : 'students_micro_service',
+																			'action' : 'update course add student',
+																			'course_name': course,
+																			'uni': uni_param}
+																		clientRIPub.publish("referential integrity", event_message);
 																	} else {
 																		var err = new Error('Database error');
 																		err.status = 500;
@@ -261,6 +267,8 @@ exports.add_course = function(req, res, next) {
 		}
 	}
 };
+
+exports.add_course = add_course;
 
 exports.remove_course = function(req, res, next) {
 	var db = req.app.locals.db;
@@ -300,6 +308,14 @@ exports.remove_course = function(req, res, next) {
 																 function(error, result) {
 																 	if (error === null) {
 																		res.sendStatus(200);
+																		//  Publishing to referential integrity channel the event
+																		var event_message = {
+																			'sender' : 'students_micro_service',
+																			'action' : 'update course delete student',
+																			'course_name': course,
+																			'uni': uni_param}
+																		clientRI.publish("referential integrity", event_message);
+
 																	} else {
 																		var err = new Error('Database error');
 																		err.status = 500;
@@ -393,7 +409,37 @@ exports.update = function(req, res, next) {
 	});
 };
 
+//The url we want is `www.nodejitsu.com:1337/`
+var options = {
+  host: 'www.nodejitsu.com',
+  path: '/',
+  //since we are listening on a custom port, we need to specify it by hand
+  port: '1337',
+  //This is what changes the request to a POST request
+  method: 'POST'
+};
 
+
+clientRISub.on("subscribe", function (channel, count) {
+    console.log("Subscribed to " + channel + " channel.")
+});
+
+clientRISub.on("message", function (channel, message) { // Listens for referential integrity channel JSON messgages
+    console.log("Channel name: " + channel);
+    console.log("Message: " + message);
+
+    var req = http.request(options, null);
+    //var res = http.response(null, null);
+
+    res = add_course(req, null, null)
+    // obj = JSON.parse(message)
+
+    // Parse the JSON message and publish message to student or course channel
+    //switch (obj.action) {
+
+    //}
+    
+});
 
 
 

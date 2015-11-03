@@ -44,11 +44,12 @@ exports.updateCourse = function( ) {
 
 
 	// Store local variables
-	  var lastname = students_request.lastname;
-	  var firstname = students_request.firstname;
+	var uni = students_request.uni;
+	var lastname = students_request.lastname;
+	var firstname = students_request.firstname;
 
-	if ( (typeof lastname === 'undefined') || (typeof firstname === 'undefined') ) {
-	    throw new Error("Either students.lastname or students.firstname is undefined");
+	if ( (typeof uni === 'undefined') || (typeof lastname === 'undefined') || (typeof firstname === 'undefined') ) {
+	    throw new Error("Either students.uni or students.lastname or students.firstname is undefined");
 	};
 
 
@@ -60,15 +61,14 @@ exports.updateCourse = function( ) {
 			course_found.collection.aggregate([
 				{"$match"	: {name : name} }
 				,{"$unwind"	: "$students" }
-				,{"$match"	: {"students.lastname" : lastname} }
-				,{"$match"	: {"students.firstname": firstname} }
+				,{"$match"	: {"students.uni" : uni} }
 			],
 				function (err_lastname, student_found){
 
 			// If the entry already exists
 					if (student_found.length > 0 ) {
 
-						console.log('-> '+lastname+', '+firstname+' is already enrolled in '+name+'.');
+						console.log('-> '+lastname+', '+firstname+ ' ('+ uni +')' + ' is already enrolled in '+name+'.');
 						res.send(false);
 
 			// If the student entry does not exist, add it to the db
@@ -76,7 +76,7 @@ exports.updateCourse = function( ) {
 
 						course_found.students.push(students_request);				
 						course_found.save();
-						console.log('-> '+lastname+', '+firstname+' is added to '+name+'.');
+						console.log('-> '+lastname+', '+firstname+ ' ('+ uni +')' +' is added to '+name+'.');
 						res.send(true);
 
 						// Publish to to the referential integrity that the course has been updated

@@ -9,8 +9,9 @@ var Schema   = mongoose.Schema;
 
 
 	var students_model = new Schema({
-		  lastname : String,
-		  firstname: String
+		uni : String,
+		lastname : String,
+		firstname: String
 	});
 
 //module.exports = function() {
