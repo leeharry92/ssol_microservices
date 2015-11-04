@@ -214,7 +214,7 @@ var add_course = function(req, res, next) {
 	var uni_param = req.params.uni;
 
 	if (course === undefined) {
-		var err = new Error('Must specify course to add' + uni_param);
+		var err = new Error('Must specify course to add ' + uni_param);
 		err.status = 400;
 		next(err);
 	} else {
@@ -412,16 +412,6 @@ exports.update = function(req, res, next) {
 	});
 };
 
-//The url we want is `www.nodejitsu.com:1337/`
-var options = {
-  host: 'www.nodejitsu.com',
-  path: '/',
-  //since we are listening on a custom port, we need to specify it by hand
-  port: '1337',
-  //This is what changes the request to a POST request
-  method: 'POST'
-};
-
 
 clientRISub.on("subscribe", function (channel, count) {
     console.log("Subscribed to " + channel + " channel.")
@@ -431,7 +421,35 @@ clientRISub.on("message", function (channel, message) { // Listens for referenti
     console.log("Channel name: " + channel);
     console.log("Message: " + message);
 
-    request.put('http://localhost:3300/hhl2114/add-course', {'course':"34974"})
+    var options = {
+	  host: 'localhost',
+	  path: '/hhl2114/add-course',
+	  port: 3300,
+	  method: 'PUT',
+	  body: JSON.stringify(
+	  	{ 'course': '63453' }
+	  ),
+	  json: true
+	};
+
+	var callback = function(response) {
+		var str = '';
+
+		//another chunk of data has been recieved, so append it to `str`
+		response.on('data', function (chunk) {
+			console.log('WTF if happening'+ chunk);
+		});
+
+		//the whole response has been recieved, so we just print it out here
+		response.on('end', function () {
+			console.log(str);
+		});
+
+	}
+
+	http.request(options, callback).end();
+
+    //request.put('http://localhost:3300/hhl2114/add-course', {'course':"34974"})
     
 });
 
