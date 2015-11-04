@@ -1,16 +1,18 @@
 'use strict';
 
-var redis = require("redis")
+var redis = require("redis");
 var http = require('http');
+var request = require('request');
 
-clientRISub = redis.createClient()	// Subscribes to ri channel
-clientRIPub = redis.createClient() // Publishes to ri channel
+clientRISub = redis.createClient();	// Subscribes to ri channel
+clientRIPub = redis.createClient(); // Publishes to ri channel
 
 clientRISub.subscribe("students microservice");
 
 var _ = require('lodash');
 var required_keys = ['first_name', 'last_name', 'uni'];
 var no_delete_keys = ['first_name', 'last_name', 'uni', 'courses'];
+var host = 'localhost';
 
 exports.find = function(req, res, next) {
 	const db = req.app.locals.db;
@@ -212,7 +214,7 @@ var add_course = function(req, res, next) {
 	var uni_param = req.params.uni;
 
 	if (course === undefined) {
-		var err = new Error('Must specify course to add');
+		var err = new Error('Must specify course to add' + uni_param);
 		err.status = 400;
 		next(err);
 	} else {
@@ -246,7 +248,8 @@ var add_course = function(req, res, next) {
 																 {$set: {courses: courseList}}, 
 																 function(error, result) {
 																 	if (error === null) {
-																		res.sendStatus(200);
+																		res.sendStatus(200); //Handle failure - Harry/Peter N
+
 																		//  Publishing to referential integrity channel the event
 																		var event_message = {
 																			'sender' : 'students_micro_service',
@@ -428,16 +431,7 @@ clientRISub.on("message", function (channel, message) { // Listens for referenti
     console.log("Channel name: " + channel);
     console.log("Message: " + message);
 
-    var req = http.request(options, null);
-    //var res = http.response(null, null);
-
-    res = add_course(req, null, null)
-    // obj = JSON.parse(message)
-
-    // Parse the JSON message and publish message to student or course channel
-    //switch (obj.action) {
-
-    //}
+    request.put('http://localhost:3300/hhl2114/add-course', {'course':"34974"})
     
 });
 

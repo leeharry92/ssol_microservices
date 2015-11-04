@@ -33,6 +33,8 @@ clientRI.on("message", function (channel, message) { // Listens for ri channel J
         // Parse the JSON message and publish message to course channel
         switch (obj.action) {
             case "update course add student":
+                //Make sure course exists.
+                
                 console.log("\n Performing Ref integrity \t\n")
             break
             case "update course delete student":
