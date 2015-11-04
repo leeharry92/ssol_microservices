@@ -1,17 +1,17 @@
-db = db.getSiblingDB('students_service');
+db = db.getSiblingDB('students_service_1');
 db.dropDatabase();
-db = db.getSiblingDB('students_service');
+db = db.getSiblingDB('students_service_1');
 db.createCollection('Students', {});
 db.Students.insert(
 	{
-		"first_name": "Harry",
-		"last_name": "Lee",
+		"first_name": "Jonathan",
+		"last_name": "Chang",
 		"address": "123 High Street",
 		"class": 2016,
-		"uni": "hhl2114",
-		"major": "Computer Science",
+		"uni": "jc4267",
+		"major": "Electrical Engineering",
 		"minor": "Entrepreneurship",
-		"courses": [98054, 63453, 10762, 21107]
+		"courses": [1111, 2222, 3333, 4444]
 	}
 );
 
@@ -24,7 +24,7 @@ db.Students.insert(
 		"uni": "hh2473",
 		"major": "Computer Engineering",
 		"minor": "French",
-		"courses": [15415, 29215, 14730, 13818]
+		"courses": [1111, 3333, 5555]
 	}
 );
 

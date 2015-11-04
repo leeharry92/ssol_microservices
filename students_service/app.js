@@ -76,7 +76,6 @@ app.use(function(err, req, res, next) {
     error: {}
   });
 });
-config.port = 3300;
 
 server.listen(config.port);
 module.exports = app;
