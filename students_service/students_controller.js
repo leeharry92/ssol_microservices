@@ -7,7 +7,7 @@ var request = require('request');
 clientRISub = redis.createClient();	// Subscribes to ri channel
 clientRIPub = redis.createClient(); // Publishes to ri channel
 
-clientRISub.subscribe("students microservice");
+clientRISub.subscribe("referential integrity");
 
 var _ = require('lodash');
 var required_keys = ['first_name', 'last_name', 'uni'];
@@ -421,10 +421,11 @@ clientRISub.on("message", function (channel, message) { // Listens for referenti
     console.log("Channel name: " + channel);
     console.log("Message: " + message);
 
+    /*
     var options = {
 	  host: 'localhost',
-	  path: '/hhl2114/add-course',
-	  port: 3300,
+	  path: '/jc4267/add-course',
+	  port: 3001,
 	  method: 'PUT',
 	  body: JSON.stringify(
 	  	{ 'course': '63453' }
@@ -450,6 +451,43 @@ clientRISub.on("message", function (channel, message) { // Listens for referenti
 	http.request(options, callback).end();
 
     //request.put('http://localhost:3300/hhl2114/add-course', {'course':"34974"})
+	*/
+
+
+    var bodyString = JSON.stringify({
+	course: '11',
+	});
+	
+
+	var headers = {
+	    'Content-Type': 'application/json',
+	    'Content-Length': bodyString.length
+	};
+
+	var options = {
+	    host: 'localhost',
+	    path: '/jc4267/add-course',
+	    port: 3001,
+	    method: 'PUT',
+	    headers: headers
+	};
+
+	// callback is same as in the above seen example.
+	var callback = function(response) {
+		var str = '';
+
+		//another chunk of data has been recieved, so append it to `str`
+		response.on('data', function(chunk) {
+		str += chunk;
+		});
+
+		//the whole response has been recieved, so we just print it out here
+		response.on('end', function() {
+		console.log(str);
+		});
+	};
+
+	http.request(options, callback).write(bodyString);
     
 });
 
