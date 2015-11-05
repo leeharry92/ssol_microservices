@@ -37,20 +37,38 @@ module.exports = function(app) {
     
     //Switch statement for three RI cases
     var obj = JSON.parse(message);
-    var call_number = 8765;
+    var call_number = 1234;
     var uni = obj.uni.toLowerCase();
 
     switch (obj.action) {
         case "update student add course":
-        	students.ref_add_course(call_number, uni, app);
+        	students.ref_add_course(call_number, uni, app, function(err) {
+        		if (err != null) {
+        			//error handling
+        		} else {
+        			//handle correct case
+        		}
+        	});
         	break;
 
         case "update student delete course":
-        	students.ref_remove_course(call_number, uni, app);
+        	students.ref_remove_course(call_number, uni, app, function(err) {
+        		if (err != null) {
+        			//error handling
+        		} else {
+        			//handle correct case
+        		}
+        	});
         	break;
 
         case "delete course":
-        	students.ref_remove_course_on_all_students(call_number, app);
+        	students.ref_remove_course_on_all_students(call_number, app, function(err) {
+        		if (err != null) {
+        			//error handling
+        		} else {
+        			//handle correct case
+        		}
+        	});
         	break;
     }
 	});   
