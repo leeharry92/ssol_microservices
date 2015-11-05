@@ -6,6 +6,7 @@ var fs = require('fs');
 var http = require('http');
 var redis = require("redis")
 
+
 // Database-related dependencies
 var Promise = require('bluebird');
 var MongoDB = Promise.promisifyAll(require('mongodb'));
@@ -76,6 +77,7 @@ app.use(function(err, req, res, next) {
     error: {}
   });
 });
+
 
 server.listen(config.port);
 module.exports = app;

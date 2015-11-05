@@ -7,7 +7,9 @@ var request = require('request');
 clientRISub = redis.createClient();	// Subscribes to ri channel
 clientRIPub = redis.createClient(); // Publishes to ri channel
 
-clientRISub.subscribe("referential integrity");
+clientRISub.subscribe("students_micro_service");
+
+var pub_channel = "referential_integrity";
 
 var _ = require('lodash');
 var required_keys = ['first_name', 'last_name', 'uni'];
@@ -212,9 +214,10 @@ var add_course = function(req, res, next) {
 	var collection = db.collection('Students');
 	var course = req.body.course;
 	var uni_param = req.params.uni;
+	var sender = req.body.sender;
 
 	if (course === undefined) {
-		var err = new Error('Must specify course to add ' + uni_param);
+		var err = new Error('Must specify course to add ' + uni_param );
 		err.status = 400;
 		next(err);
 	} else {
@@ -227,8 +230,20 @@ var add_course = function(req, res, next) {
 			collection.findOneAsync({uni: uni_param})
 			.then(function(student) {
 				if (student == null) {
-					var err = new Error('Specified student not found');
+					var err = new Error('Specified student not found : ' + uni_param);
 					err.status = 404;
+					// If student is not found and the request came from the Referential integrity,
+					// Delete the student from the courses microservice.
+					if (sender === "course_micro_service") {
+						//  Publishing to referential integrity channel the event
+						var event_message = {
+							'sender' : 'students_micro_service',
+							'action' : 'update course delete student',
+							'course_name': course,
+							'uni': uni_param}
+						clientRIPub.publish("referential integrity", JSON.stringify(event_message));
+					}
+
 					next(err);
 				} else {
 					var courseList = student.courses;
@@ -239,7 +254,7 @@ var add_course = function(req, res, next) {
 					}
 
 					if (_.indexOf(courseList, callNumber) != -1) {
-						var err = new Error('Student is already registered for course specified');
+						var err = new Error('Student '+ uni_param +' is already registered for course '+ callNumber);
 						err.status = 400;
 						next(err);
 					} else {
@@ -251,12 +266,14 @@ var add_course = function(req, res, next) {
 																		res.sendStatus(200); //Handle failure - Harry/Peter N
 
 																		//  Publishing to referential integrity channel the event
-																		var event_message = {
-																			'sender' : 'students_micro_service',
-																			'action' : 'update course add student',
-																			'course_name': course,
-																			'uni': uni_param}
-																		clientRIPub.publish("referential integrity", JSON.stringify(event_message));
+																		if (sender !== "courses_micro_service") {
+																			var event_message = {
+																				'sender' : 'students_micro_service',
+																				'action' : 'update course add student',
+																				'course_name': course,
+																				'uni': uni_param}
+																			clientRIPub.publish(pub_channel, JSON.stringify(event_message));
+																		}
 																	} else {
 																		var err = new Error('Database error');
 																		err.status = 500;
@@ -314,10 +331,10 @@ exports.remove_course = function(req, res, next) {
 																		//  Publishing to referential integrity channel the event
 																		var event_message = {
 																			'sender' : 'students_micro_service',
-																			'action' : 'update course delete student',
+																			'service_action' : 'update course delete student',
 																			'course_name': course,
 																			'uni': uni_param}
-																		clientRI.publish("referential integrity", event_message);
+																		clientRIPub.publish("referential integrity", event_message);
 
 																	} else {
 																		var err = new Error('Database error');
@@ -421,41 +438,15 @@ clientRISub.on("message", function (channel, message) { // Listens for referenti
     console.log("Channel name: " + channel);
     console.log("Message: " + message);
 
-    /*
-    var options = {
-	  host: 'localhost',
-	  path: '/jc4267/add-course',
-	  port: 3001,
-	  method: 'PUT',
-	  body: JSON.stringify(
-	  	{ 'course': '63453' }
-	  ),
-	  json: true
-	};
+    var msg = JSON.parse(message);
 
-	var callback = function(response) {
-		var str = '';
+    switch (msg.action) {
 
-		//another chunk of data has been recieved, so append it to `str`
-		response.on('data', function (chunk) {
-			console.log('WTF if happening'+ chunk);
-		});
-
-		//the whole response has been recieved, so we just print it out here
-		response.on('end', function () {
-			console.log(str);
-		});
-
-	}
-
-	http.request(options, callback).end();
-
-    //request.put('http://localhost:3300/hhl2114/add-course', {'course':"34974"})
-	*/
-
+    }
 
     var bodyString = JSON.stringify({
-		course: '11',
+		course: msg.course_cn,				//TODO (Peter) Change this param to ccn
+		sender: msg.sender,
 	});
 	
 
@@ -466,11 +457,13 @@ clientRISub.on("message", function (channel, message) { // Listens for referenti
 
 	var options = {
 	    host: 'localhost',
-	    path: '/jc4267/add-course',
-	    port: 3001,
+	    path: '/' + msg.uni + '/add-course',
+	    port: 3003,										//TODO (Peter/Jivtesh) Direct this to the proper microservices.
 	    method: 'PUT',
 	    headers: headers
 	};
+
+	console.log("Option: " + JSON.stringify(options));
 
 	// callback is same as in the above seen example.
 	var callback = function(response) {

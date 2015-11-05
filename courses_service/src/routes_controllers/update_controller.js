@@ -10,7 +10,7 @@ var model = courses_db.model('courses_model');
 var redis = require("redis")
 clientRI = redis.createClient() // Publishes to ri channel
 
-
+var pub_channel = "referential_integrity";
 
 var root = '/courses/';
 
@@ -24,7 +24,7 @@ exports.updateCourse = function( ) {
 
 // FIRST, TRY UPDATING THE STUDENT DOCS IN THE COURSE DB
   try {
-	  var name = req.query.name.toUpperCase();
+	  var course_cn = req.query.name.toLowerCase();
 	  var students_request = req.body.students;
 
 	  // convert JSON REQUEST to Upper Case
@@ -54,12 +54,12 @@ exports.updateCourse = function( ) {
 
 
 	// First find the course in the db model
-	  model.findOne({name: name}, function(err, course_found){
+	  model.findOne({name: course_cn}, function(err, course_found){
 
 	// If the course exists, check student entries to make sure no duplicate exists
 		if (course_found) { 
 			course_found.collection.aggregate([
-				{"$match"	: {name : name} }
+				{"$match"	: {name : course_cn} }
 				,{"$unwind"	: "$students" }
 				,{"$match"	: {"students.uni" : uni} }
 			],
@@ -76,16 +76,17 @@ exports.updateCourse = function( ) {
 
 						course_found.students.push(students_request);				
 						course_found.save();
-						console.log('-> '+lastname+', '+firstname+ ' ('+ uni +')' +' is added to '+name+'.');
+						console.log('-> '+lastname+', '+firstname+ ' ('+ uni +')' +' is added to '+ course_cn +'.');
 						res.send(true);
 
 						// Publish to to the referential integrity that the course has been updated
 						// with a student
 						students_request["sender"] = 'courses_micro_service';
-						students_request["action"] = 'update student add course';
-						var message =JSON.stringify(students_request)
+						students_request["service_action"] = 'update student add course';
+						students_request["course_cn"] = course_cn;
+						var message = JSON.stringify(students_request).toLowerCase();
 
-            			clientRI.publish("referential integrity", message)
+            			clientRI.publish(pub_channel, message)
 
 
 					};
@@ -94,7 +95,7 @@ exports.updateCourse = function( ) {
 	// If the course does not exist
 		} else {
 
-			console.log('-> '+name+' doesnt exist.');
+			console.log('-> ' + name + ' doesn\'t exist.');
 			res.send(false);
 
 		};
