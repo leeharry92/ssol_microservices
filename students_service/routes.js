@@ -40,7 +40,7 @@ module.exports = function(app) {
     var call_number = 1234;
     var uni = obj.uni.toLowerCase();
 
-    switch (obj.action) {
+    switch (obj.service_action) {
         case "update student add course":
             students.ref_add_course(call_number, uni, app, function(err) {
                 if (err != null) {
