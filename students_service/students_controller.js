@@ -112,7 +112,7 @@ exports.remove = function(req, res, next) {
 			} else {
 				collection.deleteOne({uni: uni_param}, null, 
 					function(error, result) {
-						if (error === null) {
+						if (error == null) {
 							res.sendStatus(200);
 						} else {
 							var err = new Error('Database error');
@@ -311,7 +311,7 @@ exports.remove_course = function(req, res, next) {
 																			'action' : 'update course delete student',
 																			'course_name': course,
 																			'uni': uni_param}
-																		clientRI.publish("referential integrity", event_message);
+																		clientRIPub.publish("referential integrity", event_message);
 
 																	} else {
 																		var err = new Error('Database error');

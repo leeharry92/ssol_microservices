@@ -7,6 +7,8 @@ var courses_model = requireDB.getModel;
  
 var model = courses_db.model('courses_model');
 
+var redis = require("redis")
+clientRI = redis.createClient() // Publishes to ri channel
 
 var root = '/courses/';
 
@@ -74,6 +76,14 @@ exports.removeStudent = function( ) {
 							if (s){
 								console.log('-> '+lastname+', '+firstname+' removed from '+coursedata.name);
 								//res.send(true);
+
+								// Publish to to the referential integrity that the course has been updated
+								// with a student
+								students_request["sender"] = 'courses_micro_service';
+								students_request["action"] = 'update student remove course';
+								var message =JSON.stringify(students_request)
+
+		            			clientRI.publish("referential integrity", message)
 							} else {
 								console.log('-> Error removing '+lastname+', '+firstname+' from '+coursedata.name+'.');
 								//res.send(false);
