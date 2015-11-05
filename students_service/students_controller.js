@@ -523,7 +523,7 @@ exports.ref_remove_course_on_all_students = function(callNumber, app) {
 												});
 };
 
-
+/*
     var msg = JSON.parse(message);
 
     switch (msg.action) {
@@ -570,7 +570,7 @@ exports.ref_remove_course_on_all_students = function(callNumber, app) {
     
 });
 
-
+*/
 
 
 
