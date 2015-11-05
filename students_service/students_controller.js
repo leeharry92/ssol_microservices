@@ -16,6 +16,8 @@ var required_keys = ['first_name', 'last_name', 'uni'];
 var no_delete_keys = ['first_name', 'last_name', 'uni', 'courses'];
 var host = 'localhost';
 
+clientRIPub = redis.createClient(); // Publishes to ri channel
+
 exports.find = function(req, res, next) {
 	const db = req.app.locals.db;
 	var collection = db.collection('Students');
@@ -118,7 +120,7 @@ exports.remove = function(req, res, next) {
 			} else {
 				collection.deleteOne({uni: uni_param}, null, 
 					function(error, result) {
-						if (error === null) {
+						if (error == null) {
 							res.sendStatus(200);
 						} else {
 							var err = new Error('Database error');
@@ -209,7 +211,7 @@ exports.remove_attribute = function(req, res, next) {
 };
 
 
-var add_course = function(req, res, next) {
+exports.add_course = function(req, res, next) {
 	var db = req.app.locals.db;
 	var collection = db.collection('Students');
 	var course = req.body.course;
@@ -287,8 +289,6 @@ var add_course = function(req, res, next) {
 		}
 	}
 };
-
-exports.add_course = add_course;
 
 exports.remove_course = function(req, res, next) {
 	var db = req.app.locals.db;
@@ -429,14 +429,100 @@ exports.update = function(req, res, next) {
 	});
 };
 
+exports.ref_add_course = function(callNumber, uni_param, app, callback) {
+	var db = app.locals.db;
+	var collection = db.collection('Students');
 
-clientRISub.on("subscribe", function (channel, count) {
-    console.log("Subscribed to " + channel + " channel.")
-});
+	collection.findOneAsync({uni: uni_param})
+	.then(function(student) {
+		if (student == null) {
+			var err = new Error('Specified student not found');
+			err.status = 404;
+			callback(err);
+		} else {
+			var courseList = student.courses;
+			
+			// If courses list does not exist, initialize empty array
+			if (courseList == null) {
+				courseList = [];
+			}
 
-clientRISub.on("message", function (channel, message) { // Listens for referential integrity channel JSON messgages
-    console.log("Channel name: " + channel);
-    console.log("Message: " + message);
+			if (_.indexOf(courseList, callNumber) != -1) {
+				var err = new Error('Student is already registered for course specified');
+				err.status = 400;
+				callback(err);
+			} else {
+				courseList.push(callNumber);
+				collection.updateOne({_id: student._id},
+														 {$set: {courses: courseList}}, 
+														 function(error, result) {
+														 	if (error === null) {
+														 		callback(null);
+															} else {
+																var err = new Error('Database error');
+																err.status = 500;
+																callback(err);
+															}
+														 });
+
+				}
+			}
+		});
+};
+
+
+exports.ref_remove_course = function(callNumber, uni_param, app, callback) {
+	var db = app.locals.db;
+	var collection = db.collection('Students');
+
+	collection.findOneAsync({uni: uni_param})
+	.then(function(student) {
+		if (student == null) {
+			var err = new Error('Specified student not found');
+			err.status = 404;
+			callback(err);
+		} else {
+			var courseList = student.courses;
+			var index;
+			if (courseList == null || 
+					(index = _.indexOf(courseList, callNumber)) == -1) {
+				var err = new Error('Student is not registered for course specified');
+				err.status = 400;
+				callback(err);
+			} else {
+				var removed = courseList.splice(index, 1);
+				collection.updateOne({_id: student._id},
+														 {$set: {courses: courseList}}, 
+														 function(error, result) {
+														 	if (error === null) {
+														 		callback(null);
+															} else {
+																var err = new Error('Database error');
+																err.status = 500;
+																callback(err);
+															}
+														 });
+				}
+			}
+	});
+};
+
+exports.ref_remove_course_on_all_students = function(callNumber, app) {
+	var db = app.locals.db;
+	var collection = db.collection('Students');
+
+	collection.updateMany({$isolated:1},
+												{$pull: {courses: callNumber}}, function(error, result) {
+													if (error === null) {
+														callback(null);
+													} else {
+														var err = new Error('Database error');
+														err.status = 500;
+														callback(err);
+													}
+												});
+};
+
 
     var msg = JSON.parse(message);
 

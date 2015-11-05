@@ -16,15 +16,15 @@ Thus in order to typically run the students service, one would have to
 Below we outline the steps to achieve the above - please replace <number> with the service instance being instantiated.
 
 To set up the database:
-1. run mongod on separate terminal window (This step is done only once)
+Run mongod on separate terminal window (This step is done only once)
 ```
 	mongod [--dbpath ./data/]
 ```	
-2. run mongo to setup the database
+Run mongo to setup the database
 ```	
 	mongo students_service_<number> db_scripts/setup_db_<number>.js
 ```
-3. modify the following line in config file to the appropriate number (config/env/development.js)
+Modify the following line in config file to the appropriate number (config/env/development.js)
 ```	
 	port: process.env.PORT || 300<number>,
 	db: 'mongodb://0.0.0.0/students_service_<number>'
