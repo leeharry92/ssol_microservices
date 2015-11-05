@@ -1,21 +1,57 @@
 var express = require('express');
 var router = express.Router();
-var students = require('./students_controller')
+var students = require('./students_controller');
+var redis = require("redis")
 
+clientRISub = redis.createClient();	// Subscribes to ri channel
 
-router.get('/', students.find);
-router.post('/', students.create);
+clientRISub.subscribe("students microservice");
 
-router.post('/attributes', students.add_attribute);
-router.delete('/attributes', students.remove_attribute);
+module.exports = function(app) {
+	app.route('/')
+		.get(students.find)
+		.post(students.create);
 
-router.get('/:uni', students.show);
-router.delete('/:uni', students.remove);
-router.put('/:uni', students.update);
-router.put('/:uni/add-course', students.add_course);
-router.put('/:uni/remove-course', students.remove_course);
+	app.route('/attributes')
+		.post(students.add_attribute)
+		.delete(students.add_attribute);
 
+	app.route('/:uni')
+		.get(students.show)
+		.delete(students.remove)
+		.put(students.update);
 
+	app.route('/:uni/add-course')
+		.put(students.add_course);
 
+	app.route('/:uni/remove-course')
+		.put(students.remove_course);
 
-module.exports = router;
+	clientRISub.on("subscribe", function (channel, count) {
+    console.log("Subscribed to " + channel + " channel.")
+	});
+
+	clientRISub.on("message", function (channel, message) { // Listens for referential integrity channel JSON messgages
+    console.log("Channel name: " + channel);
+    console.log("Message: " + message);
+    
+    //Switch statement for three RI cases
+    var obj = JSON.parse(message);
+    var call_number = 8765;
+    var uni = obj.uni.toLowerCase();
+
+    switch (obj.action) {
+        case "update student add course":
+        	students.ref_add_course(call_number, uni, app);
+        	break;
+
+        case "update student delete course":
+        	students.ref_remove_course(call_number, uni, app);
+        	break;
+
+        case "delete course":
+        	students.ref_remove_course_on_all_students(call_number, app);
+        	break;
+    }
+	});   
+};

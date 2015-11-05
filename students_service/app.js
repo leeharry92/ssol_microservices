@@ -4,7 +4,7 @@ var logger = require('morgan');
 var bodyParser = require('body-parser');
 var fs = require('fs');
 var http = require('http');
-var redis = require("redis")
+var redis = require('redis');
 
 // Database-related dependencies
 var Promise = require('bluebird');
@@ -44,7 +44,7 @@ MongoClient.connect(config.db, { promiseLibrary: Promise }, (err, db) => {
   app.locals.db = db;
 });
 
-app.use('/', routes);
+require('./routes')(app);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
