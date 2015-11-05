@@ -406,7 +406,7 @@ exports.update = function(req, res, next) {
 	});
 };
 
-exports.ref_add_course = function(callNumber, uni_param, app) {
+exports.ref_add_course = function(callNumber, uni_param, app, callback) {
 	var db = app.locals.db;
 	var collection = db.collection('Students');
 
@@ -415,7 +415,7 @@ exports.ref_add_course = function(callNumber, uni_param, app) {
 		if (student == null) {
 			var err = new Error('Specified student not found');
 			err.status = 404;
-			return err;
+			callback(err);
 		} else {
 			var courseList = student.courses;
 			
@@ -427,18 +427,18 @@ exports.ref_add_course = function(callNumber, uni_param, app) {
 			if (_.indexOf(courseList, callNumber) != -1) {
 				var err = new Error('Student is already registered for course specified');
 				err.status = 400;
-				return err;
+				callback(err);
 			} else {
 				courseList.push(callNumber);
 				collection.updateOne({_id: student._id},
 														 {$set: {courses: courseList}}, 
 														 function(error, result) {
 														 	if (error === null) {
-														 		return null;
+														 		callback(null);
 															} else {
 																var err = new Error('Database error');
 																err.status = 500;
-																return err;
+																callback(err);
 															}
 														 });
 
@@ -448,7 +448,7 @@ exports.ref_add_course = function(callNumber, uni_param, app) {
 };
 
 
-exports.ref_remove_course = function(callNumber, uni_param, app) {
+exports.ref_remove_course = function(callNumber, uni_param, app, callback) {
 	var db = app.locals.db;
 	var collection = db.collection('Students');
 
@@ -457,7 +457,7 @@ exports.ref_remove_course = function(callNumber, uni_param, app) {
 		if (student == null) {
 			var err = new Error('Specified student not found');
 			err.status = 404;
-			return err;
+			callback(err);
 		} else {
 			var courseList = student.courses;
 			var index;
@@ -465,18 +465,18 @@ exports.ref_remove_course = function(callNumber, uni_param, app) {
 					(index = _.indexOf(courseList, callNumber)) == -1) {
 				var err = new Error('Student is not registered for course specified');
 				err.status = 400;
-				return err;
+				callback(err);
 			} else {
 				var removed = courseList.splice(index, 1);
 				collection.updateOne({_id: student._id},
 														 {$set: {courses: courseList}}, 
 														 function(error, result) {
 														 	if (error === null) {
-														 		return null;
+														 		callback(null);
 															} else {
 																var err = new Error('Database error');
 																err.status = 500;
-																return err;
+																callback(err);
 															}
 														 });
 				}
@@ -485,6 +485,19 @@ exports.ref_remove_course = function(callNumber, uni_param, app) {
 };
 
 exports.ref_remove_course_on_all_students = function(callNumber, app) {
+	var db = app.locals.db;
+	var collection = db.collection('Students');
+
+	collection.updateMany({$isolated:1},
+												{$pull: {courses: callNumber}}, function(error, result) {
+													if (error === null) {
+														callback(null);
+													} else {
+														var err = new Error('Database error');
+														err.status = 500;
+														callback(err);
+													}
+												});
 };
 
 
