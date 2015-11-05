@@ -31,7 +31,6 @@ module.exports = function(app) {
     console.log("Subscribed to " + channel + " channel.")
 	});
 
-<<<<<<< HEAD
 	clientSub.on("message", function (channel, message) { // Listens for referential integrity channel JSON messgages
 	    console.log("Channel name: " + channel);
 	    console.log("Message: " + message);
@@ -54,7 +53,7 @@ module.exports = function(app) {
 	        	students.ref_remove_course_on_all_students(call_number, app);
 	        	break;
     	}
-=======
+
 	clientRISub.on("message", function (channel, message) { // Listens for referential integrity channel JSON messgages
     console.log("Channel name: " + channel);
     console.log("Message: " + message);
@@ -95,6 +94,6 @@ module.exports = function(app) {
         	});
         	break;
     }
->>>>>>> 7b0c8f01f62d323a8935098bde19da6fbf36cc54
+
 	});   
 };
