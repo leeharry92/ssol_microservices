@@ -127,7 +127,7 @@ exports.remove = function(req, res, next) {
 exports.add_attribute = function(req, res, next) {
 	var db = req.app.locals.db;
 	var collection = db.collection('Students');
-	var attribute = req.body.attribute;
+	var attribute = req.body.attribute.toLowerCase();
 
 	if (attribute === undefined) {
 		var err = new Error('Must specify attribute');
@@ -164,7 +164,7 @@ exports.add_attribute = function(req, res, next) {
 exports.remove_attribute = function(req, res, next) {
 	var db = req.app.locals.db;
 	var collection = db.collection('Students');
-	var attribute = req.body.attribute;
+	var attribute = req.body.attribute.toLowerCase();
 
 	if (attribute === undefined) {
 		var err = new Error('Must specify attribute');
@@ -347,7 +347,7 @@ exports.update = function(req, res, next) {
 						var valid = true;
 						var contains_uni = false;
 						_(param_keys).forEach(function(key) {
-							// Disallow changing courses throug this endpoint
+							// Disallow changing courses through this endpoint
 							if (key == "courses" ||  _.indexOf(schema_keys, key) == -1) {
 								valid = false;
 							}
