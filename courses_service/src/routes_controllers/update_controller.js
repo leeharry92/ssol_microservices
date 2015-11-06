@@ -11,7 +11,10 @@ var model = courses_db.model('courses_model');
 
 var root = '/courses/';
 
-
+// Redis RI
+var redis = require("redis")
+clientRI = redis.createClient() // Publishes to ri channel
+var pub_channel = "referential_integrity";
 
 
 exports.updateCourse = function( ) {
@@ -69,6 +72,9 @@ exports.updateCourse = function( ) {
 						console.log('-> '+uni+' is added to '+course_found.name+'.');
 						res.send(true);
 
+						var ri_message = { service_action: 'update student add course', course_cn: course_num, uni: uni };
+						var message = JSON.stringify(ri_message).toLowerCase();
+						clientRI.publish(pub_channel, message);
 					};
 			}); // ends model.findOne
 
