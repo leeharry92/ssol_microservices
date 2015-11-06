@@ -23,7 +23,7 @@ module.exports = function(app){
 
 	// delete 
 	app.delete(  root, 								delete_controller.removeCourse() ); 
-	app.delete( root + '/:course' ,					delete_controller.removeStudentFromCourse() );
+	app.delete( root + '/:course_num' ,					delete_controller.removeStudentFromCourse() );
 	app.delete( '/student',							delete_controller.removeStudent() );
 
 

@@ -7,10 +7,7 @@ var courses_model = requireDB.getModel;
  
 var model = courses_db.model('courses_model');
 
-var redis = require("redis")
-clientRI = redis.createClient() // Publishes to ri channel
 
-var pub_channel = "referential_integrity";
 
 var root = '/courses/';
 
@@ -24,70 +21,53 @@ exports.updateCourse = function( ) {
 
 // FIRST, TRY UPDATING THE STUDENT DOCS IN THE COURSE DB
   try {
-	  var course_cn = req.query.name.toLowerCase();
-	  var students_request = req.body.students;
-
-	  // convert JSON REQUEST to Upper Case
-		JSON.stringify(students_request, function (key, value) {
-		  if (value && typeof value === 'object') {
-			var replacement = {};
-			for (var k in value) {
-			  if (Object.hasOwnProperty.call(value, k)) {
-				value[k] = value[k].toUpperCase();
-				replacement[k && k.charAt(0).toLowerCase() + k.substring(1)] = value[k].toUpperCase();
-			  }
-			}
-			return replacement;
-		  }
-		  return value;
-		});
-
+	  var course_num = req.query.course_num;
+	  var students_request = req.body;
 
 	// Store local variables
-	var uni = students_request.uni;
-	var lastname = students_request.lastname;
-	var firstname = students_request.firstname;
+	  var uni = students_request.uni.toUpperCase();
+	  var lastname = students_request.lastname;
+	  var firstname = students_request.firstname;
+
+// convert uni to caps
+	var student_entry = {
+  		uni : uni,
+ 		lastname : lastname,
+		firstname : firstname
+	}
+
 
 	if ( (typeof uni === 'undefined') || (typeof lastname === 'undefined') || (typeof firstname === 'undefined') ) {
-	    throw new Error("Either students.uni or students.lastname or students.firstname is undefined");
+	    throw new Error("Students entry is of type undefined");
 	};
 
 
 	// First find the course in the db model
-	  model.findOne({name: course_cn}, function(err, course_found){
+	  model.findOne({course_num: course_num}, function(err, course_found){
 
 	// If the course exists, check student entries to make sure no duplicate exists
 		if (course_found) { 
 			course_found.collection.aggregate([
-				{"$match"	: {name : course_cn} }
+				{"$match"	: { course_num : parseInt(course_num)} }
 				,{"$unwind"	: "$students" }
-				,{"$match"	: {"students.uni" : uni} }
+				,{"$match"	: {"students.uni" : uni} } 
 			],
 				function (err_lastname, student_found){
+
 
 			// If the entry already exists
 					if (student_found.length > 0 ) {
 
-						console.log('-> '+lastname+', '+firstname+ ' ('+ uni +')' + ' is already enrolled in '+name+'.');
+						console.log('-> '+uni+' is already enrolled in '+course_found.name+'.');
 						res.send(false);
 
 			// If the student entry does not exist, add it to the db
 					} else	{		
 
-						course_found.students.push(students_request);				
+						course_found.students.push(student_entry);				
 						course_found.save();
-						console.log('-> '+lastname+', '+firstname+ ' ('+ uni +')' +' is added to '+ course_cn +'.');
+						console.log('-> '+uni+' is added to '+course_found.name+'.');
 						res.send(true);
-
-						// Publish to to the referential integrity that the course has been updated
-						// with a student
-						students_request["sender"] = 'courses_micro_service';
-						students_request["service_action"] = 'update student add course';
-						students_request["course_cn"] = course_cn;
-						var message = JSON.stringify(students_request).toLowerCase();
-
-            			clientRI.publish(pub_channel, message)
-
 
 					};
 			}); // ends model.findOne
@@ -95,7 +75,7 @@ exports.updateCourse = function( ) {
 	// If the course does not exist
 		} else {
 
-			console.log('-> ' + name + ' doesn\'t exist.');
+			console.log('-> course_num:'+course_num+' doesnt exist.');
 			res.send(false);
 
 		};
@@ -109,11 +89,6 @@ exports.updateCourse = function( ) {
 	console.log(e);
 
 		try{
-			if (typeof req.body.students === 'object'){
-
-				throw new Error("invalid students entry");
-
-			};
 
 		  // Iterate through the requests within the body
 			for(var key in req.body) {
@@ -122,7 +97,7 @@ exports.updateCourse = function( ) {
 			// store the key-value pair to be PUT
 			  var path = key;
 			  var update = {};
-			  update[path] = req.body[key].toUpperCase(); 
+			  update[path] = req.body[key]; 
 				// use update[path] = { text: 'test test' }; if you want to put a field
 
 			// store the key-value pair to be 
@@ -137,17 +112,17 @@ exports.updateCourse = function( ) {
 
 					if ( result != null ) {
 
-							model.findOneAndUpdate( {name:name}, {
+							model.findOneAndUpdate( {course_num:course_num}, {
 								$set: update//req.body[key]
 							}, function (e, s){
 								if (s){
 
-									console.log('-> {'+key+' : '+req.body[key]+'} saved in '+name);
+									console.log('-> {'+key+' : '+req.body[key]+'} saved in '+s.name);
 									res.send(true);
 
 								} else {
 								
-									console.log('-> Error saving {'+key+' : '+req.body[key]+'} in '+name);
+									console.log('-> Error saving {'+key+' : '+req.body[key]+'} in '+s.name);
 									res.send(false);
 
 								}

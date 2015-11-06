@@ -9,9 +9,9 @@ var Schema   = mongoose.Schema;
 
 
 	var students_model = new Schema({
-		uni : String,
-		lastname : String,
-		firstname: String
+		  uni	   : String,
+		  lastname : String,
+		  firstname: String
 	});
 
 //module.exports = function() {
@@ -19,6 +19,7 @@ var Schema   = mongoose.Schema;
 
 	courses_model.add({
 		user_id    : String,
+	    course_num   :  { type: Number, min: 0000, max: 9999 },
 		name	   : String,
 		students   : [students_model],
 		updated_at : Date

@@ -7,8 +7,6 @@ var courses_model = requireDB.getModel;
  
 var model = courses_db.model('courses_model');
 
-var redis = require("redis")
-clientRI = redis.createClient() // Publishes to ri channel
 
 var root = '/courses/';
 
@@ -21,28 +19,8 @@ exports.removeStudent = function( ) {
 
   try {
 
-	// local variable to store the course name, which comes from the url /courses/<coursename>
-	  var students_request = req.body.students;
-
-	  // convert JSON REQUEST to Upper Case
-		JSON.stringify(students_request, function (key, value) {
-		  if (value && typeof value === 'object') {
-			var replacement = {};
-			for (var k in value) {
-			  if (Object.hasOwnProperty.call(value, k)) {
-				value[k] = value[k].toUpperCase();
-				replacement[k && k.charAt(0).toLowerCase() + k.substring(1)] = value[k].toUpperCase();
-			  }
-			}
-			return replacement;
-		  }
-		  return value;
-		});
-
-
-	// Store local variables
-	  var lastname = students_request.lastname;
-	  var firstname = students_request.firstname;
+	var students_request = req.body;
+	var uni = students_request.uni.toUpperCase();
 
 	// First find the course in the db model
 	  model.find({}, function(err, course_found){
@@ -54,10 +32,10 @@ exports.removeStudent = function( ) {
 		  function( coursedata ) {
 
 			coursedata.collection.aggregate( [
-				{"$match"	: {name : coursedata.name} }
+				{"$match"	: {course_num : parseInt(coursedata.course_num) } }
 				,{"$unwind"	: "$students" }
-				,{"$match"	: {"students.lastname" : lastname} }
-				,{"$match"	: {"students.firstname": firstname} }
+				,{"$match"	: {"students.uni" : uni} }
+				//,{"$match"	: {"students.firstname": firstname} }
 			],
 				function (err_lastname, student_found){
 
@@ -68,24 +46,17 @@ exports.removeStudent = function( ) {
 						coursedata.update(  {
 							$pull: {
 								students: {	
-									lastname: lastname,
-									firstname: firstname
+									uni : uni
+									//lastname: lastname,
+									//firstname: firstname
 								}
 							} // ends $pull
 						}, function (e, s){
 							if (s){
-								console.log('-> '+lastname+', '+firstname+' removed from '+coursedata.name);
+								console.log('-> '+uni+' removed from '+coursedata.name);
 								//res.send(true);
-
-								// Publish to to the referential integrity that the course has been updated
-								// with a student
-								students_request["sender"] = 'courses_micro_service';
-								students_request["action"] = 'update student remove course';
-								var message =JSON.stringify(students_request)
-
-		            			clientRI.publish("referential integrity", message)
 							} else {
-								console.log('-> Error removing '+lastname+', '+firstname+' from '+coursedata.name+'.');
+								console.log('-> Error removing '+uni+' from '+coursedata.name+'.');
 								//res.send(false);
 							}
 						});
@@ -94,7 +65,7 @@ exports.removeStudent = function( ) {
 				// If the student entry does not exist
 					} else	{		
 
-						console.log('-> '+lastname+', '+firstname+' does not exist in '+coursedata.name+'.');
+						console.log('-> '+uni+' does not exist in '+coursedata.name+'.');
 						//res.send(false);
 
 					};
@@ -126,40 +97,20 @@ exports.removeStudentFromCourse = function( ) {
   try {
 
 	// local variable to store the course name, which comes from the url /courses/<coursename>
-	var name = req.params.course.toUpperCase();
+	var course_num = req.params.course_num;
+	var students_request = req.body;
+	var uni = students_request.uni.toUpperCase();
 
-	  var students_request = req.body.students;
-
-	  // convert JSON REQUEST to Upper Case
-		JSON.stringify(students_request, function (key, value) {
-		  if (value && typeof value === 'object') {
-			var replacement = {};
-			for (var k in value) {
-			  if (Object.hasOwnProperty.call(value, k)) {
-				value[k] = value[k].toUpperCase();
-				replacement[k && k.charAt(0).toLowerCase() + k.substring(1)] = value[k].toUpperCase();
-			  }
-			}
-			return replacement;
-		  }
-		  return value;
-		});
-
-
-	// Store local variables
-	  var lastname = students_request.lastname;
-	  var firstname = students_request.firstname;
 
 	// First find the course in the db model
-	  model.findOne({name: name}, function(err, course_found){
+	  model.findOne({course_num: course_num}, function(err, course_found){
 
 	// If the course exists, check student entries to make sure no duplicate exists
 		if (course_found) { 
 			course_found.collection.aggregate([
-				{"$match"	: {name : name} }
+				{"$match"	: {course_num : parseInt(course_num)} }
 				,{"$unwind"	: "$students" }
-				,{"$match"	: {"students.lastname" : lastname} }
-				,{"$match"	: {"students.firstname": firstname} }
+				,{"$match"	: {"students.uni" : uni} }
 			],
 				function (err_lastname, student_found){
 
@@ -167,19 +118,18 @@ exports.removeStudentFromCourse = function( ) {
 					if (student_found.length > 0 ) {
 
 					// pull (remove) the student from the student collection withing the course 
-						model.findOneAndUpdate( {name:name}, {
+						model.findOneAndUpdate( {course_num:course_num}, {
 							$pull: {
 								students: {	
-									lastname: lastname,
-									firstname: firstname
+									uni : uni
 								}
 							} // ends $pull
 						}, function (e, s){
 							if (s){
-								console.log('-> '+lastname+', '+firstname+' removed from '+name);
+								console.log('-> '+uni+' removed from '+course_found.name);
 								res.send(true);
 							} else {
-								console.log('-> Error removing '+lastname+', '+firstname+' from '+name+'.');
+								console.log('-> Error removing '+uni+' from '+course_found.name+'.');
 								res.send(false);
 							}
 						});
@@ -187,7 +137,7 @@ exports.removeStudentFromCourse = function( ) {
 			// If the student entry does not exist
 					} else	{		
 
-						console.log('-> '+lastname+', '+firstname+' does not exist in '+name+'.');
+						console.log('-> '+uni+' does not exist in '+course_found.name+'.');
 						res.send(false);
 
 					};
@@ -196,7 +146,7 @@ exports.removeStudentFromCourse = function( ) {
 	// If the course does not exist
 		} else {
 
-			console.log('-> '+name+' doesnt exist.');
+			console.log('-> course_num:'+course_num+' doesnt exist.');
 			res.send(false);
 
 		}; // ends else
@@ -225,17 +175,11 @@ exports.removeCourse = function () {
 	  try{
 
 		// local variable to save the query
-		var name = req.query.name.toUpperCase();
+		var course_num = req.query.course_num;//.toUpperCase();
 
-		model.findOne( {name: name}, function ( err, destroy_model ){
+		model.findOne( {course_num: course_num}, function ( err, destroy_model ){
 			var user_id = req.cookies ?
 			   req.cookies.user_id : undefined;
-
-			/*
-				if( model.user_id !== user_id ){
-				  return utils.forbidden( res );
-				}
-			*/
 
 			// if the course does exist, then delete it
 			if (destroy_model != null) {
@@ -243,12 +187,12 @@ exports.removeCourse = function () {
 				destroy_model.remove( function ( err, destroy_model ){
 
 				  	if (destroy_model) {
-						console.log('-> '+name+' removed');
+						console.log('-> course_num:'+course_num+' removed');
 						res.send(true);
 
 					// there was an error deleting
 					} else {
-						console.log("-> Error deleting "+name);
+						console.log("-> Error deleting course_num:"+course_num);
 						res.send(false);
 					}
 
@@ -257,7 +201,7 @@ exports.removeCourse = function () {
 			// if the course does not exist, then return an error
 			} else {
 
-				console.log("-> "+name+" cannot be removed because it does not exist");
+				console.log("-> "+course_num+" cannot be removed because it does not exist");
 				res.send(false);
 
 			}; // ends else

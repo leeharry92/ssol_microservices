@@ -6,7 +6,7 @@ var courses_db = requireDB.getdb;
 var courses_model = requireDB.getModel;
  
 var model = courses_db.model('courses_model');
-var paths = ["user_id","name", "students", "updated_at"];
+var paths = ["user_id","course_num","name", "students", "updated_at"];
 
 var root = '/courses/';
 
@@ -73,7 +73,9 @@ exports.deleteKEY = function( ){
 							userKeyValues.splice(index,1);
 						}
 
-					var keyValues = [req.cookies.user_id, success[j].name, success[j].students, Date.now()];	
+
+
+					var keyValues = [req.cookies.user_id, success[j].course_num, success[j].name, success[j].students, Date.now()];	
 
 
 					keyValues = keyValues.concat(userKeyValues);
@@ -87,14 +89,22 @@ exports.deleteKEY = function( ){
 					createCourseHandler(model, paths, keyValues);
 
 					// Reset the paths variable for each iteration
-					paths = ["user_id","name", "students", "updated_at"];
+					paths = ["user_id","course_num","name", "students", "updated_at"];
 					
 			  } // ends for loop
 
 
 
-				console.log('-> '+key+' key removed from schema');
-				res.send(true);
+			// check if user attempted to modify an inherent key
+			  	var ind = paths.indexOf(key);
+				if (ind > -1){
+					console.log('-> '+key+' key removal from schema is restricted');
+					res.send(false);
+				} else {
+					console.log('-> '+key+' key removed from schema');
+					res.send( true );
+				}
+
 
 			  }); // ends model.findOne
 
@@ -126,6 +136,8 @@ exports.addKEY = function( ){
 
   try{
 	var key = req.body.key;
+
+
 
 	if (typeof key === 'undefined'){
 		throw new Error("key entry is of type 'undefined' ");
@@ -167,7 +179,7 @@ exports.addKEY = function( ){
 				// find and return all keys and keyValues within model p
 					getKeysAndValues(success[j],userKeys,userKeyValues);
 
-					var keyValues = [req.cookies.user_id, success[j].name, success[j].students, Date.now()];	
+					var keyValues = [req.cookies.user_id, success[j].course_num, success[j].name, success[j].students, Date.now()];	
 					keyValues = keyValues.concat(userKeyValues);
 
 					//console.log(keyValues);
@@ -182,13 +194,21 @@ exports.addKEY = function( ){
 						createCourseHandler(model, paths, keyValues);
 
 					// Reset the paths variable for each iteration
-						paths = ["user_id","name", "students", "updated_at"];
+						paths = ["user_id","course_num","name", "students", "updated_at"];
 					
 			  } // ends for loop
 
 
+			// check if user attempted to modify an inherent key
+			  	var ind = paths.indexOf(key);
+				if (ind > -1){
+					console.log('-> '+key+' key already exists in schema');
+					res.send(false);
+				} else {
 					console.log('-> '+key+' key added to schema');
 					res.send( true );
+				}
+
 
 			  }); // ends model.findOne
 
@@ -214,15 +234,19 @@ exports.createCourse = function () {
 
 	try{
 
-		var name = req.body.name.toUpperCase();
-		model.findOne({name : name}, function (find_err, result){
+		var incoming = req.body;
+
+		var course_num = incoming.course_num;
+		var name = incoming.name;
+
+		model.findOne({course_num : course_num}, function (find_err, result){
 
 			if (find_err) return find_err;
 
 			if ( result == null ) {
 
 
-			  var keyValues = [req.cookies.user_id, name, req.body.students, Date.now()];
+			  var keyValues = [req.cookies.user_id, course_num, name, req.body.students, Date.now()];
 			  var attributes = nconf.get('courseAttributes');
 
 
@@ -241,15 +265,15 @@ exports.createCourse = function () {
 			  createCourseHandler(model, paths, keyValues);
 
 			// Reset the paths variable
-			  paths = ["user_id","name", "students", "updated_at"];
+			  paths = ["user_id","course_num","name", "students", "updated_at"];
 			
 			// Log and Return to User
-			  console.log('-> '+name+' created');
+			  console.log('-> Course Number:'+course_num+' created');
 			  res.send( true );
 
 			} else {
 
-				console.log('-> '+name+' already exists');
+				console.log('-> course_num:'+course_num+' already exists');
 				res.send( false );
 
 			};
@@ -283,6 +307,7 @@ createCourseHandler = function(model, paths, keyValues){
 
 		{
 		  user_id    : req.cookies.user_id,
+		  course_num : Number,
 		  name		 : name,
 		  students   : req.body.students,//["randcourse1","randcourse2"],
 		  updated_at : Date.now()
@@ -308,6 +333,7 @@ getKeysAndValues = function(p,userKeys,userKeyValues){
 			// Search for keys that are user defined
 				if ( (p2.hasOwnProperty(key2) ) &&
 					 (key2 != "name") && 
+					 (key2 != "course_num") && 
 					 (key2 != "students") && 
 					 (key2 != "updated_at") && 
 					 (key2 != "_id") && 
