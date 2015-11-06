@@ -72,7 +72,12 @@ exports.updateCourse = function( ) {
 						console.log('-> '+uni+' is added to '+course_found.name+'.');
 						res.send(true);
 
-						var ri_message = { service_action: 'update student add course', course_cn: course_num, uni: uni };
+						var ri_message = {
+							'sender' : 'courses_micro_service',
+							'action' : 'update student add course',
+							'course_cn': course_num,
+							'uni': uni };
+						
 						var message = JSON.stringify(ri_message).toLowerCase();
 						clientRI.publish(pub_channel, message);
 					};
