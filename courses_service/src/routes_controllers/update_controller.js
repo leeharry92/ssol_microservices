@@ -162,7 +162,6 @@ exports.removeStudentFromCourse = function( ) {
 	var params = req.params;
 	var clientQuery = req.query;
 	var resource = params.resource;
-	var resourceID = params.uni;
 
 
   // BUILD THE QUERY FOR THE COLLECTION
@@ -181,13 +180,14 @@ exports.removeStudentFromCourse = function( ) {
 		resourceQuery[resource+"."+query_keys[i]] = clientQuery[query_keys[i]];
 	}	
 
-
+/*
+	console.log(clientQuery.uni)
 	console.log(params);
 	console.log(clientQuery);
 	console.log(resource);
 	console.log(collectionQuery);
 	console.log(resourceQuery);
-
+*/
 
   // business logic
   	// redis message
@@ -195,7 +195,7 @@ exports.removeStudentFromCourse = function( ) {
 			'sender' : 'courses_micro_service',
 			'service_action' : 'update student delete course',
 			'course_name': params.course_num,
-			'uni': params.uni };
+			'uni': clientQuery.uni };
 		
 		var message = JSON.stringify(ri_message).toLowerCase();
 		clientRI.publish(pub_channel, message);
