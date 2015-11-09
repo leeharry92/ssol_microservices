@@ -173,11 +173,21 @@ exports.removeStudentFromCourse = function( ) {
 */
 
   // business logic
-
+  	// redis message
+		var ri_message = {
+			'sender' : 'courses_micro_service',
+			'service_action' : 'update student delete course',
+			'course_name': params.course_num,
+			'uni': params.uni };
+		
+		var message = JSON.stringify(ri_message).toLowerCase();
+		clientRI.publish(pub_channel, message);
 
 
 	// update db - remove the student from the course
 		DELETEresource(res, collectionQuery, resource, resourceQuery, clientQuery);
+
+
 
 
 
@@ -237,8 +247,8 @@ exports.addStudentToCourse = function( ) {
   	// redis message
 		var ri_message = {
 			'sender' : 'courses_micro_service',
-			'action' : 'update student add course',
-			'course_cn': course_num,
+			'service_action' : 'update student add course',
+			'course_name': course_num,
 			'uni': uni };
 		
 		var message = JSON.stringify(ri_message).toLowerCase();
