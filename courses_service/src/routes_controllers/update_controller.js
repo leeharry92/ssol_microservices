@@ -7,87 +7,53 @@ var courses_model = requireDB.getModel;
  
 var model = courses_db.model('courses_model');
 
-var redis = require("redis")
-clientRI = redis.createClient() // Publishes to ri channel
 
-var pub_channel = "referential_integrity";
 
 var root = '/courses/';
 
+// Redis RI
+var redis = require("redis")
+clientRI = redis.createClient() // Publishes to ri channel
+var pub_channel = "referential_integrity";
 
 
 
-exports.updateCourse = function( ) {
+// subroutine to build the client's inputted query
+buildQuery = function(query, params, iterations){
+	var param_keys = Object.keys(params);
+	for (var i = 0; i < iterations; i++) {
+		query[param_keys[i]] = parseInt(params[param_keys[i]]);
+	}
+}
 
-  return function ( req, res, next ){
+// subroutine to post a resource
+POSTresource = function (res, collectionQuery, resource, resourceQuery, clientQuery){
 
+  // First use the collection Query to query the db
+	model.findOne(collectionQuery, function(err, course_found){
 
-// FIRST, TRY UPDATING THE STUDENT DOCS IN THE COURSE DB
-  try {
-	  var course_cn = req.query.name.toLowerCase();
-	  var students_request = req.body.students;
-
-	  // convert JSON REQUEST to Upper Case
-		JSON.stringify(students_request, function (key, value) {
-		  if (value && typeof value === 'object') {
-			var replacement = {};
-			for (var k in value) {
-			  if (Object.hasOwnProperty.call(value, k)) {
-				value[k] = value[k].toUpperCase();
-				replacement[k && k.charAt(0).toLowerCase() + k.substring(1)] = value[k].toUpperCase();
-			  }
-			}
-			return replacement;
-		  }
-		  return value;
-		});
-
-
-	// Store local variables
-	var uni = students_request.uni;
-	var lastname = students_request.lastname;
-	var firstname = students_request.firstname;
-
-	if ( (typeof uni === 'undefined') || (typeof lastname === 'undefined') || (typeof firstname === 'undefined') ) {
-	    throw new Error("Either students.uni or students.lastname or students.firstname is undefined");
-	};
-
-
-	// First find the course in the db model
-	  model.findOne({name: course_cn}, function(err, course_found){
-
-	// If the course exists, check student entries to make sure no duplicate exists
+	// If the collection exists, check resource entries to make sure no duplicate exists
 		if (course_found) { 
 			course_found.collection.aggregate([
-				{"$match"	: {name : course_cn} }
-				,{"$unwind"	: "$students" }
-				,{"$match"	: {"students.uni" : uni} }
-			],
-				function (err_lastname, student_found){
+				{"$match"	: collectionQuery } // NEED TO PARSE INT() !!!
+				,{"$unwind"	: "$"+resource }
+				,{"$match"	: resourceQuery } 
+			], 
+			function (err_lastname, student_found){
 
-			// If the entry already exists
-					if (student_found.length > 0 ) {
+			// If the resource already exists
+					if ( err_lastname || (student_found.length > 0) ) {
 
-						console.log('-> '+lastname+', '+firstname+ ' ('+ uni +')' + ' is already enrolled in '+name+'.');
+						console.log('-> '+JSON.stringify(resourceQuery)+' was NOT POSTED to '+JSON.stringify(collectionQuery));
 						res.send(false);
 
-			// If the student entry does not exist, add it to the db
+			// If the resource does not exist, add it to the db
 					} else	{		
 
-						course_found.students.push(students_request);				
+						course_found[resource].push(clientQuery);					
 						course_found.save();
-						console.log('-> '+lastname+', '+firstname+ ' ('+ uni +')' +' is added to '+ course_cn +'.');
+						console.log('-> '+JSON.stringify(clientQuery)+' was POSTED to '+JSON.stringify(collectionQuery));
 						res.send(true);
-
-						// Publish to to the referential integrity that the course has been updated
-						// with a student
-						students_request["sender"] = 'courses_micro_service';
-						students_request["service_action"] = 'update student add course';
-						students_request["course_cn"] = course_cn;
-						var message = JSON.stringify(students_request).toLowerCase();
-
-            			clientRI.publish(pub_channel, message)
-
 
 					};
 			}); // ends model.findOne
@@ -95,83 +61,269 @@ exports.updateCourse = function( ) {
 	// If the course does not exist
 		} else {
 
-			console.log('-> ' + name + ' doesn\'t exist.');
+			console.log('-> Query not found : '+JSON.stringify(collectionQuery));
 			res.send(false);
 
 		};
 
-	 }); // ends model.findOne
+	}); // ends model.findOne
+}
 
 
 
-// IF THE STUDENT UPDATE FAILS, THEN PERHAPS THE USER WISHES TO UPDATE ANOTHER REQUEST 
-  } catch(e) {
-	console.log(e);
+// subroutine to DELETE a resource
+DELETEresource = function (res, collectionQuery, resource, resourceQuery, clientQuery){
 
-		try{
-			if (typeof req.body.students === 'object'){
+  // First use the collection Query to query the db
+	model.findOne(collectionQuery, function(err, course_found){
 
-				throw new Error("invalid students entry");
+	// If the collection exists, check resource entries to make sure no duplicate exists
+		if (course_found) { 
+			course_found.collection.aggregate([
+				{"$match"	: collectionQuery } // NEED TO PARSE INT() !!!
+				,{"$unwind"	: "$"+resource }
+				,{"$match"	: resourceQuery } 
+			], 
+			function (err_lastname, student_found){
 
-			};
+			// If the entry already exists
+				if (student_found.length > 0 ) {
 
-		  // Iterate through the requests within the body
-			for(var key in req.body) {
-			  if(req.body.hasOwnProperty(key)){
+				// pull (remove) the student from the student collection withing the course 
+					model.findOneAndUpdate( collectionQuery, {
+						$pull: //{resourceQuery}
+							
+						{
+							students: {	
+								uni : clientQuery.uni
+							}
+						} // ends $pull
 
-			// store the key-value pair to be PUT
-			  var path = key;
-			  var update = {};
-			  update[path] = req.body[key].toUpperCase(); 
-				// use update[path] = { text: 'test test' }; if you want to put a field
+					}, function (e, s){
+						if (s){
+							console.log('-> '+JSON.stringify(resourceQuery)+' DELETED from '+JSON.stringify(collectionQuery));
+							res.send(true);
+						} else {
+							console.log('-> '+JSON.stringify(resourceQuery)+' NOT DELETED from '+JSON.stringify(collectionQuery));
+							res.send(false);
+						}
+					});
 
-			// store the key-value pair to be 
-			  var update_exists = {};
-			  update_exists[path] = { $exists : true };
+			// If the student entry does not exist
+				} else	{		
+
+					console.log('-> '+JSON.stringify(resourceQuery)+' does not exist in '+JSON.stringify(collectionQuery));
+					res.send(false);
+
+				};
 
 
-			// check if the field exists in the schema
-				model.findOne(update_exists, function (find_err, result){
+		})// ends aggregate
 
-					if (find_err) return find_err;
+	// If the course does not exist
+		} else {
 
-					if ( result != null ) {
-
-							model.findOneAndUpdate( {name:name}, {
-								$set: update//req.body[key]
-							}, function (e, s){
-								if (s){
-
-									console.log('-> {'+key+' : '+req.body[key]+'} saved in '+name);
-									res.send(true);
-
-								} else {
-								
-									console.log('-> Error saving {'+key+' : '+req.body[key]+'} in '+name);
-									res.send(false);
-
-								}
-							});
-
-					} else {
-
-						console.log('-> '+key+' key does not exist in schema');
-						res.send( false );
-
-					};
-
-				}); // ends .findOne()
-
-			  } // ends if
-
-			} // ends for loop
-
-		} catch(e2){
-			console.log(e2);
+			console.log('-> Query not found : '+JSON.stringify(collectionQuery));
 			res.send(false);
-		}
 
-    } // ends outer catch
+		};
+
+	}); // ends model.findOne
+}
+
+
+
+
+exports.removeStudentFromCourse = function( ) {
+
+  return function ( req, res, next ){
+
+  // exported from:
+  // 	app.post(  root+'/:course_num/:resource' )
+
+  // Read in the params and client query 	
+	var params = req.params;
+	var clientQuery = req.query;
+	var resource = params.resource;
+	var resourceID = params.uni;
+
+
+  // BUILD THE QUERY FOR THE COLLECTION
+  //	Note: the collection identifier (/:collection_id/) == param_keys[0]
+	var collectionQuery = {};
+	var collection_keys = Object.keys(params);
+	collectionQuery[collection_keys[0]] = parseInt(params[collection_keys[0]]);
+	//   Note: parseInt() called for the collection query id
+
+
+  // BUILD THE QUERY for the RESOURCE -- for Mongo's collection.aggregation function
+	var resourceQuery = {};
+
+	var query_keys = Object.keys(clientQuery);
+	for (var i = 0; i < query_keys.length; i++){
+		resourceQuery[resource+"."+query_keys[i]] = clientQuery[query_keys[i]];
+	}	
+
+/*
+	console.log(params);
+	console.log(clientQuery);
+	console.log(resource);
+	console.log(collectionQuery);
+	console.log(resourceQuery);
+*/
+
+  // business logic
+  	// redis message
+		var ri_message = {
+			'sender' : 'courses_micro_service',
+			'service_action' : 'update student delete course',
+			'course_name': params.course_num,
+			'uni': params.uni };
+		
+		var message = JSON.stringify(ri_message).toLowerCase();
+		clientRI.publish(pub_channel, message);
+
+
+	// update db - remove the student from the course
+		DELETEresource(res, collectionQuery, resource, resourceQuery, clientQuery);
+
+
+
+
+
+  } // ends return
+
+} // ends export
+
+
+
+
+exports.addStudentToCourse = function( ) {
+
+  return function ( req, res, next ){
+
+  // exported from:
+  // 	app.post(  root+'/:course_num/:resource' )
+
+  // Read in the params and client query 	
+	var params = req.params;
+	var clientQuery = req.query;
+	var resource = params.resource;
+
+
+  // BUILD THE QUERY FOR THE COLLECTION
+  //	Note: the collection identifier (/:collection_id/) == param_keys[0]
+	var collectionQuery = {};
+	var collection_keys = Object.keys(params);
+	collectionQuery[collection_keys[0]] = parseInt(params[collection_keys[0]]);
+	//   Note: parseInt() called for the collection query id
+
+
+  // BUILD THE QUERY for the RESOURCE -- for Mongo's collection.aggregation function
+	var resourceQuery = {};
+	var query_keys = Object.keys(clientQuery);
+	for (var i = 0; i < query_keys.length; i++){
+		resourceQuery[resource+"."+query_keys[i]] = clientQuery[query_keys[i]];
+	}	
+
+/*
+	console.log(params);
+	console.log(clientQuery);
+	console.log(resource);
+	console.log(collectionQuery);
+	console.log(resourceQuery);
+*/
+
+  // business logic
+	if ( (typeof clientQuery.uni === 'undefined') ) {
+	    console.log("-> uni is not defined");
+		res.send(false);
+
+	} else {
+
+	  var uni = clientQuery.uni;
+	  var course_num = parseInt(params.course_num); 
+
+  	// redis message
+		var ri_message = {
+			'sender' : 'courses_micro_service',
+			'service_action' : 'update student add course',
+			'course_name': course_num,
+			'uni': uni };
+		
+		var message = JSON.stringify(ri_message).toLowerCase();
+		clientRI.publish(pub_channel, message);
+
+	// update db - post the student to the course
+		POSTresource(res, collectionQuery, resource, resourceQuery, clientQuery);
+
+	} // ends else
+
+  } // ends return
+
+} // ends export
+
+
+
+PUTdocument = function (res, collectionQuery, clientQuery){
+	model.findOneAndUpdate( collectionQuery, {
+		$set: clientQuery//req.body[key]
+	}, function (e, s){
+		if (s){
+
+			console.log('-> '+JSON.stringify(clientQuery)+' PUT to '+JSON.stringify(collectionQuery));
+			res.send(true);
+
+		} else {
+		
+			console.log('-> '+JSON.stringify(clientQuery)+' NOT PUT to '+JSON.stringify(collectionQuery));
+			res.send(false);
+
+		}
+	});
+}
+
+
+exports.updateCourse = function( ) {
+
+  return function ( req, res, next ){
+
+
+  // exported from:
+  // 	app.post(  root+'/:course_num/:resource' )
+
+  // Read in the params and client query 	
+	var params = req.params;
+	var clientQuery = req.query;
+
+
+  // BUILD THE QUERY FOR THE COLLECTION
+  //	Note: the collection identifier (/:collection_id/) == param_keys[0]
+	var collectionQuery = {};
+	var collection_keys = Object.keys(params);
+	collectionQuery[collection_keys[0]] = parseInt(params[collection_keys[0]]);
+	//   Note: parseInt() called for the collection query id
+
+/*
+	console.log(params);
+	console.log(clientQuery);
+	console.log(collectionQuery);
+*/
+
+
+// business logic
+	if ( (clientQuery.name == null) && (clientQuery.students == null) ) {
+
+	// update db - post the student to the course
+		PUTdocument(res, collectionQuery, clientQuery);
+
+	} else {
+
+	    console.log("-> restricted key");
+		res.send(false);
+
+	}
+
 
   }; // ends return
 

@@ -12,104 +12,31 @@ var root = '/courses/';
 
 
 
-
-// routes.index handler
-exports.returnAllCoursesInfo = function (){
-
-	return function(req, res, next ){
-
-	  // assign a unique ID
-	  var user_id = req.cookies ?
-		req.cookies.user_id : undefined;
-
-	  model.
-		find({ user_id : user_id }).
-		sort( '-updated_at' ).
-		exec( function ( err, models ){
-
-			if( err ) return next( err );
-
-			res.json(models);
-
-		});
-
-	}; // ends return
-
-}; // ends exports.index
-
-
-
-
-
-
+// GET course info based on the client's query
 exports.returnCourseInfo = function () {
 	// need this return syntax because we are passing io from app.js
 	return function(req, res, next ){
 
-		// see if the query was legal
-		try{
 
-			var name = req.query.name.toUpperCase();
+  // Read in the client query 	
+	var clientQuery = req.query;
 
-			model.findOne( {name:name}, function ( err, course_found ){
-				if (course_found) {
-					console.log("-> "+course_found.name+" information responded to user");
-					res.json(course_found);
-				} else { 
-					console.log ("-> "+JSON.stringify(name)+" not found");
-					res.send(false);
-				}
-			}); //ends findOne()
+/*
+	console.log(clientQuery);
+*/
 
 
-		} catch (e) {
+		model.find( clientQuery, function ( err, course_found ){
+			if ( err || (course_found.length == 0) ) {
+				console.log("-> Query not found : "+JSON.stringify(clientQuery));
+				res.send([]);
+			} else { 
+				console.log("-> Query found     : "+JSON.stringify(clientQuery));
+				res.json(course_found);
+			}
 
-			var query = JSON.stringify(req.query);
-
-			// if the query was "/courses"
-			if (query == "{}") {
-				
-				console.log("-> ALL course information responded to user");
-				//res.send("\nALL\n");
-				returnAllCoursesInfo(req,res,next);
-
-			// if the query was an error
-			} else {
-
-				console.log("-> Error reading Query: "+JSON.stringify(req.query));
-				res.send(false);
-
-			};
-
-		};
+		}); //ends findOne()
 
 	}; // ends return
 
 }; // ends exports.
-
-
-
-
-// subroutine for exports.returnCourseInfo
-//		returns all courses -> i.e. http://localhost:3000/courses
-returnAllCoursesInfo = function (req, res, next){
-
-	  // assign a unique ID
-	  var user_id = req.cookies ?
-		req.cookies.user_id : undefined;
-
-	  model.
-		find({ user_id : user_id }).
-		sort( '-updated_at' ).
-		exec( function ( err, models ){
-
-			if( err ) return next( err );
-
-			res.json(models);
-
-		});
-
-}; // ends function
-
-
-
