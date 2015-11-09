@@ -55,7 +55,7 @@ POSTresource = exports.POSTresource = function (res, params, collectionQuery, re
 						console.log('-> '+JSON.stringify(clientQuery)+' was POSTED to '+JSON.stringify(collectionQuery));
 
 							  var uni = clientQuery.uni;
-							  var course_num = parseInt(params.course_num); 
+							  var course_num = parseInt(params.course_num);
 
 						  	// redis message
 								var ri_message = {
