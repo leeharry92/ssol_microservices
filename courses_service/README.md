@@ -100,8 +100,6 @@ POST http://<host>:<port>/courses/<course_call_number>/students
 
 URL Parameter Keys:
 * uni { type: String } (required parameter)
-* lastname { type: String }
-* lastname { type: String }
 
 ```JSON
 {
@@ -183,7 +181,7 @@ PUT http://<host>:<port>/courses/<course_call_number>
 ```
 
 URL Parameter Key:
-* <key> { type: not specified } (required parameter)
+* "<key>" { type: not specified } (required parameter)
 ```JSON
 {
 	"<key>"	:	<key_value>
