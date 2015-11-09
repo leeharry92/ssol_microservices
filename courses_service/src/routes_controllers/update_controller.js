@@ -453,7 +453,8 @@ exports.updateCourse = function( ) {
 
 
 // business logic
-	if ( (clientQuery.name == null) && (clientQuery.students == null) ) {
+	// not allowed to modify students from here
+	if ( (clientQuery.students == null) ) {
 
 	// update db - post the student to the course
 		PUTdocument(res, collectionQuery, clientQuery);
