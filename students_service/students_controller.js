@@ -2,7 +2,6 @@
 
 var redis = require("redis");
 var http = require('http');
-var request = require('request');
 
 clientRISub = redis.createClient();	// Subscribes to ri channel
 clientRIPub = redis.createClient(); // Publishes to ri channel
@@ -34,6 +33,7 @@ exports.create = function(req, res, next) {
 	const db = req.app.locals.db;
 	var collection = db.collection('Students');
 	var params = req.body;
+	console.log(params);
 	var param_keys = Object.keys(params);
 
 	// Set error responses for invalid parameters
@@ -122,6 +122,13 @@ exports.remove = function(req, res, next) {
 					function(error, result) {
 						if (error == null) {
 							res.sendStatus(200);
+
+							//  Publishing to referential integrity channel the event
+							var event_message = {
+								'sender' : 'students_micro_service',
+								'action' : 'delete student',
+								'uni': uni_param }
+							clientRIPub.publish(pub_channel, JSON.stringify(event_message));
 						} else {
 							var err = new Error('Database error');
 							err.status = 500;
@@ -216,7 +223,6 @@ exports.add_course = function(req, res, next) {
 	var collection = db.collection('Students');
 	var course = req.body.course;
 	var uni_param = req.params.uni;
-	var sender = req.body.sender;
 
 	if (course === undefined) {
 		var err = new Error('Must specify course to add ' + uni_param );
@@ -234,18 +240,6 @@ exports.add_course = function(req, res, next) {
 				if (student == null) {
 					var err = new Error('Specified student not found : ' + uni_param);
 					err.status = 404;
-					// If student is not found and the request came from the Referential integrity,
-					// Delete the student from the courses microservice.
-					if (sender === "course_micro_service") {
-						//  Publishing to referential integrity channel the event
-						var event_message = {
-							'sender' : 'students_micro_service',
-							'action' : 'update course delete student',
-							'course_name': course,
-							'uni': uni_param}
-						clientRIPub.publish("referential integrity", JSON.stringify(event_message));
-					}
-
 					next(err);
 				} else {
 					var courseList = student.courses;
@@ -268,14 +262,12 @@ exports.add_course = function(req, res, next) {
 																		res.sendStatus(200); //Handle failure - Harry/Peter N
 
 																		//  Publishing to referential integrity channel the event
-																		if (sender !== "courses_micro_service") {
-																			var event_message = {
-																				'sender' : 'students_micro_service',
-																				'action' : 'update course add student',
-																				'course_name': course,
-																				'uni': uni_param}
-																			clientRIPub.publish(pub_channel, JSON.stringify(event_message));
-																		}
+																		var event_message = {
+																			'sender' : 'students_micro_service',
+																			'action' : 'update course add student',
+																			'course_name': course,
+																			'uni': uni_param }
+																		clientRIPub.publish(pub_channel, JSON.stringify(event_message));
 																	} else {
 																		var err = new Error('Database error');
 																		err.status = 500;
@@ -522,55 +514,6 @@ exports.ref_remove_course_on_all_students = function(callNumber, app) {
 													}
 												});
 };
-
-/*
-    var msg = JSON.parse(message);
-
-    switch (msg.action) {
-
-    }
-
-    var bodyString = JSON.stringify({
-		course: msg.course_cn,				//TODO (Peter) Change this param to ccn
-		sender: msg.sender,
-	});
-	
-
-	var headers = {
-	    'Content-Type': 'application/json',
-	    'Content-Length': bodyString.length
-	};
-
-	var options = {
-	    host: 'localhost',
-	    path: '/' + msg.uni + '/add-course',
-	    port: 3003,										//TODO (Peter/Jivtesh) Direct this to the proper microservices.
-	    method: 'PUT',
-	    headers: headers
-	};
-
-	console.log("Option: " + JSON.stringify(options));
-
-	// callback is same as in the above seen example.
-	var callback = function(response) {
-		var str = '';
-
-		//another chunk of data has been recieved, so append it to `str`
-		response.on('data', function(chunk) {
-		str += chunk;
-		});
-
-		//the whole response has been recieved, so we just print it out here
-		response.on('end', function() {
-		console.log(str);
-		});
-	};
-
-	http.request(options, callback).write(bodyString);
-    
-});
-
-*/
 
 
 

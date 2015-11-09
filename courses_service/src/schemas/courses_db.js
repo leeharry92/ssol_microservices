@@ -19,7 +19,7 @@ var Schema   = mongoose.Schema;
 
 	courses_model.add({
 		user_id    : String,
-	    course_num   :  { type: Number, min: 0000, max: 9999 },
+	    course_num :  { type: Number, min: 0000, max: 9999 },
 		name	   : String,
 		students   : [students_model],
 		updated_at : Date

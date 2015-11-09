@@ -4,11 +4,11 @@ db = db.getSiblingDB('students_service_3');
 db.createCollection('Students', {});
 db.Students.insert(
 	{
-		"first_name": "Jivtesh",
+		"first_name": "Sam",
 		"last_name": "Singh",
 		"address": "123 High Street",
 		"class": 2014,
-		"uni": "jsc2226",
+		"uni": "ss1111",
 		"major": "Electrical Engineering",
 		"minor": "Gender Studies",
 		"courses": [1111, 4444, 9999, 0000]
@@ -17,11 +17,11 @@ db.Students.insert(
 
 db.Students.insert(
 	{
-		"first_name": "Alan",
-		"last_name": "Zhu",
+		"first_name": "Robert",
+		"last_name": "Ronson",
 		"address": "1230 Cross Street",
 		"class": 2014,
-		"uni": "az1234",
+		"uni": "rr1111",
 		"major": "Psychology",
 		"minor": "Spanish",
 		"courses": [2222, 3333, 6666, 5555]
