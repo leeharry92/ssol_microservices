@@ -3,7 +3,7 @@
 <br />
 ### 1. Things to note before beginning:
 
-In order to implement sharding my last names, three instance of the services need to be instantiated, each connected to a different database. The databases are sharded by last names in the following way:
+In order to implement sharding my last names, three instance of the services need to be instantiated, each connected to a different database. The databases are sharded by uni's in the following way:
 
 * students_service_1: A-H
 * students_service_2: I-Q
@@ -142,11 +142,6 @@ As with adding an attribute, this method must be provided an 'attribute' paramet
 * courses
 
 An attempt to do so will result in a 403 error.
-
-
-
-
-
 
 
 
