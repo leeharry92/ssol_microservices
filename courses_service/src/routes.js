@@ -11,7 +11,7 @@ var redis = require("redis")
 
 clientRISub = redis.createClient(); // Subscribes to ri channel
 
-var subChannel = "students_micro_service";
+var subChannel = "courses_micro_service";
 
 clientRISub.subscribe(subChannel);
 
