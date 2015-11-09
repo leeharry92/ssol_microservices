@@ -21,6 +21,7 @@ nconf.argv()
   .file({ file: pathToConfigJSON });
 
 
+
 exports.deleteKEY = function( ){
 
 
@@ -28,7 +29,7 @@ exports.deleteKEY = function( ){
   try{
 
 
-	var key = req.body.key;
+	var key = req.params.key;
 
 	if (typeof key === 'undefined'){
 		throw new Error("key entry is of type 'undefined' ");
@@ -232,14 +233,21 @@ exports.createCourse = function () {
 
     return function(req, res, next) {
 
-	try{
+  // Read in the client query 	
 
-		var incoming = req.body;
+	var clientQuery = req.query;
 
-		var course_num = incoming.course_num;
-		var name = incoming.name;
+	var course_num = clientQuery.course_num;
+	var name = clientQuery.name;
 
-		model.findOne({course_num : course_num}, function (find_err, result){
+	// business logic
+	if ( (typeof course_num === 'undefined') && (typeof name === 'undefined') ) {
+	    console.log("-> invalid client queries - course_num || name is undefined");
+		res.send(false);
+
+	} else {
+
+		model.findOne(clientQuery, function (find_err, result){
 
 			if (find_err) return find_err;
 
@@ -278,15 +286,11 @@ exports.createCourse = function () {
 
 			};
 
-		}); // ends .findOne()
+		});  // ends .findOne()
 
+	};
 
-	} catch (e) {
-		console.log(e);
-		res.send(false);
-	}
-
-	}; // ends return
+  }; // ends return
 
 }; // ends createCourse
 

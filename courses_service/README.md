@@ -60,7 +60,14 @@ From the command line, following APIs can be executed:
 ##### A. CREATE A NEW COURSE
 ```sh
 $ curl -H "Content-Type: application/json" -X POST -d '{"course_num":<course_call_number>, "name":<course_name>}' http://<host>:<port>/courses/
+
+POST http://<host>:<port>/courses/ 
 ```
+
+Required Queries:
+
+'{"course_num":<course_call_number>, "name":<course_name>}'
+
 
 <br /> 
 
