@@ -51,9 +51,8 @@ All configurable parameters are accessible the following JSON file:
 
 <br /> 
 
-### 4. API Documentation (as CURL Templates):
+### 4. API Documentation:
 
-From the command line, following APIs can be executed:
 
 <br /> 
 
@@ -64,7 +63,7 @@ POST http://<host>:<port>/courses
 
 URL Parameter Keys:
 * course_num { type: Number, min: 0000, max: 9999 } (required parameter)
-* name { type: String }
+* name { type: String } (required parameter)
 
 ```JSON
 {
@@ -77,7 +76,6 @@ URL Parameter Keys:
 
 ##### B. GET COURSE INFORMATION
 
-###### - ALL COURSES:
 ```
  GET http:///<host>:<port>/courses
 ```
@@ -97,7 +95,7 @@ URL Parameter Keys:
 
 ##### C. ADD A STUDENT TO A COURSE
 ```
-POST http://<host>:<port>/courses/<course_num>/students
+POST http://<host>:<port>/courses/<course_call_number>/students
 ```
 
 URL Parameter Keys:
@@ -107,9 +105,7 @@ URL Parameter Keys:
 
 ```JSON
 {
-	"uni"		:	<unique_id>,
-	"lastname"	:	<lastname>,
-	"firstname"	:	<firstname>
+	"uni"		:	<unique_id>
 } 
 ```
 
@@ -165,7 +161,7 @@ URL Parameter Key:
 
 ##### G. MODIFY THE SCHEMA
 
-###### -ADD A USER-DEFINED KEY TO THE SCHEMA:
+1. ADD A USER-DEFINED KEY TO THE SCHEMA:
 ```
 POST http://<host>:<port>/courses/schema
 ```
@@ -178,7 +174,10 @@ URL Parameter Key:
 	"key" : "<key>"
 } 
 ```
-###### -UPDATE A USER-DEFINED KEY IN A DOCUMENT:
+
+<br /> 
+
+2. UPDATE A USER-DEFINED KEY IN A DOCUMENT:
 ```
 PUT http://<host>:<port>/courses/<course_call_number>
 ```
@@ -191,7 +190,9 @@ URL Parameter Key:
 }
 ```
 
-###### -DELETE A USER-DEFINED KEY IN THE SCHEMA:
+<br /> 
+
+3. DELETE A USER-DEFINED KEY IN THE SCHEMA:
 ```
 DELETE http://<host>:<port>/courses/schema
 ```
@@ -240,6 +241,7 @@ POST http://localhost:4000/courses
 
 * URL: localhost:4000/courses?course_num=9999&name=Microservices and APIs
 
+<br /> 
 
 ```
 POST http://localhost:3000/courses/9999/students
@@ -250,6 +252,8 @@ POST http://localhost:3000/courses/9999/students
 
 ```
 * URL: localhost:4000/courses/9999/students?uni=phb2114
+
+<br /> 
 
 ```json
 [
@@ -280,15 +284,18 @@ Note: The key, "instructor", was previously initialized in the config.json file
 PUT http://localhost:3000/courses/9999
 ```
 
+
 ```JSON
 {
 	"instructor"	:	"Don Ferguson"
 }
+```
 
 * URL: localhost:4000/courses/9999?instructor=Don Ferguson
 
+<br /> 
 
-```json
+```JSON
 [
   {
     "_id": "5640cfbeb541a8043c41514f",
@@ -311,7 +318,7 @@ PUT http://localhost:3000/courses/9999
 
 ##### D. POST another user-defined key and PUT a value to the key
 
-```sh
+```
 POST http://localhost:3000/courses/schema
 ```
 
@@ -323,6 +330,7 @@ POST http://localhost:3000/courses/schema
 
 * URL: localhost:4000/courses/schema?key=room
 
+<br /> 
 
 ```
 PUT http://localhost:3000/courses?course_num=9999
@@ -335,6 +343,8 @@ PUT http://localhost:3000/courses?course_num=9999
 ```
 
 * URL: localhost:4000/courses/9999?room=428 Pupin
+
+<br /> 
 
 ```json
 [
@@ -370,6 +380,7 @@ DELETE http://localhost:3000/courses/schema
 ```
 * URL: localhost:4000/courses/schema?key=instructor
 
+<br /> 
 
 ```
 DELETE http://localhost:3000/courses/9999/students
@@ -380,6 +391,8 @@ DELETE http://localhost:3000/courses/9999/students
 	"uni"	:	"phb2114"
 } 
 ```
+
+<br /> 
 
 ```JSON
 [
