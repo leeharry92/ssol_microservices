@@ -25,7 +25,6 @@ module.exports = function(app){
 
 	// ROUTING FOR COURSES
 	var schema_controller = require('./routes_controllers/schema_controller');
-	var read_controller = require('./routes_controllers/read_controller');
 	var update_controller = require('./routes_controllers/update_controller');
 
 
