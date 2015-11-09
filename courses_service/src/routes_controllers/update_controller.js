@@ -120,7 +120,7 @@ POSTresource = exports.POSTresource = function (res, params, collectionQuery, re
 
 
 // subroutine to DELETE a resource
-DELETEresource = function (res, params, collectionQuery, resource, resourceQuery, clientQuery,resmode){
+DELETEresource = exports.DELETEresource = function (res, params, collectionQuery, resource, resourceQuery, clientQuery,resmode){
 
   // First use the collection Query to query the db
 	model.findOne(collectionQuery, function(err, course_found){
