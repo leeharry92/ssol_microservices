@@ -18,12 +18,16 @@ module.exports = function(app){
 
 
 	// update -- includes adding students to a course
-	app.put(  root,									update_controller.updateCourse() );
+	app.put(  root+'/:course_num',					update_controller.updateCourse() );
+	app.post(  root+'/:course_num/:resource',		update_controller.addStudentToCourse() );
+	//app.put(  root+'/:course_num/:students/:uni',	update_controller.updateStudentInCourse() );
+
 
 
 	// delete 
 	app.delete(  root, 								delete_controller.removeCourse() ); 
-	app.delete( root + '/:course_num' ,					delete_controller.removeStudentFromCourse() );
+	//app.delete( root + '/:course_num' ,					delete_controller.removeStudentFromCourse() );
+	app.delete( root + '/:course_num/:resource' ,update_controller.removeStudentFromCourse() );
 	app.delete( '/student',							delete_controller.removeStudent() );
 
 
