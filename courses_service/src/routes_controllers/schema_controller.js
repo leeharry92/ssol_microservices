@@ -24,16 +24,15 @@ nconf.argv()
 
 exports.deleteKEY = function( ){
 
-
   return function ( req, res, next ){
-  try{
 
-
-	var key = req.params.key;
+	var clientQuery = req.query;
+	var key = clientQuery.key;
 
 	if (typeof key === 'undefined'){
-		throw new Error("key entry is of type 'undefined' ");
-	}
+		console.log("-> key entry is of type 'undefined' ");
+		res.send(false);
+	} else {
 
 	// store the key-value pair to be 
 	  var update_exists = {};
@@ -118,10 +117,7 @@ exports.deleteKEY = function( ){
 
 		}); // ends .findOne()
 
-  } catch(e){
-	console.log(e);
-	res.send(false);
-  }
+	}
 
   }; // ends return
 
@@ -135,14 +131,14 @@ exports.addKEY = function( ){
 
   return function ( req, res, next ){
 
-  try{
-	var key = req.body.key;
-
+	var clientQuery = req.query;
+	var key = clientQuery.key;
 
 
 	if (typeof key === 'undefined'){
-		throw new Error("key entry is of type 'undefined' ");
-	}
+	console.log("-> key entry is of type 'undefined' ");
+	res.send(false);
+	} else {
 
 	// store the key-value pair to be 
 	  var update_exists = {};
@@ -172,7 +168,7 @@ exports.addKEY = function( ){
 			// iterate through all models to add the keys
 			  for (var j in success){
 
-					
+				
 				// preallocate
 					var userKeys = [];
 					var userKeyValues = [];
@@ -196,7 +192,7 @@ exports.addKEY = function( ){
 
 					// Reset the paths variable for each iteration
 						paths = ["user_id","course_num","name", "students", "updated_at"];
-					
+				
 			  } // ends for loop
 
 
@@ -218,10 +214,7 @@ exports.addKEY = function( ){
 
 		}); // ends .findOne()
 
-  } catch(e){
-	console.log(e);
-	res.send(false);
-  }
+	}
 
   }; // ends return
 

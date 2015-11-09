@@ -10,8 +10,6 @@ var Schema   = mongoose.Schema;
 
 	var students_model = new Schema({
 		  uni	   : String,
-		  lastname : String,
-		  firstname: String
 	});
 
 //module.exports = function() {

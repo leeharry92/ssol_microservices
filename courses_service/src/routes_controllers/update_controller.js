@@ -4,17 +4,51 @@ var utils    = require( '../../utils' );
 var requireDB = require('../schemas/courses_db.js');
 var courses_db = requireDB.getdb;
 var courses_model = requireDB.getModel;
- 
 var model = courses_db.model('courses_model');
 
 
 
 var root = '/courses/';
 
+
+
 // Redis RI
 var redis = require("redis")
 clientRI = redis.createClient() // Publishes to ri channel
 var pub_channel = "referential_integrity";
+
+
+
+
+// GET course info based on the client's query
+exports.returnCourseInfo = function () {
+	// need this return syntax because we are passing io from app.js
+	return function(req, res, next ){
+
+
+  // Read in the client query 	
+	var clientQuery = req.query;
+
+/*
+	console.log(clientQuery);
+*/
+
+
+		model.find( clientQuery, function ( err, course_found ){
+			if ( err || (course_found.length == 0) ) {
+				console.log("-> Query not found : "+JSON.stringify(clientQuery));
+				res.send([]);
+			} else { 
+				console.log("-> Query found     : "+JSON.stringify(clientQuery));
+				res.json(course_found);
+			}
+
+		}); //ends findOne()
+
+	}; // ends return
+
+}; // ends exports.
+
 
 
 
@@ -27,7 +61,7 @@ buildQuery = function(query, params, iterations){
 }
 
 // subroutine to post a resource
-POSTresource = exports.POSTresource = function (res, params, collectionQuery, resource, resourceQuery, clientQuery){
+POSTresource = exports.POSTresource = function (res, params, collectionQuery, resource, resourceQuery, clientQuery, resmode){
 
   // First use the collection Query to query the db
 	model.findOne(collectionQuery, function(err, course_found){
@@ -45,7 +79,8 @@ POSTresource = exports.POSTresource = function (res, params, collectionQuery, re
 					if ( err_lastname || (student_found.length > 0) ) {
 
 						console.log('-> '+JSON.stringify(resourceQuery)+' was NOT POSTED to '+JSON.stringify(collectionQuery));
-						res.send(false);
+						if (resmode)
+							res.send(false);
 
 			// If the resource does not exist, add it to the db
 					} else	{		
@@ -67,8 +102,8 @@ POSTresource = exports.POSTresource = function (res, params, collectionQuery, re
 								var message = JSON.stringify(ri_message).toLowerCase();
 								clientRI.publish(pub_channel, message);
 
-
-						res.send(true);
+						if (resmode)
+							res.send(true);
 
 					};
 			}); // ends model.findOne
@@ -77,7 +112,8 @@ POSTresource = exports.POSTresource = function (res, params, collectionQuery, re
 		} else {
 
 			console.log('-> Query not found : '+JSON.stringify(collectionQuery));
-			res.send(false);
+			if (resmode)
+				res.send(false);
 
 		};
 
@@ -89,7 +125,7 @@ POSTresource = exports.POSTresource = function (res, params, collectionQuery, re
 
 
 // subroutine to DELETE a resource
-DELETEresource = function (res, collectionQuery, resource, resourceQuery, clientQuery){
+DELETEresource = function (res, params, collectionQuery, resource, resourceQuery, clientQuery,resmode){
 
   // First use the collection Query to query the db
 	model.findOne(collectionQuery, function(err, course_found){
@@ -106,23 +142,34 @@ DELETEresource = function (res, collectionQuery, resource, resourceQuery, client
 			// If the entry already exists
 				if (student_found.length > 0 ) {
 
+				var deleteQuery = {};
+				deleteQuery[resource] = clientQuery;
+
 				// pull (remove) the student from the student collection withing the course 
 					model.findOneAndUpdate( collectionQuery, {
-						$pull: //{resourceQuery}
-							
-						{
-							students: {	
-								uni : clientQuery.uni
-							}
-						} // ends $pull
-
+						$pull: deleteQuery
 					}, function (e, s){
 						if (s){
-							console.log('-> '+JSON.stringify(resourceQuery)+' DELETED from '+JSON.stringify(collectionQuery));
-							res.send(true);
+
+					  	// redis message
+							var ri_message = {
+								'sender' : 'courses_micro_service',
+								'service_action' : 'update student delete course',
+								'course_name': params.course_num,
+								'uni': clientQuery.uni };
+		
+							var message = JSON.stringify(ri_message).toLowerCase();
+							clientRI.publish(pub_channel, message);
+
+
+							console.log('-> '+JSON.stringify(deleteQuery)+' DELETED from '+JSON.stringify(collectionQuery));
+
+							if (resmode)
+								res.send(true);
 						} else {
-							console.log('-> '+JSON.stringify(resourceQuery)+' NOT DELETED from '+JSON.stringify(collectionQuery));
-							res.send(false);
+							console.log('-> '+JSON.stringify(deleteQuery)+' NOT DELETED from '+JSON.stringify(collectionQuery));
+							if (resmode)
+								res.send(false);
 						}
 					});
 
@@ -130,7 +177,8 @@ DELETEresource = function (res, collectionQuery, resource, resourceQuery, client
 				} else	{		
 
 					console.log('-> '+JSON.stringify(resourceQuery)+' does not exist in '+JSON.stringify(collectionQuery));
-					res.send(false);
+					if (resmode)
+						res.send(false);
 
 				};
 
@@ -147,6 +195,114 @@ DELETEresource = function (res, collectionQuery, resource, resourceQuery, client
 
 	}); // ends model.findOne
 }
+
+
+DELETEresourceFromAll = exports.DELETEresourceFromAll = function(res, params, collectionQuery, resource, resourceQuery, clientQuery,resmode){
+	// First find the course in the db model
+	  model.find({}, function(err, course_found){
+
+	// Iterate through each document and delete the resource
+		course_found.forEach( 
+
+		  function( coursedata ) {
+
+			console.log(coursedata);
+
+			coursedata.collection.aggregate( [
+				//{"$match"	: {course_num : parseInt(coursedata.course_num) } }
+				{"$unwind"	: "$"+resource }
+				,{"$match"	: resourceQuery }
+				//,{"$match"	: {"students.firstname": firstname} }
+			],
+				function (err_lastname, student_found){
+	
+				// Build the delete query
+					var deleteQuery = {};
+					deleteQuery[resource] = clientQuery;
+					console.log(deleteQuery);
+
+				// If the entry already exists
+					if (student_found.length > 0 ) {
+
+					// pull (remove) the student from the student collection withing the course 
+						coursedata.update({
+							$pull: deleteQuery
+
+						}, function (e, s){
+							if (s){
+								console.log('-> '+JSON.stringify(resourceQuery)+' DELETED from '+JSON.stringify(coursedata.course_num));
+								//res.send(true);
+							} else {
+								console.log('-> '+JSON.stringify(resourceQuery)+' NOT DELETED from '+JSON.stringify(coursedata.course_num));
+								//res.send(false);
+							}
+						});
+
+
+				// If the student entry does not exist
+					} else	{		
+
+						console.log('-> Query NOT found : '+JSON.stringify(resourceQuery));
+						//res.send(false);
+
+					};
+			}); // ends collection.aggregate
+
+		}); // ends .forEach()
+
+		if (resmode)
+			res.send(true);
+
+	 }); // ends model.findOne
+}
+
+
+exports.removeStudent = function( ) {
+
+  return function ( req, res, next ){
+
+  // exported from:
+  // 	app.delete(  root+'/:resource' )
+
+  // Read in the params and client query 	
+	var params = req.params;
+	var clientQuery = req.query;
+	var resource = params.resource;
+
+
+  // BUILD THE QUERY FOR THE COLLECTION
+  //	Note: the collection identifier (/:collection_id/) == param_keys[0]
+	var collectionQuery = {};
+	var collection_keys = Object.keys(params);
+	collectionQuery[collection_keys[0]] = parseInt(params[collection_keys[0]]);
+	//   Note: parseInt() called for the collection query id
+
+
+  // BUILD THE QUERY for the RESOURCE -- for Mongo's collection.aggregation function
+	var resourceQuery = {};
+
+	var query_keys = Object.keys(clientQuery);
+	for (var i = 0; i < query_keys.length; i++){
+		resourceQuery[resource+"."+query_keys[i]] = clientQuery[query_keys[i]];
+	}	
+
+/*
+	console.log(clientQuery.uni)
+	console.log(params);
+	console.log(clientQuery);
+	console.log(resource);
+	console.log(collectionQuery);
+	console.log(resourceQuery);
+*/
+
+	var resmode = true; // enables sending response to client
+	DELETEresourceFromAll(res, params, collectionQuery, resource, resourceQuery, clientQuery,resmode);
+
+  }; // ends return
+
+}; // ends exports.updateCourse
+
+
 
 
 
@@ -190,23 +346,9 @@ exports.removeStudentFromCourse = function( ) {
 */
 
   // business logic
-  	// redis message
-		var ri_message = {
-			'sender' : 'courses_micro_service',
-			'service_action' : 'update student delete course',
-			'course_name': params.course_num,
-			'uni': clientQuery.uni };
-		
-		var message = JSON.stringify(ri_message).toLowerCase();
-		clientRI.publish(pub_channel, message);
-
-
+	var resmode = true; // enables sending response to client
 	// update db - remove the student from the course
-		DELETEresource(res, collectionQuery, resource, resourceQuery, clientQuery);
-
-
-
-
+		DELETEresource(res, params, collectionQuery, resource, resourceQuery, clientQuery, resmode);
 
   } // ends return
 
@@ -260,9 +402,9 @@ exports.addStudentToCourse = function( ) {
 
 	} else {
 
-
+	var resmode = true; // enables sending response to client
 	// update db - post the student to the course
-		POSTresource(res, params, collectionQuery, resource, resourceQuery, clientQuery);
+		POSTresource(res, params, collectionQuery, resource, resourceQuery, clientQuery, resmode);
 
 	} // ends else
 
@@ -331,10 +473,54 @@ exports.updateCourse = function( ) {
 
 	}
 
-
   }; // ends return
 
 }; // ends exports.updateCourse
+
+
+exports.removeCourse = function () {
+    return function(req, res, next) {
+
+
+		// local variable to save the query
+		var collectionQuery = req.query;//.toUpperCase();
+
+		
+		model.findOne( collectionQuery, function ( err, destroy_model ){
+			var user_id = req.cookies ?
+			   req.cookies.user_id : undefined;
+
+			// if the course does exist, then delete it
+			if (destroy_model != null) {
+
+				destroy_model.remove( function ( err, destroy_model ){
+
+				  	if (destroy_model) {
+						console.log('-> '+JSON.stringify(collectionQuery)+' DELETED');
+						res.send(true);
+
+					// there was an error deleting
+					} else {
+						console.log('-> '+JSON.stringify(collectionQuery)+' NOT DELETED');
+						res.send(false);
+					}
+
+				}); // ends .remove()
+			
+			// if the course does not exist, then return an error
+			} else {
+
+				console.log("-> Query NOT found : "+JSON.stringify(collectionQuery));
+				res.send(false);
+
+			}; // ends else
+				
+		}); // ends findOne
+
+    }; // ends return
+
+}; // ends remove course
+
 
 
 
