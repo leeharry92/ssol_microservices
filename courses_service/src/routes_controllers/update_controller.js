@@ -29,11 +29,6 @@ exports.returnCourseInfo = function () {
   // Read in the client query 	
 	var clientQuery = req.query;
 
-/*
-	console.log(clientQuery);
-*/
-
-
 		model.find( clientQuery, function ( err, course_found ){
 			if ( err || (course_found.length == 0) ) {
 				console.log("-> Query not found : "+JSON.stringify(clientQuery));
@@ -206,8 +201,6 @@ DELETEresourceFromAll = exports.DELETEresourceFromAll = function(res, params, co
 
 		  function( coursedata ) {
 
-			console.log(coursedata);
-
 			coursedata.collection.aggregate( [
 				//{"$match"	: {course_num : parseInt(coursedata.course_num) } }
 				{"$unwind"	: "$"+resource }
@@ -219,7 +212,6 @@ DELETEresourceFromAll = exports.DELETEresourceFromAll = function(res, params, co
 				// Build the delete query
 					var deleteQuery = {};
 					deleteQuery[resource] = clientQuery;
-					console.log(deleteQuery);
 
 				// If the entry already exists
 					if (student_found.length > 0 ) {
