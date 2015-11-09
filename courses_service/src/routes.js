@@ -52,10 +52,6 @@ module.exports = function(app){
 
 
 
-
-
-
-
     clientRISub.on("message", function (channel, message) { // Listens for referential integrity channel JSON messgages
         console.log("Channel name: " + channel);
         console.log("Message: " + message);
@@ -73,7 +69,7 @@ module.exports = function(app){
 	*/
 
 
-		// BUILD the arguments for update_controller.POSTresource()
+		// BUILD the arguments for switch/case functions
             var res = {}, 
 				//params = {}, 
 				//collectionQuery, 
