@@ -58,56 +58,108 @@ From the command line, following APIs can be executed:
 <br /> 
 
 ##### A. CREATE A NEW COURSE
-```sh
-$ curl -H "Content-Type: application/json" -X POST -d '{"course_num":<course_call_number>, "name":<course_name>}' http://<host>:<port>/courses/
-
+```
 POST http://<host>:<port>/courses/ 
 ```
 
-Required Queries:
+URL Parameters:
+* course_num { type: Number, min: 0000, max: 9999 } (required parameter)
+* name { type: String }
 
-'{"course_num":<course_call_number>, "name":<course_name>}'
-
+```JSON
+{
+	course_num  : <course_call_number>, 
+	name		: <course_name>
+}
+```
 
 <br /> 
 
 ##### B. GET COURSE INFORMATION
 
 ###### - ALL COURSES:
-```sh
-$ curl -H "Content-Type: application/json" -X GET http://localhost:3000/courses/
 ```
-###### - ONE COURSE:
-```sh
-$ curl -H "Content-Type: application/json" -X GET http://<host>:<port>/courses?course_num=<course_call_number>
+ GET http:///<host>:<port>/courses
+```
+
+URL Parameters:
+
+* course_num { type: Number, min: 0000, max: 9999 }
+* name { type: String }
+
+```JSON
+{
+	course_num	:	<course_call_number>, 
+	name		:	<course_name>
+}
 ```
 
 <br /> 
 
 ##### C. ADD A STUDENT TO A COURSE
-```sh
-$ curl -i -X PUT -H 'Content-Type: application/json' -d '{"uni":<unique_id>,"lastname":"<lastname>","firstname":"<firstname>"}' http://<host>:<port>/courses?course_num=<course_call_number>
+```
+POST http://<host>:<port>/courses/<course_num>
+```
+
+URL Parameters:
+* uni { type: String } (required parameter)
+* lastname { type: String }
+* lastname { type: String }
+
+```JSON
+{
+	uni			:	<unique_id>,
+	lastname	:	<lastname>,
+	firstname	:	<firstname>
+} 
 ```
 
 <br /> 
 
 ##### D. DELETE A COURSE
-```sh
-$ curl -H "Content-Type: application/json" -X DELETE http://<host>:<port>/courses?course_num=<course_call_number>
+```
+DELETE http://<host>:<port>/courses
+```
+
+URL Parameters:
+* course_num { type: Number, min: 0000, max: 9999 }
+
+
+```JSON
+{
+	course_num	:	<course_call_number> 
+}
 ```
 
 <br /> 
 
 ##### E. REMOVE A STUDENT FROM ONE COURSE
 ```sh
-$ curl -i -X DELETE -H 'Content-Type: application/json' -d '{"uni":<unique_id>}' http://<host>:<port>/courses/<course_call_number>
+DELETE http://<host>:<port>/courses/<course_call_number>/students
 ```
 
+URL Parameters:
+* uni { type: String } (required parameter)
+
+```JSON
+{
+	uni		:	<unique_id>
+}
+```
 <br /> 
 
 ##### F. REMOVE A STUDENT FROM ALL COURSES
-```sh
-$ curl -i -X DELETE -H 'Content-Type: application/json' -d '{"uni":<unique_id>,"lastname":"<lastname>","firstname":"<firstname>"}' http://<host>:<port>/student
+```
+DELETE http://<host>:<port>/students
+```
+
+URL Parameters:
+* uni { type: String } (required parameter)
+
+```JSON
+{
+	uni		:	<unique_id>
+}
 ```
 
 <br /> 
@@ -131,7 +183,7 @@ $ curl -i -X DELETE -H 'Content-Type: application/json' -d '{"key":"<key>"}' htt
 
 <br /> 
 
-### 5. Example
+### 5. Example Usage 
 
 <br /> 
 
@@ -152,10 +204,25 @@ $ curl -i -X DELETE -H 'Content-Type: application/json' -d '{"key":"<key>"}' htt
 <br /> 
 
 ##### B. POST a course and PUT a student to that course
-```sh
-curl -H "Content-Type: application/json" -X POST -d '{"course_num":9999,"name":"Microservices and APIs"}' http://localhost:3000/courses/
+```
+POST http://localhost:3000/courses
 
-	curl -i -X PUT -H 'Content-Type: application/json' -d '{"uni":"phb2114","lastname":"Burrows","firstname":"Peter"}' http://localhost:3000/courses?course_num=9999
+{
+	course_num	:	9999,
+	name		:	"Microservices and APIs"
+}
+
+```
+
+
+
+```
+POST http://localhost:3000/courses/<course_call_number>
+
+{
+	uni	:	"phb2114"
+}
+
 ```
 
 
@@ -170,9 +237,7 @@ curl -H "Content-Type: application/json" -X POST -d '{"course_num":9999,"name":"
           "__v": 1,
           "students": [
                {
-                    "uni": "PHB2114",
-                    "lastname": "Burrows",
-                    "firstname": "Peter",
+                    "uni": "phb2114",
                     "_id": "563bf7d86d2689cb31735bd9"
                }
           ]
