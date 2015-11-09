@@ -271,7 +271,7 @@ exports.add_course = function(req, res, next) {
 																		if (sender !== "courses_micro_service") {
 																			var event_message = {
 																				'sender' : 'students_micro_service',
-																				'action' : 'update course add student',
+																				'service_action' : 'update course add student',
 																				'course_name': course,
 																				'uni': uni_param}
 																			clientRIPub.publish(pub_channel, JSON.stringify(event_message));
