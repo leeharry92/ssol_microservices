@@ -27,7 +27,7 @@ buildQuery = function(query, params, iterations){
 }
 
 // subroutine to post a resource
-exports.POSTresource = function (res, params, collectionQuery, resource, resourceQuery, clientQuery){
+POSTresource = exports.POSTresource = function (res, params, collectionQuery, resource, resourceQuery, clientQuery){
 
   // First use the collection Query to query the db
 	model.findOne(collectionQuery, function(err, course_found){
@@ -83,6 +83,8 @@ exports.POSTresource = function (res, params, collectionQuery, resource, resourc
 
 	}); // ends model.findOne
 }
+
+
 
 
 
@@ -179,13 +181,13 @@ exports.removeStudentFromCourse = function( ) {
 		resourceQuery[resource+"."+query_keys[i]] = clientQuery[query_keys[i]];
 	}	
 
-/*
+
 	console.log(params);
 	console.log(clientQuery);
 	console.log(resource);
 	console.log(collectionQuery);
 	console.log(resourceQuery);
-*/
+
 
   // business logic
   	// redis message
@@ -242,11 +244,13 @@ exports.addStudentToCourse = function( ) {
 	}	
 
 /*
+	console.log(res)
+	console.log(typeof res)
 	console.log(params);
-	console.log(clientQuery);
-	console.log(resource);
 	console.log(collectionQuery);
+	console.log(resource);
 	console.log(resourceQuery);
+	console.log(clientQuery);
 */
 
   // business logic
@@ -258,7 +262,7 @@ exports.addStudentToCourse = function( ) {
 
 
 	// update db - post the student to the course
-		this.POSTresource(res, params, collectionQuery, resource, resourceQuery, clientQuery);
+		POSTresource(res, params, collectionQuery, resource, resourceQuery, clientQuery);
 
 	} // ends else
 

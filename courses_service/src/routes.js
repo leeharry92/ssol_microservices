@@ -74,10 +74,55 @@ module.exports = function(app){
         var call_number = 1234;
         var uni = obj.uni.toLowerCase();
 
+	/* Message takes the following form
+		sender:
+		service_action:
+		course_name: (the ID number)
+		uni:
+	*/
+
         switch (obj.service_action) {
             case "update course add student":
                 //students.ref_add_course(call_number, uni, app, function(err) {
-                var res, params, collectionQuery, resource, resourceQuery, clientQuery;
+
+			// BUILD the arguments for update_controller.POSTresource()
+                var res = {}, 
+					//params = {}, 
+					//collectionQuery, 
+					resource = "students";
+					//resourceQuery, 
+					//clientQuery;
+
+				var params = {};
+				params['course_num'] = obj.course_name;
+				params['resource'] = resource;
+				
+			  // BUILD THE QUERY FOR THE COLLECTION
+			  //	Note: the collection identifier (/:collection_id/) == param_keys[0]
+				var collectionQuery = {};
+				var collection_keys = Object.keys(params);
+				collectionQuery[collection_keys[0]] = parseInt(params[collection_keys[0]]);
+				//   Note: parseInt() called for the collection query id
+
+				var clientQuery = {};
+				clientQuery['uni'] = uni;
+
+			  // BUILD THE QUERY for the RESOURCE -- for Mongo's collection.aggregation function
+				var resourceQuery = {};
+				var query_keys = Object.keys(clientQuery);
+				for (var i = 0; i < query_keys.length; i++){
+					resourceQuery[resource+"."+query_keys[i]] = clientQuery[query_keys[i]];
+				}	
+
+
+				console.log(res);
+				console.log(params);
+				console.log(collectionQuery);
+				console.log(resource);
+				console.log(resourceQuery);
+				console.log(clientQuery);
+
+
                 update_controller.POSTresource( res, params, collectionQuery, resource, resourceQuery, clientQuery, function (err) {	
                     if (err != null) {
                         //error handling
