@@ -5,7 +5,7 @@ var redis = require("redis")
 
 clientRISub = redis.createClient(); // Subscribes to ri channel
 
-clientRISub.subscribe("students microservice");
+clientRISub.subscribe("students_micro_service");
 
 module.exports = function(app) {
     app.route('/')
@@ -28,7 +28,7 @@ module.exports = function(app) {
         .put(students.remove_course);
 
     clientRISub.on("subscribe", function (channel, count) {
-    console.log("Subscribed to " + channel + " channel.")
+        console.log("Subscribed to " + channel + " channel.")
     });
 
     clientRISub.on("message", function (channel, message) { // Listens for referential integrity channel JSON messgages

@@ -515,55 +515,6 @@ exports.ref_remove_course_on_all_students = function(callNumber, app) {
 												});
 };
 
-/*
-    var msg = JSON.parse(message);
-
-    switch (msg.action) {
-
-    }
-
-    var bodyString = JSON.stringify({
-		course: msg.course_cn,				//TODO (Peter) Change this param to ccn
-		sender: msg.sender,
-	});
-	
-
-	var headers = {
-	    'Content-Type': 'application/json',
-	    'Content-Length': bodyString.length
-	};
-
-	var options = {
-	    host: 'localhost',
-	    path: '/' + msg.uni + '/add-course',
-	    port: 3003,										//TODO (Peter/Jivtesh) Direct this to the proper microservices.
-	    method: 'PUT',
-	    headers: headers
-	};
-
-	console.log("Option: " + JSON.stringify(options));
-
-	// callback is same as in the above seen example.
-	var callback = function(response) {
-		var str = '';
-
-		//another chunk of data has been recieved, so append it to `str`
-		response.on('data', function(chunk) {
-		str += chunk;
-		});
-
-		//the whole response has been recieved, so we just print it out here
-		response.on('end', function() {
-		console.log(str);
-		});
-	};
-
-	http.request(options, callback).write(bodyString);
-    
-});
-
-*/
-
 
 
 
