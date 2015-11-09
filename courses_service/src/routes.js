@@ -39,13 +39,10 @@ module.exports = function(app){
 	// schema changes
 	app.post( root+'/schema',    					schema_controller.addKEY() );
 	app.delete( root+'/schema',    					schema_controller.deleteKEY() );
-	//app.put( root+'/:course/:attribute',			attributes_controller.updateKeyInAttributes() );
 
 	// update
 	app.put(  root+'/:course_num',					update_controller.updateCourse() );
 	app.post(  root+'/:course_num/:resource',		update_controller.addStudentToCourse() );
-	//app.put(  root+'/:course_num/:students/:uni',	update_controller.updateStudentInCourse() );
-
 
 	// delete 
 	app.delete(  root, 								update_controller.removeCourse() ); 
@@ -120,8 +117,8 @@ module.exports = function(app){
 
         switch (obj.service_action) {
             case "update course add student":
-
-            update_controller.POSTresource( res, params, collectionQuery, resource, resourceQuery, clientQuery, resmode, function (err) {	
+            update_controller.POSTresource(model, res, params, collectionQuery, resource, resourceQuery, clientQuery, resmode, 
+				function (err) {	
                     if (err != null) {
                         //error handling
                     } else {
@@ -131,7 +128,8 @@ module.exports = function(app){
                 break;
 
             case "update course delete student":
-            update_controller.DELETEresource( res, params, collectionQuery, resource, resourceQuery, clientQuery, resmode, function(err) {	
+            update_controller.DELETEresource(model, res, params, collectionQuery, resource, resourceQuery, clientQuery, resmode, 
+				function(err) {	
                     if (err != null) {
                         //error handling
                     } else {
@@ -141,7 +139,8 @@ module.exports = function(app){
                 break;
 
             case "delete student":
-            DELETEresourceFromAll(res, params, collectionQuery, resource, resourceQuery, clientQuery,resmode, function(err) {
+            update_controller.DELETEresourceFromAll(model, res, params, collectionQuery, resource, resourceQuery, clientQuery,resmode, 
+				function(err) {
                 
                     if (err != null) {
                         //error handling

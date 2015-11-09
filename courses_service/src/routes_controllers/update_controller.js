@@ -56,7 +56,7 @@ buildQuery = function(query, params, iterations){
 }
 
 // subroutine to post a resource
-POSTresource = exports.POSTresource = function (res, params, collectionQuery, resource, resourceQuery, clientQuery, resmode){
+POSTresource = exports.POSTresource = function (model, res, params, collectionQuery, resource, resourceQuery, clientQuery, resmode){
 
   // First use the collection Query to query the db
 	model.findOne(collectionQuery, function(err, course_found){
@@ -120,7 +120,7 @@ POSTresource = exports.POSTresource = function (res, params, collectionQuery, re
 
 
 // subroutine to DELETE a resource
-DELETEresource = exports.DELETEresource = function (res, params, collectionQuery, resource, resourceQuery, clientQuery,resmode){
+DELETEresource = exports.DELETEresource = function (model, res, params, collectionQuery, resource, resourceQuery, clientQuery,resmode){
 
   // First use the collection Query to query the db
 	model.findOne(collectionQuery, function(err, course_found){
@@ -192,7 +192,7 @@ DELETEresource = exports.DELETEresource = function (res, params, collectionQuery
 }
 
 
-DELETEresourceFromAll = exports.DELETEresourceFromAll = function(res, params, collectionQuery, resource, resourceQuery, clientQuery,resmode){
+DELETEresourceFromAll = exports.DELETEresourceFromAll = function(model, res, params, collectionQuery, resource, resourceQuery, clientQuery,resmode){
 	// First find the course in the db model
 	  model.find({}, function(err, course_found){
 
@@ -288,7 +288,7 @@ exports.removeStudent = function( ) {
 */
 
 	var resmode = true; // enables sending response to client
-	DELETEresourceFromAll(res, params, collectionQuery, resource, resourceQuery, clientQuery,resmode);
+	DELETEresourceFromAll(model, res, params, collectionQuery, resource, resourceQuery, clientQuery,resmode);
 
   }; // ends return
 
@@ -340,7 +340,7 @@ exports.removeStudentFromCourse = function( ) {
   // business logic
 	var resmode = true; // enables sending response to client
 	// update db - remove the student from the course
-		DELETEresource(res, params, collectionQuery, resource, resourceQuery, clientQuery, resmode);
+		DELETEresource(model, res, params, collectionQuery, resource, resourceQuery, clientQuery, resmode);
 
   } // ends return
 
@@ -396,7 +396,7 @@ exports.addStudentToCourse = function( ) {
 
 	var resmode = true; // enables sending response to client
 	// update db - post the student to the course
-		POSTresource(res, params, collectionQuery, resource, resourceQuery, clientQuery, resmode);
+		POSTresource(model, res, params, collectionQuery, resource, resourceQuery, clientQuery, resmode);
 
 	} // ends else
 
