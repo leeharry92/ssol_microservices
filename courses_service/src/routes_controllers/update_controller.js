@@ -27,7 +27,7 @@ buildQuery = function(query, params, iterations){
 }
 
 // subroutine to post a resource
-POSTresource = function (res, collectionQuery, resource, resourceQuery, clientQuery){
+exports.POSTresource = function (res, params, collectionQuery, resource, resourceQuery, clientQuery){
 
   // First use the collection Query to query the db
 	model.findOne(collectionQuery, function(err, course_found){
@@ -53,6 +53,21 @@ POSTresource = function (res, collectionQuery, resource, resourceQuery, clientQu
 						course_found[resource].push(clientQuery);					
 						course_found.save();
 						console.log('-> '+JSON.stringify(clientQuery)+' was POSTED to '+JSON.stringify(collectionQuery));
+
+							  var uni = clientQuery.uni;
+							  var course_num = parseInt(params.course_num); 
+
+						  	// redis message
+								var ri_message = {
+									'sender' : 'courses_micro_service',
+									'service_action' : 'update student add course',
+									'course_name': course_num,
+									'uni': uni };
+								
+								var message = JSON.stringify(ri_message).toLowerCase();
+								clientRI.publish(pub_channel, message);
+
+
 						res.send(true);
 
 					};
@@ -241,21 +256,9 @@ exports.addStudentToCourse = function( ) {
 
 	} else {
 
-	  var uni = clientQuery.uni;
-	  var course_num = parseInt(params.course_num); 
-
-  	// redis message
-		var ri_message = {
-			'sender' : 'courses_micro_service',
-			'service_action' : 'update student add course',
-			'course_name': course_num,
-			'uni': uni };
-		
-		var message = JSON.stringify(ri_message).toLowerCase();
-		clientRI.publish(pub_channel, message);
 
 	// update db - post the student to the course
-		POSTresource(res, collectionQuery, resource, resourceQuery, clientQuery);
+		this.POSTresource(res, params, collectionQuery, resource, resourceQuery, clientQuery);
 
 	} // ends else
 

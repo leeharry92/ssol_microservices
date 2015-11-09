@@ -1,9 +1,3 @@
-var requireDB = require('../schemas/courses_db.js');
-var courses_db = requireDB.getdb;
-var courses_model = requireDB.getModel;
- 
-var model = courses_db.model('courses_model');
-
 
 
 
@@ -83,7 +77,8 @@ module.exports = function(app){
         switch (obj.service_action) {
             case "update course add student":
                 //students.ref_add_course(call_number, uni, app, function(err) {
-                model.update_controller.addStudentToCourse( function (err) {	
+                var res, params, collectionQuery, resource, resourceQuery, clientQuery;
+                update_controller.POSTresource( res, params, collectionQuery, resource, resourceQuery, clientQuery, function (err) {	
                     if (err != null) {
                         //error handling
                     } else {
@@ -94,7 +89,7 @@ module.exports = function(app){
 
             case "update course delete student":
                 //students.ref_remove_course(call_number, uni, app, function(err) {
-                model.update_controller.removeStudentFromCourse( function(err) {	
+                update_controller.removeStudentFromCourse( function(err) {	
                     if (err != null) {
                         //error handling
                     } else {
