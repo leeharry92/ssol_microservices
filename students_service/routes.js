@@ -5,7 +5,6 @@ var redis = require("redis")
 
 clientRISub = redis.createClient(); // Subscribes to ri channel
 
-<<<<<<< HEAD
 var subChannel = "students_micro_service";
 
 clientRISub.subscribe(subChannel);
@@ -13,9 +12,7 @@ clientRISub.subscribe(subChannel);
 clientRISub.on("subscribe", function (channel, count) {
     console.log("Subscribed to " + channel + " channel.")
 });
-=======
-clientRISub.subscribe("students_micro_service");
->>>>>>> origin/master
+
 
 module.exports = function(app) {
     app.route('/')
