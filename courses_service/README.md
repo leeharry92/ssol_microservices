@@ -161,7 +161,7 @@ URL Parameter Key:
 
 ##### G. MODIFY THE SCHEMA
 
-1. ADD A USER-DEFINED KEY TO THE SCHEMA:
+1) ADD A USER-DEFINED KEY TO THE SCHEMA:
 ```
 POST http://<host>:<port>/courses/schema
 ```
@@ -177,7 +177,7 @@ URL Parameter Key:
 
 <br /> 
 
-2. UPDATE A USER-DEFINED KEY IN A DOCUMENT:
+2) UPDATE A USER-DEFINED KEY IN A DOCUMENT:
 ```
 PUT http://<host>:<port>/courses/<course_call_number>
 ```
@@ -192,7 +192,7 @@ URL Parameter Key:
 
 <br /> 
 
-3. DELETE A USER-DEFINED KEY IN THE SCHEMA:
+3) DELETE A USER-DEFINED KEY IN THE SCHEMA:
 ```
 DELETE http://<host>:<port>/courses/schema
 ```
