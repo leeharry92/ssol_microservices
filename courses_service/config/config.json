@@ -1,10 +1,9 @@
 {
   "mongo": {
-    "host": "localhost/test_server01",
+    "host": "localhost/test_server",
     "port": 4000
   },
   "courseAttributes": [
-    "instructor",
-    "ROOM"
+    "instructor"
   ]
 }
