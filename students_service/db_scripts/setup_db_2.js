@@ -2,6 +2,7 @@ db = db.getSiblingDB('students_service_2');
 db.dropDatabase();
 db = db.getSiblingDB('students_service_2');
 db.createCollection('Students', {});
+db.createCollection('Students_courselist_snapshot', {});
 db.Students.insert(
 	{
 		"first_name": "Ian",
@@ -28,5 +29,12 @@ db.Students.insert(
 	}
 );
 
+db.Students.insert(
+	{
+		"uni": "jj1111",
+		"datetime": "015/11/09 17:00:27",
+		"courses": [1111, 2222, 3333, 4444]
+	}
+);
 
 
