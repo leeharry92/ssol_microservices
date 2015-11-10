@@ -543,14 +543,13 @@ exports.ref_remove_course_on_all_students = function(callNumber, app, callback) 
 												});
 };
 
-exports.ref_rollback_course = function(callNumber, uni_param, app, callback) {
-	console.log("In ref_rollback_course!");
+exports.ref_rollback_course = function(uni_param, app, message, callback) {
 
-	/*
-	* ADD ROLLBACK LOGIC
-	*/
+	var obj = JSON.parse(message);
+	var course_num = obj.course_num;
+	console.log("In ref_rollback_course! " + message);
 
-	
+
 	var db = app.locals.db;
 	var collection = db.collection('Students');
 	var ss_collection = db.collection('Students_courselist_snapshot');
