@@ -87,6 +87,8 @@ POSTresource = exports.POSTresource = function (model, res, params, collectionQu
 							  var uni = clientQuery.uni;
 							  var course_num = parseInt(params.course_num);
 
+
+						if (resmode){
 						  	// redis message
 								var ri_message = {
 									'sender' : 'courses_micro_service',
@@ -97,8 +99,9 @@ POSTresource = exports.POSTresource = function (model, res, params, collectionQu
 								var message = JSON.stringify(ri_message).toLowerCase();
 								clientRI.publish(pub_channel, message);
 
-						if (resmode)
+					
 							res.send(true);
+						}
 
 					};
 			}); // ends model.findOne
@@ -146,6 +149,8 @@ DELETEresource = exports.DELETEresource = function (model, res, params, collecti
 					}, function (e, s){
 						if (s){
 
+
+							if (resmode){
 					  	// redis message
 							var ri_message = {
 								'sender' : 'courses_micro_service',
@@ -159,8 +164,8 @@ DELETEresource = exports.DELETEresource = function (model, res, params, collecti
 
 							console.log('-> '+JSON.stringify(deleteQuery)+' DELETED from '+JSON.stringify(collectionQuery));
 
-							if (resmode)
-								res.send(true);
+							res.send(true);
+							}
 						} else {
 							console.log('-> '+JSON.stringify(deleteQuery)+' NOT DELETED from '+JSON.stringify(collectionQuery));
 							if (resmode)
