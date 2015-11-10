@@ -50,7 +50,7 @@ It is strongly suggested that a tool such as Postman is used to send the various
 #### Searching a student
 
 ```
-GET <hostname>:<port> 
+GET <hostname>:<port>/students
 ```
 
 One can specify query parameters as URL arguments. If none is specified, the request will return all students in the database. This is a simple query to the database, thus if there are invalid parameters, the result will simply return an empty list.
