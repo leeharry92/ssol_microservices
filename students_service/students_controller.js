@@ -159,7 +159,7 @@ exports.remove = function(req, res, next) {
 							//  Publishing to referential integrity channel the event
 							var event_message = {
 								'sender' : 'students_micro_service',
-								'action' : 'delete student',
+								'service_action' : 'delete student',
 								'uni': uni_param }
 							clientRIPub.publish(pub_channel, JSON.stringify(event_message));
 						} else {
@@ -254,7 +254,7 @@ exports.remove_attribute = function(req, res, next) {
 exports.add_course = function(req, res, next) {
 	var db = req.app.locals.db;
 	var collection = db.collection('Students');
-	var ss_collection = db.collection('Students_courselist_snapshot');
+	//var ss_collection = db.collection('Students_courselist_snapshot');
 	var course = req.body.course;
 	var uni_param = req.params.uni;
 
@@ -288,31 +288,31 @@ exports.add_course = function(req, res, next) {
 						err.status = 400;
 						next(err);
 					} else {
-						var datetime = new Date().timeNow();
-						console.log(datetime);
-						var ss_params = {
-							uni : uni_param,
-							courseList : courseList,
-							datetime : datetime
-						}
+						// var datetime = new Date().timeNow();
+						// console.log(datetime);
+						// var ss_params = {
+						// 	uni : uni_param,
+						// 	courseList : courseList,
+						// 	datetime : datetime
+						// }
 
-						console.log(JSON.stringify(ss_params));
+						// console.log(JSON.stringify(ss_params));
 
 
-						ss_collection.insertOne(ss_params, function(error, result) {
-							console.log(error);
-							if (error !== null ) {
-								var err = new Error('Snapshot database error');
-								err.status = 500;
-								next(err);
-							}
-						});
+						// ss_collection.insertOne(ss_params, function(error, result) {
+						// 	console.log(error);
+						// 	if (error !== null ) {
+						// 		var err = new Error('Snapshot database error');
+						// 		err.status = 500;
+						// 		next(err);
+						// 	}
+						// });
 
-						var ss_cursor = ss_collection.find();
-						while ( ss_cursor.hasNext() ) {
-						   console.log(JSON.stringify( ss_cursor.next() ));
-						   break;
-						}
+						// var ss_cursor = ss_collection.find();
+						// while ( ss_cursor.hasNext() ) {
+						//    console.log(JSON.stringify( ss_cursor.next() ));
+						//    break;
+						// }
 
 						courseList.push(callNumber);
 						collection.updateOne({_id: student._id},
@@ -324,7 +324,7 @@ exports.add_course = function(req, res, next) {
 																		//  Publishing to referential integrity channel the event
 																		var event_message = {
 																			'sender' : 'students_micro_service',
-																			'action' : 'update course add student',
+																			'service_action' : 'update course add student',
 																			'course_name': course,
 																			'uni': uni_param }
 																		clientRIPub.publish(pub_channel, JSON.stringify(event_message));
@@ -348,6 +348,7 @@ exports.remove_course = function(req, res, next) {
 	var course = req.body.course;
 	var uni_param = req.params.uni;
 
+	console.log("Troubleshoot1")
 	if (course === undefined) {
 		var err = new Error('Must specify course to remove');
 		err.status = 400;
@@ -374,7 +375,6 @@ exports.remove_course = function(req, res, next) {
 						err.status = 400;
 						next(err);
 					} else {
-						log.info("%s",  JSON.stringify(courseList));
 						var removed = courseList.splice(index, 1);
 						collection.updateOne({_id: student._id},
 																 {$set: {courses: courseList}}, 
@@ -382,12 +382,14 @@ exports.remove_course = function(req, res, next) {
 																 	if (error === null) {
 																		res.sendStatus(200);
 																		//  Publishing to referential integrity channel the event
+
+																		console.log("Troubleshoot2")
 																		var event_message = {
 																			'sender' : 'students_micro_service',
 																			'service_action' : 'update course delete student',
 																			'course_name': course,
 																			'uni': uni_param}
-																		clientRIPub.publish("referential integrity", event_message);
+																		clientRIPub.publish(pub_channel, JSON.stringify(event_message));
 
 																	} else {
 																		var err = new Error('Database error');
