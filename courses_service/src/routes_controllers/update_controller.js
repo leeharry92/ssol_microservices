@@ -91,7 +91,7 @@ POSTresource = exports.POSTresource = function (model, res, params, collectionQu
 								var ri_message = {
 									'sender' : 'courses_micro_service',
 									'service_action' : 'update student add course',
-									'course_name': course_num,
+									'course_num': course_num,
 									'uni': uni };
 								
 								var message = JSON.stringify(ri_message).toLowerCase();
@@ -150,7 +150,7 @@ DELETEresource = exports.DELETEresource = function (model, res, params, collecti
 							var ri_message = {
 								'sender' : 'courses_micro_service',
 								'service_action' : 'update student delete course',
-								'course_name': params.course_num,
+								'course_num': params.course_num,
 								'uni': clientQuery.uni };
 		
 							var message = JSON.stringify(ri_message).toLowerCase();
@@ -490,6 +490,17 @@ exports.removeCourse = function () {
 
 				  	if (destroy_model) {
 						console.log('-> '+JSON.stringify(collectionQuery)+' DELETED');
+
+					  	// redis message
+							var ri_message = {
+								'sender' : 'courses_micro_service',
+								'service_action' : 'delete course',
+								'course_num': collectionQuery.course_num
+							};
+		
+							var message = JSON.stringify(ri_message).toLowerCase();
+							clientRI.publish(pub_channel, message);
+						
 						res.send(true);
 
 					// there was an error deleting

@@ -499,7 +499,7 @@ exports.ref_remove_course = function(callNumber, uni_param, app, callback) {
 	});
 };
 
-exports.ref_remove_course_on_all_students = function(callNumber, app) {
+exports.ref_remove_course_on_all_students = function(callNumber, app, callback) {
 	var db = app.locals.db;
 	var collection = db.collection('Students');
 

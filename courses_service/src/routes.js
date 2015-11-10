@@ -109,8 +109,8 @@ module.exports = function(app){
 			console.log("");
 
 			var resmode = false; // disables sending a response to the client
-
-
+			console.log(obj.service_action);
+			
         switch (obj.service_action) {
             case "update course add student":
             update_controller.POSTresource(model, res, params, collectionQuery, resource, resourceQuery, clientQuery, resmode, 

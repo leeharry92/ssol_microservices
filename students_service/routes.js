@@ -36,27 +36,22 @@ module.exports = function(app) {
     app.route('/:uni/remove-course')
         .put(students.remove_course);
 
-    clientRISub.on("subscribe", function (channel, count) {
-        console.log("Subscribed to " + channel + " channel.")
-    });
-
     clientRISub.on("message", function (channel, message) { // Listens for referential integrity channel JSON messgages
         console.log("Channel name: " + channel);
         console.log("Message: " + message);
         
         //Switch statement for three RI cases
         var obj = JSON.parse(message);
-        var call_number = 1234;
-        var uni = obj.uni.toLowerCase();
-
-    var firstChar = uni.charAt(0);
-    if (firstChar < config.starting_uni || firstChar > config.ending_uni) {
-        console.log("UNI received from MQ is out of bounds");
-        return;
-    }
+        var call_number = parseInt(obj.course_num);
 
     switch (obj.service_action) {
         case "update student add course":
+            var uni = obj.uni.toLowerCase();
+            var firstChar = uni.charAt(0);
+            if (firstChar < config.starting_uni || firstChar > config.ending_uni) {
+                console.log("UNI received from MQ is out of bounds");
+                return;
+            }
             students.ref_add_course(call_number, uni, app, function(err) {
                 if (err != null) {
                     console.log("error");
@@ -67,6 +62,12 @@ module.exports = function(app) {
             break;
 
         case "update student delete course":
+            var uni = obj.uni.toLowerCase();
+            var firstChar = uni.charAt(0);
+            if (firstChar < config.starting_uni || firstChar > config.ending_uni) {
+                console.log("UNI received from MQ is out of bounds");
+                return;
+            }
             students.ref_remove_course(call_number, uni, app, function(err) {
                 if (err != null) {
                     //error handling
