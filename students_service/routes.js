@@ -17,24 +17,22 @@ clientRISub.on("subscribe", function (channel, count) {
 
 
 module.exports = function(app) {
-    app.route('/')
+    app.route('/students')
         .get(students.find)
         .post(students.create);
 
-    app.route('/attributes')
+    app.route('/students/attributes')
         .post(students.add_attribute)
         .delete(students.remove_attribute);
 
-    app.route('/:uni')
+    app.route('/students/:uni')
         .get(students.show)
         .delete(students.remove)
         .put(students.update);
 
-    app.route('/:uni/add-course')
-        .put(students.add_course);
-
-    app.route('/:uni/remove-course')
-        .put(students.remove_course);
+    app.route('/students/:uni/courses')
+        .post(students.add_course)
+        .delete(students.remove_course);
 
     clientRISub.on("message", function (channel, message) { // Listens for referential integrity channel JSON messgages
         console.log("Channel name: " + channel);
@@ -42,7 +40,7 @@ module.exports = function(app) {
         
         //Switch statement for three RI cases
         var obj = JSON.parse(message);
-        var call_number = parseInt(obj.course_num);
+        var call_number = parseInt(obj.course_id);
 
         console.log("Action " + obj.service_action);
 

@@ -225,7 +225,7 @@ exports.add_course = function(req, res, next) {
 	var db = req.app.locals.db;
 	var collection = db.collection('Students');
 	var ss_collection = db.collection('Students_courselist_snapshot');
-	var course = req.body.course;
+	var course = req.body.course_id;
 	var uni_param = req.params.uni;
 
 	if (course === undefined) {
@@ -311,7 +311,7 @@ exports.add_course = function(req, res, next) {
 exports.remove_course = function(req, res, next) {
 	var db = req.app.locals.db;
 	var collection = db.collection('Students');
-	var course = req.body.course;
+	var course = req.body.course_id;
 	var uni_param = req.params.uni;
 
 	if (course === undefined) {
@@ -371,7 +371,6 @@ exports.remove_course = function(req, res, next) {
 exports.update = function(req, res, next) {
 	var db = req.app.locals.db;
 	var collection = db.collection('Students');
-	var course = req.body.course;
 	var uni_param = req.params.uni;
 	var params = req.body;
 	var param_keys = Object.keys(params);
@@ -543,7 +542,7 @@ exports.ref_remove_course_on_all_students = function(callNumber, app, callback) 
 												});
 };
 
-exports.ref_rollback_course = function(callNumber, uni_param, app, callback) {
+exports.ref_rollback_course = function(callNumber, app, callback) {
 	console.log("In ref_rollback_course!");
 
 	/*
