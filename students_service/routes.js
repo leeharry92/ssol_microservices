@@ -23,7 +23,7 @@ module.exports = function(app) {
 
     app.route('/attributes')
         .post(students.add_attribute)
-        .delete(students.add_attribute);
+        .delete(students.remove_attribute);
 
     app.route('/:uni')
         .get(students.show)
