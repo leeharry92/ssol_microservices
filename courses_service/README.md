@@ -51,87 +51,162 @@ All configurable parameters are accessible the following JSON file:
 
 <br /> 
 
-### 4. API Documentation (as CURL Templates):
+### 4. API Documentation:
 
-From the command line, following APIs can be executed:
 
 <br /> 
 
 ##### A. CREATE A NEW COURSE
-```sh
-$ curl -H "Content-Type: application/json" -X POST -d '{"course_num":<course_call_number>, "name":<course_name>}' http://<host>:<port>/courses/
-
-POST http://<host>:<port>/courses/ 
+```
+POST http://<host>:<port>/courses 
 ```
 
-Required Queries:
+URL Parameter Keys:
+* course_num { type: Number, min: 0000, max: 9999 } (required parameter)
+* name { type: String } (required parameter)
 
-'{"course_num":<course_call_number>, "name":<course_name>}'
-
+```JSON
+{
+	"course_num" : <course_call_number>, 
+	"name"		 : <course_name>
+}
+```
 
 <br /> 
 
 ##### B. GET COURSE INFORMATION
 
-###### - ALL COURSES:
-```sh
-$ curl -H "Content-Type: application/json" -X GET http://localhost:3000/courses/
 ```
-###### - ONE COURSE:
-```sh
-$ curl -H "Content-Type: application/json" -X GET http://<host>:<port>/courses?course_num=<course_call_number>
+ GET http:///<host>:<port>/courses
+```
+
+URL Parameter Keys:
+* course_num { type: Number, min: 0000, max: 9999 }
+* name { type: String }
+
+```JSON
+{
+	"course_num" :	<course_call_number>, 
+	"name"		 :	<course_name>
+}
 ```
 
 <br /> 
 
 ##### C. ADD A STUDENT TO A COURSE
-```sh
-$ curl -i -X PUT -H 'Content-Type: application/json' -d '{"uni":<unique_id>,"lastname":"<lastname>","firstname":"<firstname>"}' http://<host>:<port>/courses?course_num=<course_call_number>
+```
+POST http://<host>:<port>/courses/<course_call_number>/students
+```
+
+URL Parameter Keys:
+* uni { type: String } (required parameter)
+
+```JSON
+{
+	"uni"		:	<unique_id>
+} 
 ```
 
 <br /> 
 
 ##### D. DELETE A COURSE
-```sh
-$ curl -H "Content-Type: application/json" -X DELETE http://<host>:<port>/courses?course_num=<course_call_number>
+```
+DELETE http://<host>:<port>/courses
+```
+
+URL Parameter Key:
+* course_num { type: Number, min: 0000, max: 9999 }
+
+
+```JSON
+{
+	"course_num"	:	<course_call_number> 
+}
 ```
 
 <br /> 
 
 ##### E. REMOVE A STUDENT FROM ONE COURSE
 ```sh
-$ curl -i -X DELETE -H 'Content-Type: application/json' -d '{"uni":<unique_id>}' http://<host>:<port>/courses/<course_call_number>
+DELETE http://<host>:<port>/courses/<course_call_number>/students
 ```
 
+URL Parameter Key:
+* uni { type: String } (required parameter)
+
+```JSON
+{
+	"uni"		:	<unique_id>
+}
+```
 <br /> 
 
 ##### F. REMOVE A STUDENT FROM ALL COURSES
-```sh
-$ curl -i -X DELETE -H 'Content-Type: application/json' -d '{"uni":<unique_id>,"lastname":"<lastname>","firstname":"<firstname>"}' http://<host>:<port>/student
+```
+DELETE http://<host>:<port>/courses/students
+```
+
+URL Parameter Key:
+* uni { type: String } (required parameter)
+
+```JSON
+{
+	"uni"		:	<unique_id>
+}
 ```
 
 <br /> 
 
 ##### G. MODIFY THE SCHEMA
 
-###### -ADD A USER-DEFINED KEY TO THE SCHEMA:
-```sh
-$ curl -i -X POST -H 'Content-Type: application/json' -d '{"key":"<key>"}' http://<host>:<port>/schema/courses
+1) ADD A USER-DEFINED KEY TO THE SCHEMA:
 ```
-###### -UPDATE A USER-DEFINED KEY IN A DOCUMENT:
-```sh
-$ curl -i -X PUT -H 'Content-Type: application/json' -d '{"attribute1":<key_value>}' http://<host>:<port>/courses?course_num=<course_call_number>
+POST http://<host>:<port>/courses/schema
 ```
-###### -DELETE A USER-DEFINED KEY IN THE SCHEMA:
-```sh
-$ curl -i -X DELETE -H 'Content-Type: application/json' -d '{"key":"<key>"}' http://<host>:<port>/schema/courses
+
+URL Parameter Key:
+* key { type: String } (required parameter)
+
+```JSON
+{
+	"key" : "<key>"
+} 
+```
+
+<br /> 
+
+2) UPDATE A USER-DEFINED KEY IN A DOCUMENT:
+```
+PUT http://<host>:<port>/courses/<course_call_number>
+```
+
+URL Parameter Key:
+* "<key>" { type: not specified } (required parameter)
+```JSON
+{
+	"<key>"	:	<key_value>
+}
+```
+
+<br /> 
+
+3) DELETE A USER-DEFINED KEY IN THE SCHEMA:
+```
+DELETE http://<host>:<port>/courses/schema
+```
+URL Parameter Key:
+* key { type: String } (required parameter)
+```JSON
+{
+	"key"	:	"<key>"
+}
 ```
 
 <br /> 
 
 <br /> 
 
-### 5. Example
+### 5. Example Usage 
 
 <br /> 
 
@@ -141,7 +216,7 @@ $ curl -i -X DELETE -H 'Content-Type: application/json' -d '{"key":"<key>"}' htt
 {
   "mongo": {
     "host": "localhost/test_server",
-    "port": 3000
+    "port": 4000
   },
   "courseAttributes": [
     "instructor"
@@ -152,31 +227,48 @@ $ curl -i -X DELETE -H 'Content-Type: application/json' -d '{"key":"<key>"}' htt
 <br /> 
 
 ##### B. POST a course and PUT a student to that course
-```sh
-curl -H "Content-Type: application/json" -X POST -d '{"course_num":9999,"name":"Microservices and APIs"}' http://localhost:3000/courses/
+```
+POST http://localhost:4000/courses
 
-	curl -i -X PUT -H 'Content-Type: application/json' -d '{"uni":"phb2114","lastname":"Burrows","firstname":"Peter"}' http://localhost:3000/courses?course_num=9999
+{
+	course_num	:	9999,
+	name		:	"Microservices and APIs"
+}
+
 ```
 
+* URL: localhost:4000/courses?course_num=9999&name=Microservices and APIs
+
+<br /> 
+
+```
+POST http://localhost:3000/courses/9999/students
+
+{
+	uni	:	"phb2114"
+}
+
+```
+* URL: localhost:4000/courses/9999/students?uni=phb2114
+
+<br /> 
 
 ```json
 [
-     {
-          "_id": "563bf7d76d2689cb31735bd8",
-          "course_num": 9999,
-          "name": "Microservices and APIs",
-          "updated_at": "2015-11-06T00:44:07.474Z",
-          "instructor": null,
-          "__v": 1,
-          "students": [
-               {
-                    "uni": "PHB2114",
-                    "lastname": "Burrows",
-                    "firstname": "Peter",
-                    "_id": "563bf7d86d2689cb31735bd9"
-               }
-          ]
-     }
+  {
+    "_id": "5640cfbeb541a8043c41514f",
+    "course_num": 9999,
+    "name": "Microservices and APIs",
+    "updated_at": "2015-11-09T16:54:22.802Z",
+    "instructor": null,
+    "__v": 1,
+    "students": [
+      {
+        "uni": "phb2114",
+        "_id": "5640d0f38f0fc7243cbd74b2"
+      }
+    ]
+  }
 ]
 ```
 
@@ -186,29 +278,37 @@ curl -H "Content-Type: application/json" -X POST -d '{"course_num":9999,"name":"
 
 Note: The key, "instructor", was previously initialized in the config.json file
 
-```sh
-curl -i -X PUT -H 'Content-Type: application/json' -d '{"instructor":"Don Ferguson"}' http://localhost:3000/courses?course_num=9999
+```
+PUT http://localhost:3000/courses/9999
 ```
 
 
-```json
+```JSON
+{
+	"instructor"	:	"Don Ferguson"
+}
+```
+
+* URL: localhost:4000/courses/9999?instructor=Don Ferguson
+
+<br /> 
+
+```JSON
 [
-     {
-          "_id": "563bf7d76d2689cb31735bd8",
-          "course_num": 9999,
-          "name": "Microservices and APIs",
-          "updated_at": "2015-11-06T00:44:07.474Z",
-          "instructor": "Don Ferguson",
-          "__v": 1,
-          "students": [
-               {
-                    "uni": "PHB2114",
-                    "lastname": "Burrows",
-                    "firstname": "Peter",
-                    "_id": "563bf7d86d2689cb31735bd9"
-               }
-          ]
-     }
+  {
+    "_id": "5640cfbeb541a8043c41514f",
+    "course_num": 9999,
+    "name": "Microservices and APIs",
+    "updated_at": "2015-11-09T16:54:22.802Z",
+    "instructor": "Don Ferguson",
+    "__v": 1,
+    "students": [
+      {
+        "uni": "phb2114",
+        "_id": "5640d0f38f0fc7243cbd74b2"
+      }
+    ]
+  }
 ]
 ```
 
@@ -216,55 +316,93 @@ curl -i -X PUT -H 'Content-Type: application/json' -d '{"instructor":"Don Fergus
 
 ##### D. POST another user-defined key and PUT a value to the key
 
-```sh
-curl -i -X POST -H 'Content-Type: application/json' -d '{"key":"ROOM"}' http://localhost:3000/schema/courses
-
-curl -i -X PUT -H 'Content-Type: application/json' -d '{"ROOM":"428 Pupin"}' http://localhost:3000/courses?course_num=9999
+```
+POST http://localhost:3000/courses/schema
 ```
 
+```JSON
+{
+	"key"	:	"room"
+}
+```
+
+* URL: localhost:4000/courses/schema?key=room
+
+<br /> 
+
+```
+PUT http://localhost:3000/courses?course_num=9999
+```
+
+```JSON
+{
+	"room"	:	"428 Pupin"
+}
+```
+
+* URL: localhost:4000/courses/9999?room=428 Pupin
+
+<br /> 
 
 ```json
 [
-     {
-          "_id": "563bf8e2bcecae0632d0da42",
-          "course_num": 9999,
-          "name": "Microservices and APIs",
-          "updated_at": "2015-11-06T00:48:34.573Z",
-          "instructor": "Don Ferguson",
-          "ROOM": "428 Pupin",
-          "__v": 0,
-          "students": [
-               {
-                    "uni": "PHB2114",
-                    "lastname": "Burrows",
-                    "firstname": "Peter",
-                    "_id": "563bf89ebcecae0632d0da41"
-               }
-          ]
-     }
+  {
+    "_id": "5640d2748f0fc7243cbd74b3",
+    "course_num": 9999,
+    "name": "Microservices and APIs",
+    "updated_at": "2015-11-09T17:05:56.722Z",
+    "instructor": "Don Ferguson",
+    "room": "428 Pupin",
+    "__v": 0,
+    "students": [
+      {
+        "uni": "phb2114",
+        "_id": "5640d0f38f0fc7243cbd74b2"
+      }
+    ]
+  }
 ]
 ```
 
 <br /> 
 
 ##### E. DELETE a user-defined key and DELETE a student from a course
-```sh
-curl -i -X DELETE -H 'Content-Type: application/json' -d '{"key":"instructor"}' http://localhost:3000/schema/courses
-
-curl -i -X DELETE -H 'Content-Type: application/json' -d '{"uni":"phb2114"}' http://localhost:3000/courses/9999
+```
+DELETE http://localhost:3000/courses/schema
 ```
 
 ```JSON
+{
+	"key"	:	"instructor"
+}
+```
+* URL: localhost:4000/courses/schema?key=instructor
+
+<br /> 
+
+```
+DELETE http://localhost:3000/courses/9999/students
+```
+
+```JSON
+{
+	"uni"	:	"phb2114"
+} 
+```
+
+<br /> 
+
+```JSON
 [
-     {
-          "_id": "563bf95abcecae0632d0da43",
-          "course_num": 9999,
-          "name": "Microservices and APIs",
-          "updated_at": "2015-11-06T00:50:34.218Z",
-          "ROOM": "428 Pupin",
-          "__v": 0,
-          "students": []
-     }
+  {
+    "_id": "5640d3348f0fc7243cbd74b4",
+    "course_num": 9999,
+    "name": "Microservices and APIs",
+    "updated_at": "2015-11-09T17:09:08.285Z",
+    "room": "428 Pupin",
+    "__v": 0,
+    "students": []
+  }
 ]
 ```
 

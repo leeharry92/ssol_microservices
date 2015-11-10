@@ -7,7 +7,14 @@ var config = require('./config/config');
 
 clientRISub = redis.createClient(); // Subscribes to ri channel
 
-clientRISub.subscribe("students_micro_service");
+var subChannel = "students_micro_service";
+
+clientRISub.subscribe(subChannel);
+
+clientRISub.on("subscribe", function (channel, count) {
+    console.log("Subscribed to " + channel + " channel.")
+});
+
 
 module.exports = function(app) {
     app.route('/')
@@ -34,13 +41,13 @@ module.exports = function(app) {
     });
 
     clientRISub.on("message", function (channel, message) { // Listens for referential integrity channel JSON messgages
-    console.log("Channel name: " + channel);
-    console.log("Message: " + message);
-    
-    //Switch statement for three RI cases
-    var obj = JSON.parse(message);
-    var call_number = 1234;
-    var uni = obj.uni.toLowerCase();
+        console.log("Channel name: " + channel);
+        console.log("Message: " + message);
+        
+        //Switch statement for three RI cases
+        var obj = JSON.parse(message);
+        var call_number = 1234;
+        var uni = obj.uni.toLowerCase();
 
     var firstChar = uni.charAt(0);
     if (firstChar < config.starting_uni || firstChar > config.ending_uni) {
@@ -78,6 +85,6 @@ module.exports = function(app) {
                 }
             });
             break;
-    }
+        }
     });   
 };
