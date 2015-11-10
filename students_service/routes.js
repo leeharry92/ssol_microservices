@@ -86,6 +86,16 @@ module.exports = function(app) {
                 }
             });
             break;
+
+        case "delete course error dne":
+            students.ref_rollback_course(call_number, app, function(err) {
+                if (err != null) {
+                    //error handling
+                } else {
+                    //handle correct case
+                }
+            });
+            break;
         }
     });   
 };
