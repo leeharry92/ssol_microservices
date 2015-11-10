@@ -58,7 +58,7 @@ One can specify query parameters as URL arguments. If none is specified, the req
 #### Adding a student
 
 ```
-POST <hostname>:<port>
+POST <hostname>:<port>/students
 ```
 
 In order for this request to succeed, three required parameters must be specified in the HTTP POST request body: first_name, last_name, uni. Failure to do so will result in a error status of 400. Specification of parameters that are not part of the schema will also generate a 400 error. Lastly, a duplicate value for UNI will also result in a 400. 
@@ -66,7 +66,7 @@ In order for this request to succeed, three required parameters must be specifie
 #### Fetching a student by UNI
 
 ```
-GET <hostname>:<port>/<uni>
+GET <hostname>:<port>/students/<uni>
 ```
 
 This will result in a 404 if the student specified by <uni> is not valid. Otherwise, it will return a JSON representation of the student
@@ -74,7 +74,7 @@ This will result in a 404 if the student specified by <uni> is not valid. Otherw
 ####  Removing a student
 
 ```
-DELETE <hostname>:<port>/<uni>
+DELETE <hostname>:<port>/students/<uni>
 ```
 
 This endpoint will remove a student specified by <uni>. A 404 error willl be generated if such student does not exist
@@ -82,7 +82,7 @@ This endpoint will remove a student specified by <uni>. A 404 error willl be gen
 #### Updating a student
 
 ```
-PUT <hostname>:<port>/<uni>
+PUT <hostname>:<port>/students/<uni>
 ```
 The following cases will generate errors in this method:
 
@@ -96,10 +96,10 @@ Note that changing the courses attribute is not allowed through this endpoint, b
 ### Adding a course to a student
 
 ```
-PUT <hostname>:<port>/<uni>/add-course
+POST <hostname>:<port>/students/<uni>/courses
 ```
 
-There must be a 'course' parameter in the request body in order for this method to work - the parameter must specify the call number of the course to be added. In addition, the following errors may be generated for this method:
+There must be a 'course_id' parameter in the request body in order for this method to work - the parameter must specify the call number of the course to be added. In addition, the following errors may be generated for this method:
 
 * 'course' parameter not defined (400)
 * Call number is not a number (400)
@@ -110,10 +110,10 @@ There must be a 'course' parameter in the request body in order for this method 
 ### Removing a course from a student
 
 ```
-PUT <hostname>:<port>/<uni>/remove-course
+DELETE <hostname>:<port>/students/<uni>/courses
 ```
 
-As with adding a course, there must be a 'course' parameter in the request body specifying the call number of the course to be removed. The following errors may be generated for this method:
+As with adding a course, there must be a 'course_id' parameter in the request body specifying the call number of the course to be removed. The following errors may be generated for this method:
 
 * 'course' parameter not defined (400)
 * Call number is not a number (400)
