@@ -348,7 +348,6 @@ exports.remove_course = function(req, res, next) {
 	var course = req.body.course;
 	var uni_param = req.params.uni;
 
-	console.log("Troubleshoot1")
 	if (course === undefined) {
 		var err = new Error('Must specify course to remove');
 		err.status = 400;
@@ -383,7 +382,6 @@ exports.remove_course = function(req, res, next) {
 																		res.sendStatus(200);
 																		//  Publishing to referential integrity channel the event
 
-																		console.log("Troubleshoot2")
 																		var event_message = {
 																			'sender' : 'students_micro_service',
 																			'service_action' : 'update course delete student',
