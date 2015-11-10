@@ -101,7 +101,7 @@ POST <hostname>:<port>/students/<uni>/courses
 
 There must be a 'course_id' parameter in the request body in order for this method to work - the parameter must specify the call number of the course to be added. In addition, the following errors may be generated for this method:
 
-* 'course' parameter not defined (400)
+* 'course_id' parameter not defined (400)
 * Call number is not a number (400)
 * Student specified by <uni> not found (404)
 * Student already registered for course specified (400)
@@ -115,7 +115,7 @@ DELETE <hostname>:<port>/students/<uni>/courses
 
 As with adding a course, there must be a 'course_id' parameter in the request body specifying the call number of the course to be removed. The following errors may be generated for this method:
 
-* 'course' parameter not defined (400)
+* 'course_id' parameter not defined (400)
 * Call number is not a number (400)
 * Student specified by <uni> not found (404)
 * Student not registered for course specified (400)
