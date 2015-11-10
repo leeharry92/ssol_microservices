@@ -12,11 +12,18 @@ var config = require('./config/config');
 var students_routes = require('./students_routes');
 var courses_routes = require('./courses_routes');
 
+
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
-//require('./models/musician')
-//require('./routes')(app);
+
+// for (var i = 0; i <5; i++) {
+// 	if (i == 3) break;
+// };
+// console.log(i);
+// console.log(find_partition('ll2131', config.partitions));
+
+
 app.use('/students', students_routes);
 app.use('/courses', courses_routes);
 

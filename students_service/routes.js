@@ -44,17 +44,19 @@ module.exports = function(app) {
         var obj = JSON.parse(message);
         var call_number = parseInt(obj.course_num);
 
+        console.log("Action " + obj.service_action);
+
         switch (obj.service_action) {
             case "update student add course":
                 var uni = obj.uni.toLowerCase();
                 var firstChar = uni.charAt(0);
                 if (firstChar < config.starting_uni || firstChar > config.ending_uni) {
-                    console.log("UNI received from MQ is out of bounds");
+                    console.log("UNI received from MQ is out of bounds: Char " + firstChar + " bounds (" + config.starting_uni + "," + config.ending_uni + ")");
                     return;
                 }
                 students.ref_add_course(call_number, uni, app, function(err) {
                     if (err != null) {
-                        console.log("error");
+                        console.log(err);
                     } else {
                         //handle correct case
                     }
@@ -65,7 +67,7 @@ module.exports = function(app) {
                 var uni = obj.uni.toLowerCase();
                 var firstChar = uni.charAt(0);
                 if (firstChar < config.starting_uni || firstChar > config.ending_uni) {
-                    console.log("UNI received from MQ is out of bounds");
+                    console.log("UNI received from MQ is out of bounds: Char " + firstChar + " bounds (" + config.starting_uni + "," + config.ending_uni + ")");
                     return;
                 }
                 students.ref_remove_course(call_number, uni, app, function(err) {
@@ -88,6 +90,8 @@ module.exports = function(app) {
                 break;
 
             case "update student add course dne":
+                console.log(app);
+                
                 students.ref_rollback_course(call_number, app, function(err) {
                     if (err != null) {
                         //error handling
@@ -95,6 +99,9 @@ module.exports = function(app) {
                         //handle correct case
                     }
                 });
+                break;
+            default :
+                console.log("Service action not found " + obj.service_action);
                 break;
         }
     });   

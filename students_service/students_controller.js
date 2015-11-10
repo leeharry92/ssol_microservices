@@ -449,13 +449,15 @@ exports.update = function(req, res, next) {
 };
 
 exports.ref_add_course = function(callNumber, uni_param, app, callback) {
+	console.log("In ref_add_course");
+
 	var db = app.locals.db;
 	var collection = db.collection('Students');
 
 	collection.findOneAsync({uni: uni_param})
 	.then(function(student) {
 		if (student == null) {
-			var err = new Error('Specified student not found');
+			var err = new Error('Specified student not found |' + uni_param);
 			err.status = 404;
 			callback(err);
 		} else {
@@ -543,6 +545,10 @@ exports.ref_remove_course_on_all_students = function(callNumber, app, callback) 
 
 exports.ref_rollback_course = function(callNumber, uni_param, app, callback) {
 	console.log("In ref_rollback_course!");
+
+	/*
+	* ADD ROLLBACK LOGIC
+	*/
 
 	
 	var db = app.locals.db;
