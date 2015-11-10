@@ -2,6 +2,7 @@ db = db.getSiblingDB('students_service_3');
 db.dropDatabase();
 db = db.getSiblingDB('students_service_3');
 db.createCollection('Students', {});
+
 db.Students.insert(
 	{
 		"first_name": "Sam",

@@ -1,7 +1,9 @@
 var express = require('express');
 var router = express.Router();
 var students = require('./students_controller');
-var redis = require("redis")
+var redis = require('redis');
+var config = require('./config/config');
+
 
 clientRISub = redis.createClient(); // Subscribes to ri channel
 
@@ -40,11 +42,17 @@ module.exports = function(app) {
     var call_number = 1234;
     var uni = obj.uni.toLowerCase();
 
+    var firstChar = uni.charAt(0);
+    if (firstChar < config.starting_uni || firstChar > config.ending_uni) {
+        console.log("UNI received from MQ is out of bounds");
+        return;
+    }
+
     switch (obj.service_action) {
         case "update student add course":
             students.ref_add_course(call_number, uni, app, function(err) {
                 if (err != null) {
-                    //error handling
+                    console.log("error");
                 } else {
                     //handle correct case
                 }
