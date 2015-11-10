@@ -129,7 +129,7 @@ exports.remove = function(req, res, next) {
 							//  Publishing to referential integrity channel the event
 							var event_message = {
 								'sender' : 'students_micro_service',
-								'action' : 'delete student',
+								'service_action' : 'delete student',
 								'uni': uni_param }
 							clientRIPub.publish(pub_channel, JSON.stringify(event_message));
 						} else {
@@ -287,7 +287,7 @@ exports.add_course = function(req, res, next) {
 																				//  Publishing to referential integrity channel the event
 																				var event_message = {
 																					'sender' : 'students_micro_service',
-																					'action' : 'update course add student',
+																					'service_action' : 'update course add student',
 																					'course_name': course,
 																					'uni': uni_param,
 																					'datetime' : datetime.toISOString()
@@ -301,7 +301,6 @@ exports.add_course = function(req, res, next) {
 																		 });
 							}
 						});
-
 					}
 				}
 			});
@@ -341,7 +340,6 @@ exports.remove_course = function(req, res, next) {
 						err.status = 400;
 						next(err);
 					} else {
-						log.info("%s",  JSON.stringify(courseList));
 						var removed = courseList.splice(index, 1);
 						collection.updateOne({_id: student._id},
 																 {$set: {courses: courseList}}, 
@@ -349,12 +347,13 @@ exports.remove_course = function(req, res, next) {
 																 	if (error === null) {
 																		res.sendStatus(200);
 																		//  Publishing to referential integrity channel the event
+
 																		var event_message = {
 																			'sender' : 'students_micro_service',
 																			'service_action' : 'update course delete student',
 																			'course_name': course,
 																			'uni': uni_param}
-																		clientRIPub.publish("referential integrity", event_message);
+																		clientRIPub.publish(pub_channel, JSON.stringify(event_message));
 
 																	} else {
 																		var err = new Error('Database error');
@@ -542,8 +541,10 @@ exports.ref_remove_course_on_all_students = function(callNumber, app, callback) 
 												});
 };
 
-
 exports.ref_rollback_course = function(callNumber, uni_param, app, callback) {
+	console.log("In ref_rollback_course!");
+
+	
 	var db = app.locals.db;
 	var collection = db.collection('Students');
 	var ss_collection = db.collection('Students_courselist_snapshot');

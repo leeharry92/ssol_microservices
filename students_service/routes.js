@@ -23,7 +23,7 @@ module.exports = function(app) {
 
     app.route('/attributes')
         .post(students.add_attribute)
-        .delete(students.add_attribute);
+        .delete(students.remove_attribute);
 
     app.route('/:uni')
         .get(students.show)
@@ -44,58 +44,58 @@ module.exports = function(app) {
         var obj = JSON.parse(message);
         var call_number = parseInt(obj.course_num);
 
-    switch (obj.service_action) {
-        case "update student add course":
-            var uni = obj.uni.toLowerCase();
-            var firstChar = uni.charAt(0);
-            if (firstChar < config.starting_uni || firstChar > config.ending_uni) {
-                console.log("UNI received from MQ is out of bounds");
-                return;
-            }
-            students.ref_add_course(call_number, uni, app, function(err) {
-                if (err != null) {
-                    console.log("error");
-                } else {
-                    //handle correct case
+        switch (obj.service_action) {
+            case "update student add course":
+                var uni = obj.uni.toLowerCase();
+                var firstChar = uni.charAt(0);
+                if (firstChar < config.starting_uni || firstChar > config.ending_uni) {
+                    console.log("UNI received from MQ is out of bounds");
+                    return;
                 }
-            });
-            break;
+                students.ref_add_course(call_number, uni, app, function(err) {
+                    if (err != null) {
+                        console.log("error");
+                    } else {
+                        //handle correct case
+                    }
+                });
+                break;
 
-        case "update student delete course":
-            var uni = obj.uni.toLowerCase();
-            var firstChar = uni.charAt(0);
-            if (firstChar < config.starting_uni || firstChar > config.ending_uni) {
-                console.log("UNI received from MQ is out of bounds");
-                return;
-            }
-            students.ref_remove_course(call_number, uni, app, function(err) {
-                if (err != null) {
-                    //error handling
-                } else {
-                    //handle correct case
+            case "update student delete course":
+                var uni = obj.uni.toLowerCase();
+                var firstChar = uni.charAt(0);
+                if (firstChar < config.starting_uni || firstChar > config.ending_uni) {
+                    console.log("UNI received from MQ is out of bounds");
+                    return;
                 }
-            });
-            break;
+                students.ref_remove_course(call_number, uni, app, function(err) {
+                    if (err != null) {
+                        //error handling
+                    } else {
+                        //handle correct case
+                    }
+                });
+                break;
 
-        case "delete course":
-            students.ref_remove_course_on_all_students(call_number, app, function(err) {
-                if (err != null) {
-                    //error handling
-                } else {
-                    //handle correct case
-                }
-            });
-            break;
+            case "delete course":
+                students.ref_remove_course_on_all_students(call_number, app, function(err) {
+                    if (err != null) {
+                        //error handling
+                    } else {
+                        //handle correct case
+                    }
+                });
+                break;
 
-        case "delete course error dne":
-            students.ref_rollback_course(call_number, app, function(err) {
-                if (err != null) {
-                    //error handling
-                } else {
-                    //handle correct case
-                }
-            });
-            break;
+            case "update student add course dne":
+                students.ref_rollback_course(call_number, app, function(err) {
+                    if (err != null) {
+                        //error handling
+                    } else {
+                        //handle correct case
+                    }
+                });
+                break;
         }
     });   
 };

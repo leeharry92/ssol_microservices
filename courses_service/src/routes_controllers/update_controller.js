@@ -109,9 +109,26 @@ POSTresource = exports.POSTresource = function (model, res, params, collectionQu
 	// If the course does not exist
 		} else {
 
-			console.log('-> Query not found : '+JSON.stringify(collectionQuery));
-			if (resmode)
-				res.send(false);
+			// If the request came from the students microservices throught RI, send back the message
+			// with the timestamp.
+			if (params.sender === 'students_micro_service') {
+				console.log('-> Query not found, rolling back students_micro_service : '+JSON.stringify(collectionQuery) );
+				var ri_message = {
+					'sender' : 'courses_micro_service',
+					'service_action' : "update student add course dne",
+					'course_num': params.uni,
+					'uni': params.uni,
+					'datetime': params.datetime,
+					'course_num': params.course_num
+				};
+				var message = JSON.stringify(ri_message).toLowerCase();
+				clientRI.publish(pub_channel, message);
+
+			} else {
+				console.log('-> Query not found : '+JSON.stringify(collectionQuery));
+				if (resmode)
+					res.send(false);
+			}
 
 		};
 
@@ -189,7 +206,8 @@ DELETEresource = exports.DELETEresource = function (model, res, params, collecti
 		} else {
 
 			console.log('-> Query not found : '+JSON.stringify(collectionQuery));
-			res.send(false);
+			if (resmode)
+				res.send(false);
 
 		};
 
