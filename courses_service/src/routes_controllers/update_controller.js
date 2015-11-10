@@ -189,7 +189,8 @@ DELETEresource = exports.DELETEresource = function (model, res, params, collecti
 		} else {
 
 			console.log('-> Query not found : '+JSON.stringify(collectionQuery));
-			res.send(false);
+			if (resmode)
+				res.send(false);
 
 		};
 
