@@ -80,6 +80,9 @@ module.exports = function(app){
 			var params = {};
 			params['course_num'] = obj.course_name;
 			params['resource'] = resource;
+			params['service_action'] = obj.service_action;
+			params['datetime'] = obj.datetime;
+			params['sender'] = obj.sender;
 			
 		  // BUILD THE QUERY FOR THE COLLECTION
 		  //	Note: the collection identifier (/:collection_id/) == param_keys[0]
@@ -109,7 +112,6 @@ module.exports = function(app){
 			console.log("");
 
 			var resmode = false; // disables sending a response to the client
-			console.log(obj.service_action);
 			
         switch (obj.service_action) {
             case "update course add student":

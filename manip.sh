@@ -1,4 +1,4 @@
-for i in {1000..1020}
+for i in {2000..2300}
 
 do
 	echo "Welcome $i times"
@@ -10,6 +10,6 @@ curl -i -X PUT -H 'Content-Type: application/json' -d '{"course":"1122"}' http:/
 
 curl -i -X DELETE -H 'Content-Type: application/json' -d '{"students":{"lastname":"Singh","firstname":"Jivtesh","uni":"jsc2226"}}' http://localhost:3000/courses/1122
 
-curl -i -X PUT -H 'Content-Type: application/json' -d '{"students":{"lastname":"Singh","firstname":"Jivtesh","uni":"jsc2226"}}' http://localhost:3000/courses?name=1122
+curl -X PUT -H 'Content-Type: application/json' -d '{"students":{"lastname":"Singh","firstname":"Jivtesh","uni":"jsc2226"}}' http://localhost:3000/courses?name=1122
 
 

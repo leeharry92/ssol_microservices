@@ -17,24 +17,22 @@ clientRISub.on("subscribe", function (channel, count) {
 
 
 module.exports = function(app) {
-    app.route('/')
+    app.route('/students')
         .get(students.find)
         .post(students.create);
 
-    app.route('/attributes')
+    app.route('/students/attributes')
         .post(students.add_attribute)
         .delete(students.remove_attribute);
 
-    app.route('/:uni')
+    app.route('/students/:uni')
         .get(students.show)
         .delete(students.remove)
         .put(students.update);
 
-    app.route('/:uni/add-course')
-        .put(students.add_course);
-
-    app.route('/:uni/remove-course')
-        .put(students.remove_course);
+    app.route('/students/:uni/courses')
+        .post(students.add_course)
+        .delete(students.remove_course);
 
     clientRISub.on("message", function (channel, message) { // Listens for referential integrity channel JSON messgages
         console.log("Channel name: " + channel);
@@ -42,50 +40,66 @@ module.exports = function(app) {
         
         //Switch statement for three RI cases
         var obj = JSON.parse(message);
-        var call_number = parseInt(obj.course_num);
+        var call_number = parseInt(obj.course_id);
 
-    switch (obj.service_action) {
-        case "update student add course":
-            var uni = obj.uni.toLowerCase();
-            var firstChar = uni.charAt(0);
-            if (firstChar < config.starting_uni || firstChar > config.ending_uni) {
-                console.log("UNI received from MQ is out of bounds");
-                return;
-            }
-            students.ref_add_course(call_number, uni, app, function(err) {
-                if (err != null) {
-                    console.log("error");
-                } else {
-                    //handle correct case
-                }
-            });
-            break;
+        console.log("Action " + obj.service_action);
 
-        case "update student delete course":
-            var uni = obj.uni.toLowerCase();
-            var firstChar = uni.charAt(0);
-            if (firstChar < config.starting_uni || firstChar > config.ending_uni) {
-                console.log("UNI received from MQ is out of bounds");
-                return;
-            }
-            students.ref_remove_course(call_number, uni, app, function(err) {
-                if (err != null) {
-                    //error handling
-                } else {
-                    //handle correct case
+        switch (obj.service_action) {
+            case "update student add course":
+                var uni = obj.uni.toLowerCase();
+                var firstChar = uni.charAt(0);
+                if (firstChar < config.starting_uni || firstChar > config.ending_uni) {
+                    console.log("UNI received from MQ is out of bounds: Char " + firstChar + " bounds (" + config.starting_uni + "," + config.ending_uni + ")");
+                    return;
                 }
-            });
-            break;
+                students.ref_add_course(call_number, uni, app, function(err) {
+                    if (err != null) {
+                        console.log(err);
+                    } else {
+                        //handle correct case
+                    }
+                });
+                break;
 
-        case "delete course":
-            students.ref_remove_course_on_all_students(call_number, app, function(err) {
-                if (err != null) {
-                    //error handling
-                } else {
-                    //handle correct case
+            case "update student delete course":
+                var uni = obj.uni.toLowerCase();
+                var firstChar = uni.charAt(0);
+                if (firstChar < config.starting_uni || firstChar > config.ending_uni) {
+                    console.log("UNI received from MQ is out of bounds: Char " + firstChar + " bounds (" + config.starting_uni + "," + config.ending_uni + ")");
+                    return;
                 }
-            });
-            break;
+                students.ref_remove_course(call_number, uni, app, function(err) {
+                    if (err != null) {
+                        //error handling
+                    } else {
+                        //handle correct case
+                    }
+                });
+                break;
+
+            case "delete course":
+                students.ref_remove_course_on_all_students(call_number, app, function(err) {
+                    if (err != null) {
+                        //error handling
+                    } else {
+                        //handle correct case
+                    }
+                });
+                break;
+
+            case "update student add course dne":
+                var uni_param = obj.uni.toLowerCase();
+                students.ref_rollback_course(uni_param, app, message, function(err) {
+                    if (err != null) {
+                        //error handling
+                    } else {
+                        //handle correct case
+                    }
+                });
+                break;
+            default :
+                console.log("Service action not found " + obj.service_action);
+                break;
         }
     });   
 };

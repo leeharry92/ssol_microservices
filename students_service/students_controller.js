@@ -8,36 +8,6 @@ var service_name = "students_micro_service";
 clientRISub = redis.createClient();	// Subscribes to ri channel
 clientRIPub = redis.createClient(); // Publishes to ri channel
 
-var currentdate = new Date(); 
-
-// For the date and time SQL style.
-Date.prototype.timeNow = function () {
-	var now     = new Date(); 
-	var year    = now.getFullYear();
-	var month   = now.getMonth()+1; 
-	var day     = now.getDate();
-	var hour    = now.getHours();
-	var minute  = now.getMinutes();
-	var second  = now.getSeconds(); 
-	if(month.toString().length == 1) {
-	    var month = '0'+month;
-	}
-	if(day.toString().length == 1) {
-	    var day = '0'+day;
-	}   
-	if(hour.toString().length == 1) {
-	    var hour = '0'+hour;
-	}
-	if(minute.toString().length == 1) {
-	    var minute = '0'+minute;
-	}
-	if(second.toString().length == 1) {
-	    var second = '0'+second;
-	}   
-	var dateTime = year+'/'+month+'/'+day+' '+hour+':'+minute+':'+second;   
-	 return dateTime;
-}
-
 
 clientRISub.subscribe(service_name);
 
@@ -159,7 +129,7 @@ exports.remove = function(req, res, next) {
 							//  Publishing to referential integrity channel the event
 							var event_message = {
 								'sender' : 'students_micro_service',
-								'action' : 'delete student',
+								'service_action' : 'delete student',
 								'uni': uni_param }
 							clientRIPub.publish(pub_channel, JSON.stringify(event_message));
 						} else {
@@ -255,7 +225,7 @@ exports.add_course = function(req, res, next) {
 	var db = req.app.locals.db;
 	var collection = db.collection('Students');
 	var ss_collection = db.collection('Students_courselist_snapshot');
-	var course = req.body.course;
+	var course = req.body.course_id;
 	var uni_param = req.params.uni;
 
 	if (course === undefined) {
@@ -288,12 +258,12 @@ exports.add_course = function(req, res, next) {
 						err.status = 400;
 						next(err);
 					} else {
-						var datetime = new Date().timeNow();
-						console.log(datetime);
+						var datetime = new Date();
+						console.log(datetime.toISOString());
 						var ss_params = {
 							uni : uni_param,
 							courseList : courseList,
-							datetime : datetime
+							datetime : datetime.toISOString()
 						}
 
 						console.log(JSON.stringify(ss_params));
@@ -305,36 +275,32 @@ exports.add_course = function(req, res, next) {
 								var err = new Error('Snapshot database error');
 								err.status = 500;
 								next(err);
+							} else {
+
+								courseList.push(callNumber);
+								collection.updateOne({_id: student._id},
+																		 {$set: {courses: courseList}}, 
+																		 function(error, result) {
+																		 	if (error === null) {
+																				res.sendStatus(200); //Handle failure - Harry/Peter N
+
+																				//  Publishing to referential integrity channel the event
+																				var event_message = {
+																					'sender' : 'students_micro_service',
+																					'service_action' : 'update course add student',
+																					'course_name': course,
+																					'uni': uni_param,
+																					'datetime' : datetime.toISOString()
+																				}
+																				clientRIPub.publish(pub_channel, JSON.stringify(event_message));
+																			} else {
+																				var err = new Error('Database error');
+																				err.status = 500;
+																				next(err);
+																			}
+																		 });
 							}
 						});
-
-						var ss_cursor = ss_collection.find();
-						while ( ss_cursor.hasNext() ) {
-						   console.log(JSON.stringify( ss_cursor.next() ));
-						   break;
-						}
-
-						courseList.push(callNumber);
-						collection.updateOne({_id: student._id},
-																 {$set: {courses: courseList}}, 
-																 function(error, result) {
-																 	if (error === null) {
-																		res.sendStatus(200); //Handle failure - Harry/Peter N
-
-																		//  Publishing to referential integrity channel the event
-																		var event_message = {
-																			'sender' : 'students_micro_service',
-																			'action' : 'update course add student',
-																			'course_name': course,
-																			'uni': uni_param }
-																		clientRIPub.publish(pub_channel, JSON.stringify(event_message));
-																	} else {
-																		var err = new Error('Database error');
-																		err.status = 500;
-																		next(err);
-																	}
-																 });
-
 					}
 				}
 			});
@@ -345,7 +311,7 @@ exports.add_course = function(req, res, next) {
 exports.remove_course = function(req, res, next) {
 	var db = req.app.locals.db;
 	var collection = db.collection('Students');
-	var course = req.body.course;
+	var course = req.body.course_id;
 	var uni_param = req.params.uni;
 
 	if (course === undefined) {
@@ -374,7 +340,6 @@ exports.remove_course = function(req, res, next) {
 						err.status = 400;
 						next(err);
 					} else {
-						log.info("%s",  JSON.stringify(courseList));
 						var removed = courseList.splice(index, 1);
 						collection.updateOne({_id: student._id},
 																 {$set: {courses: courseList}}, 
@@ -382,12 +347,13 @@ exports.remove_course = function(req, res, next) {
 																 	if (error === null) {
 																		res.sendStatus(200);
 																		//  Publishing to referential integrity channel the event
+
 																		var event_message = {
 																			'sender' : 'students_micro_service',
 																			'service_action' : 'update course delete student',
 																			'course_name': course,
 																			'uni': uni_param}
-																		clientRIPub.publish("referential integrity", event_message);
+																		clientRIPub.publish(pub_channel, JSON.stringify(event_message));
 
 																	} else {
 																		var err = new Error('Database error');
@@ -405,7 +371,6 @@ exports.remove_course = function(req, res, next) {
 exports.update = function(req, res, next) {
 	var db = req.app.locals.db;
 	var collection = db.collection('Students');
-	var course = req.body.course;
 	var uni_param = req.params.uni;
 	var params = req.body;
 	var param_keys = Object.keys(params);
@@ -483,13 +448,15 @@ exports.update = function(req, res, next) {
 };
 
 exports.ref_add_course = function(callNumber, uni_param, app, callback) {
+	console.log("In ref_add_course");
+
 	var db = app.locals.db;
 	var collection = db.collection('Students');
 
 	collection.findOneAsync({uni: uni_param})
 	.then(function(student) {
 		if (student == null) {
-			var err = new Error('Specified student not found');
+			var err = new Error('Specified student not found |' + uni_param);
 			err.status = 404;
 			callback(err);
 		} else {
@@ -522,7 +489,6 @@ exports.ref_add_course = function(callNumber, uni_param, app, callback) {
 			}
 		});
 };
-
 
 exports.ref_remove_course = function(callNumber, uni_param, app, callback) {
 	var db = app.locals.db;
@@ -575,6 +541,51 @@ exports.ref_remove_course_on_all_students = function(callNumber, app, callback) 
 													}
 												});
 };
+
+
+exports.ref_rollback_course = function(uni_param, app, message, callback) {
+
+	var obj = JSON.parse(message);
+	var course_num = obj.course_num;
+	console.log("In ref_rollback_course! " + message);
+
+
+	var db = app.locals.db;
+	var collection = db.collection('Students');
+	var ss_collection = db.collection('Students_courselist_snapshot');
+
+	collection.findOneAsync({uni: uni_param})
+	.then(function(student) {
+		if (student == null) {
+			var err = new Error('Specified student not found');
+			err.status = 404;
+			callback(err);
+		} else {
+			var courseList = student.courses;
+			var index;
+			if (courseList == null || 
+					(index = _.indexOf(courseList, callNumber)) == -1) {
+				var err = new Error('Student is not registered for course specified');
+				err.status = 400;
+				callback(err);
+			} else {
+				var removed = courseList.splice(index, 1);
+				collection.updateOne({_id: student._id},
+														 {$set: {courses: courseList}}, 
+														 function(error, result) {
+														 	if (error === null) {
+														 		callback(null);
+															} else {
+																var err = new Error('Database error');
+																err.status = 500;
+																callback(err);
+															}
+														 });
+				}
+			}
+	});
+};
+
 
 
 
