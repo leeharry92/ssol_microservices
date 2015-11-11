@@ -26,8 +26,15 @@ var Schema   = mongoose.Schema;
 
 	mongoose.model( 'courses_model', courses_model ); // model
 
+	var snapshot_courses_model = new Schema;
 
+	snapshot_courses_model.add({
+		datetime : String,
+	    uni :  String,
+	    course_id : String
+	});
 
+    mongoose.model( 'snapshot_courses_model', snapshot_courses_model );
 
 
 // READ IN ATTRIBUTES FROM CONFIG FILE TO UPDATE SCHEMA

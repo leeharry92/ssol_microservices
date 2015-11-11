@@ -142,6 +142,17 @@ module.exports = function(app){
                         //handle correct case
                     }
                 });
+
+            case "update course add student dne":
+            update_controller.DELETEresourceFromAll(model, res, params, collectionQuery, resource, resourceQuery, clientQuery,resmode, 
+				function(err) {
+                
+                    if (err != null) {
+                        //error handling
+                    } else {
+                        //handle correct case
+                    }
+                });
                 break;
                
         }

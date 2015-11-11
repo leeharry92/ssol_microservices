@@ -5,7 +5,7 @@ var requireDB = require('../schemas/courses_db.js');
 var courses_db = requireDB.getdb;
 var courses_model = requireDB.getModel;
 var model = courses_db.model('courses_model');
-
+var ssmodel = courses_db.model('snapshot_courses_model');
 
 
 var root = '/courses/';
@@ -101,6 +101,26 @@ POSTresource = exports.POSTresource = function (model, res, params, collectionQu
 
 					
 							res.send(true);
+
+							
+							// Insert log into log collection
+							var date = new Date();
+							var datetime = date.toISOString().toLowerCase();
+
+							var snapshot = ssmodel({
+							  datetime: datetime,
+							  uni: uni,
+							  course_id: course_id
+							});
+
+							// save the user
+							snapshot.save(function(err) {
+							  if (err) throw err;
+
+							  console.log('Snapshot inserted!');
+							});
+							// End of inserting log into log collection
+							
 						}
 
 					};
