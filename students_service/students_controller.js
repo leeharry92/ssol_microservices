@@ -241,7 +241,6 @@ exports.add_course = function(req, res, next) {
 		} else {
 			collection.findOneAsync({uni: uni_param})
 			.then(function(student) {
-				console.log(student);
 				if (student == null) {
 					var err = new Error('Specified student not found : ' + uni_param);
 					err.status = 404;
@@ -259,37 +258,25 @@ exports.add_course = function(req, res, next) {
 						err.status = 400;
 						next(err);
 					} else {
-						var datetime = new Date();
-						console.log(datetime.toISOString());
+						var date = new Date();
+						var datetime = date.toISOString().toLowerCase();
 						var ss_params = {
-							datetime : datetime.toISOString(),
+							datetime : datetime,
 							uni : uni_param,
 							courseList : courseList
 						}
 
-						console.log(ss_params);
 
 
 						ss_collection.insert(ss_params, function(error, result) {
 
-							ss_collection.findOne({uni: uni_param, datetime: datetime})
-								.then(function(student) {
-
-
-							console.log("In findOneAsync! " + student.uni);
-						});
-
-
-
-							console.log(error);
 							if (error !== null ) {
 								var err = new Error('Snapshot database error');
 								err.status = 500;
 								next(err);
 							} else {
-								var old_courses = courseList
+								var old_courses = courseList;
 								courseList.push(callNumber);
-								console.log(student);
 								collection.updateOne({_id: student._id},
 																		 {$set: {courses: courseList}}, 
 																		 function(error, result) {
@@ -302,7 +289,7 @@ exports.add_course = function(req, res, next) {
 																					'service_action' : 'update course add student',
 																					'course_id': course_id,
 																					'uni': uni_param,
-																					'datetime' : datetime.toISOString(),
+																					'datetime' : datetime,
 																					'courseList' : courseList
 																				}
 																				clientRIPub.publish(pub_channel, JSON.stringify(event_message));
@@ -561,7 +548,6 @@ exports.ref_rollback_course = function(app, message, callback) {
 	var obj = JSON.parse(message);
 	var uni_param = obj.uni.toLowerCase();
 	var datetime_param = obj.datetime;
-	console.log("In ref_rollback_course! " + message);
 
 	var db = app.locals.db;
 	var collection = db.collection('Students');
@@ -574,14 +560,12 @@ exports.ref_rollback_course = function(app, message, callback) {
 		console.log("In findOneAsync! " + message);
 
 		if (student == null) {
-			console.log("In Error! " + message);
 			var err = new Error('Specified datetime not found ' + datetime_param);
 			console.log(err);
 			err.status = 404;
 			callback(err);
 		} else {
 			var courseList = student.courseList;
-			console.log("In Else! " + student.uni);
 			if (courseList == null) {
 				var err = new Error('Specified datetime not found ' + datetime_param);
 				err.status = 400;
