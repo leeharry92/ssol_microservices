@@ -36,7 +36,7 @@ exports.findStudent = function(req, res) {
     //console.log('Inside deleteStudent');
     var uni = req.params.uni;
     var index = find_partition(uni, config.partitions);
-    var fullUrl = req.protocol + '://' + host + ':' + config.partitions[index].port + req.url;
+    var fullUrl = req.protocol + '://' + host + ':' + config.partitions[index].port + '/students' + req.url;
     console.log(fullUrl);
     request({
         url: fullUrl
@@ -44,9 +44,14 @@ exports.findStudent = function(req, res) {
         if (err) {
             return res.status(500).end('Error');
         }
-        res.writeHead(200, {
-            "Content-Type": "text/plain"
-        });
+        obj = JSON.parse(body);
+        if (obj.hasOwnProperty('error')) {
+            return res.status(obj.error.status).end(obj.message);
+        } else {
+          res.writeHead(200, {
+              "Content-Type": "text/plain"
+          });
+      }
         res.end(body);
     });
 };
@@ -54,7 +59,7 @@ exports.findStudentAll = function(req, res) {
     //console.log(config.partitions[1].port);
     async.map(config.partitions, function(item, callback) {
 
-        var fullUrl = req.protocol + '://' + host + ':' + item.port + req.url;
+        var fullUrl = req.protocol + '://' + host + ':' + item.port + '/students' + req.url;
         console.log(fullUrl);
         request(fullUrl, function(err, response, body) {
             // JSON body
@@ -78,8 +83,9 @@ exports.findStudentAll = function(req, res) {
 };
 exports.createStudent = function(req, res) {
     var uni = req.body.uni;
+    // console.log(uni);
     var index = find_partition(uni, config.partitions);
-    var fullUrl = req.protocol + '://' + host + ':' + config.partitions[index].port + req.url;
+    var fullUrl = req.protocol + '://' + host + ':' + config.partitions[index].port + '/students' + req.url;
     console.log(fullUrl);
     request.post({
         url: fullUrl,
@@ -89,19 +95,73 @@ exports.createStudent = function(req, res) {
         if (err) {
             return res.status(500).end('Error');
         }
-        res.writeHead(200, {
-            "Content-Type": "text/plain"
-        });
+        obj = JSON.parse(body);
+        if (obj.hasOwnProperty('error')) {
+            return res.status(obj.error.status).end(obj.message);
+        } else {
+          res.writeHead(200, {
+              "Content-Type": "text/plain"
+          });
+      }
         res.end(body);
     });
 };
-
-//#TODO:
+exports.addCourse = function(req, res) {
+    var uni = req.params.uni;
+    // console.log(uni);
+    var index = find_partition(uni, config.partitions);
+    var fullUrl = req.protocol + '://' + host + ':' + config.partitions[index].port + '/students' + req.url;
+    console.log(fullUrl);
+    request.post({
+        url: fullUrl,
+        form: req.body
+    }, function(err, response, body) {
+        //console.log(response);
+        if (err) {
+            return res.status(500).end('Error');
+        }
+        obj = JSON.parse(body);
+        if (obj.hasOwnProperty('error')) {
+            return res.status(obj.error.status).end(obj.message);
+        } else {
+          res.writeHead(200, {
+              "Content-Type": "text/plain"
+          });
+      }
+        res.end(body);
+    });
+};
+exports.removeCourse = function(req, res) {
+    var uni = req.params.uni;
+    // console.log(uni);
+    var index = find_partition(uni, config.partitions);
+    var fullUrl = req.protocol + '://' + host + ':' + config.partitions[index].port + '/students' + req.url;
+    console.log(fullUrl);
+    request.del({
+        url: fullUrl,
+        form: req.body
+    }, function(err, response, body) {
+        //console.log(response);
+        if (err) {
+            return res.status(500).end('Error');
+        }
+        obj = JSON.parse(body);
+        if (obj.hasOwnProperty('error')) {
+            return res.status(obj.error.status).end(obj.message);
+        } else {
+          res.writeHead(200, {
+              "Content-Type": "text/plain"
+          });
+      }
+        res.end(body);
+    });
+};
+//#TODO: Better error handling
 exports.createStudentAll = function(req, res) {
     //console.log(config.partitions[1].port);
     async.map(config.partitions, function(item, callback) {
 
-        var fullUrl = req.protocol + '://' + host + ':' + item.port + req.url;
+        var fullUrl = req.protocol + '://' + host + ':' + item.port + '/students' + req.url;
         console.log(fullUrl);
         request.post({
             url: fullUrl,
@@ -130,7 +190,7 @@ exports.deleteStudent = function(req, res) {
     //console.log('Inside deleteStudent');
     var uni = req.params.uni;
     var index = find_partition(uni, config.partitions);
-    var fullUrl = req.protocol + '://' + host + ':' + config.partitions[index].port + req.url;
+    var fullUrl = req.protocol + '://' + host + ':' + config.partitions[index].port + '/students' + req.url;
     console.log(fullUrl);
     request.del({
         url: fullUrl
@@ -138,9 +198,14 @@ exports.deleteStudent = function(req, res) {
         if (err) {
             return res.status(500).end('Error');
         }
-        res.writeHead(200, {
-            "Content-Type": "text/plain"
-        });
+        obj = JSON.parse(body);
+        if (obj.hasOwnProperty('error')) {
+            return res.status(obj.error.status).end(obj.message);
+        } else {
+          res.writeHead(200, {
+              "Content-Type": "text/plain"
+          });
+      }
         res.end(body);
     });
 };
@@ -148,7 +213,7 @@ exports.deleteAttribute = function(req, res) {
     //console.log('Inside deleteAttribute');
     async.map(config.partitions, function(item, callback) {
 
-        var fullUrl = req.protocol + '://' + host + ':' + item.port + req.url;
+        var fullUrl = req.protocol + '://' + host + ':' + item.port + '/students' + req.url;
         console.log(fullUrl);
         request.del({
             url: fullUrl,
@@ -177,7 +242,7 @@ exports.updateStudent = function(req, res) {
     //console.log('Inside updateStudent');
     var uni = req.params.uni;
     var index = find_partition(uni, config.partitions);
-    var fullUrl = req.protocol + '://' + host + ':' + config.partitions[index].port + req.url;
+    var fullUrl = req.protocol + '://' + host + ':' + config.partitions[index].port + '/students' + req.url;
     console.log(fullUrl);
     request.put({
         url: fullUrl,
@@ -186,12 +251,19 @@ exports.updateStudent = function(req, res) {
         if (err) {
             return res.status(500).end('Error');
         }
-        res.writeHead(200, {
-            "Content-Type": "text/plain"
-        });
+        obj = JSON.parse(body);
+        if (obj.hasOwnProperty('error')) {
+            return res.status(obj.error.status).end(obj.message);
+        } else {
+          res.writeHead(200, {
+              "Content-Type": "text/plain"
+          });
+      }
         res.end(body);
     });
 };
+
+//Courses Microservice handling
 exports.findCourse = function(req, res) {
     //console.log(req);
     async.parallel([
@@ -222,7 +294,7 @@ exports.findCourse = function(req, res) {
     );
 };
 exports.createCourse = function(req, res) {
-    //console.log('Inside createStudent');
+    console.log('Inside createCourse');
     var fullUrl = req.protocol + '://' + host + ':' + config.courses_port + '/courses' + req.url;
     console.log(fullUrl);
     request.post({

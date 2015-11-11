@@ -8,11 +8,14 @@ myRouter.get('/', router.findCourse);
 
 myRouter.post('/', router.createCourse);
 
-myRouter.put('/', router.updateCourse);
+myRouter.post('/schema', router.createCourse);
+myRouter.delete('/schema', router.deleteCourse);
 
+myRouter.put('/:course_num', router.updateCourse);
+myRouter.post('/:course_num/:resource', router.createCourse);
 
 myRouter.delete('/', router.deleteCourse);
-myRouter.delete('/:course_num', router.deleteCourse);
-myRouter.delete('/student', router.deleteCourse);
+myRouter.delete('/:course_num/:resource', router.deleteCourse);
+myRouter.delete('/:resource', router.deleteCourse);
 
 module.exports = myRouter;

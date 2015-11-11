@@ -18,7 +18,7 @@ myRouter.delete('/:uni', router.deleteStudent);
 
 
 myRouter.put('/:uni', router.updateStudent);
-myRouter.put('/:uni/add-course', router.updateStudent);
-myRouter.put('/:uni/remove-course', router.updateStudent);
+myRouter.post('/:uni/courses', router.addCourse);
+myRouter.delete('/:uni/courses', router.removeCourse);
 
 module.exports = myRouter;
