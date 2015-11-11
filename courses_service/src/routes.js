@@ -144,7 +144,7 @@ module.exports = function(app){
                 });
 
             case "update course add student dne":
-            update_controller.DELETEresourceFromAll(model, res, params, collectionQuery, resource, resourceQuery, clientQuery,resmode, 
+            //call funtion to rollback, need to delete student from course
 				function(err) {
                 
                     if (err != null) {
