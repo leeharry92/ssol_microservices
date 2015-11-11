@@ -571,7 +571,6 @@ exports.ref_rollback_course = function(app, message, callback) {
 				err.status = 400;
 				callback(err);
 			} else {
-				console.log("courses: " + courseList);
 				collection.updateOne({uni: uni_param},
 														 {$set: {courses: courseList}}, 
 														 function(error, result) {
