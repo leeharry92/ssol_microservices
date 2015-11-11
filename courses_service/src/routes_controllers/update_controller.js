@@ -85,7 +85,7 @@ POSTresource = exports.POSTresource = function (model, res, params, collectionQu
 						console.log('-> '+JSON.stringify(clientQuery)+' was POSTED to '+JSON.stringify(collectionQuery));
 
 							  var uni = clientQuery.uni;
-							  var course_num = parseInt(params.course_num);
+							  var course_id = parseInt(params.course_id);
 
 
 						if (resmode){
@@ -93,7 +93,7 @@ POSTresource = exports.POSTresource = function (model, res, params, collectionQu
 								var ri_message = {
 									'sender' : 'courses_micro_service',
 									'service_action' : 'update student add course',
-									'course_num': course_num,
+									'course_id': course_id,
 									'uni': uni };
 								
 								var message = JSON.stringify(ri_message).toLowerCase();
@@ -116,10 +116,9 @@ POSTresource = exports.POSTresource = function (model, res, params, collectionQu
 				var ri_message = {
 					'sender' : 'courses_micro_service',
 					'service_action' : "update student add course dne",
-					'course_num': params.uni,
 					'uni': params.uni,
 					'datetime': params.datetime,
-					'course_num': params.course_num
+					'course_id': params.course_id
 				};
 				var message = JSON.stringify(ri_message).toLowerCase();
 				clientRI.publish(pub_channel, message);
@@ -172,7 +171,7 @@ DELETEresource = exports.DELETEresource = function (model, res, params, collecti
 							var ri_message = {
 								'sender' : 'courses_micro_service',
 								'service_action' : 'update student delete course',
-								'course_num': params.course_num,
+								'course_id': params.course_id,
 								'uni': clientQuery.uni };
 		
 							var message = JSON.stringify(ri_message).toLowerCase();
@@ -225,7 +224,6 @@ DELETEresourceFromAll = exports.DELETEresourceFromAll = function(model, res, par
 		  function( coursedata ) {
 
 			coursedata.collection.aggregate( [
-				//{"$match"	: {course_num : parseInt(coursedata.course_num) } }
 				{"$unwind"	: "$"+resource }
 				,{"$match"	: resourceQuery }
 				//,{"$match"	: {"students.firstname": firstname} }
@@ -245,10 +243,10 @@ DELETEresourceFromAll = exports.DELETEresourceFromAll = function(model, res, par
 
 						}, function (e, s){
 							if (s){
-								console.log('-> '+JSON.stringify(resourceQuery)+' DELETED from '+JSON.stringify(coursedata.course_num));
+								console.log('-> '+JSON.stringify(resourceQuery)+' DELETED from '+JSON.stringify(coursedata.course_id));
 								//res.send(true);
 							} else {
-								console.log('-> '+JSON.stringify(resourceQuery)+' NOT DELETED from '+JSON.stringify(coursedata.course_num));
+								console.log('-> '+JSON.stringify(resourceQuery)+' NOT DELETED from '+JSON.stringify(coursedata.course_id));
 								//res.send(false);
 							}
 						});
@@ -327,7 +325,7 @@ exports.removeStudentFromCourse = function( ) {
   return function ( req, res, next ){
 
   // exported from:
-  // 	app.post(  root+'/:course_num/:resource' )
+  // 	app.post(  root+'/:course_id/:resource' )
 
   // Read in the params and client query 	
 	var params = req.params;
@@ -377,7 +375,7 @@ exports.addStudentToCourse = function( ) {
   return function ( req, res, next ){
 
   // exported from:
-  // 	app.post(  root+'/:course_num/:resource' )
+  // 	app.post(  root+'/:course_id/:resource' )
 
   // Read in the params and client query 	
 	var params = req.params;
@@ -454,7 +452,7 @@ exports.updateCourse = function( ) {
 
 
   // exported from:
-  // 	app.post(  root+'/:course_num/:resource' )
+  // 	app.post(  root+'/:course_id/:resource' )
 
   // Read in the params and client query 	
 	var params = req.params;
@@ -518,7 +516,7 @@ exports.removeCourse = function () {
 							var ri_message = {
 								'sender' : 'courses_micro_service',
 								'service_action' : 'delete course',
-								'course_num': collectionQuery.course_num
+								'course_id': collectionQuery.course_id
 							};
 		
 							var message = JSON.stringify(ri_message).toLowerCase();

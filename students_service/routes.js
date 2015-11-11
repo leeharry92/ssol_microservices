@@ -88,8 +88,7 @@ module.exports = function(app) {
                 break;
 
             case "update student add course dne":
-                var uni_param = obj.uni.toLowerCase();
-                students.ref_rollback_course(uni_param, app, message, function(err) {
+                students.ref_rollback_course(app, message, function(err) {
                     if (err != null) {
                         //error handling
                     } else {

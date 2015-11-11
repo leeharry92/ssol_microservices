@@ -11,7 +11,6 @@
   "dependencies": {
     "bluebird": "^2.10.2",
     "body-parser": "~1.13.2",
-    "bunyan": "^1.5.0",
     "express": "^4.13.3",
     "glob": "~4.0.5",
     "lodash": "~2.4.1",

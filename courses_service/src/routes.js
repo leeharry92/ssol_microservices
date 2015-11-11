@@ -41,12 +41,12 @@ module.exports = function(app){
 	app.delete( root+'/schema',    					schema_controller.deleteKEY() );
 
 	// update
-	app.put(  root+'/:course_num',					update_controller.updateCourse() );
-	app.post(  root+'/:course_num/:resource',		update_controller.addStudentToCourse() );
+	app.put(  root+'/:course_id',					update_controller.updateCourse() );
+	app.post(  root+'/:course_id/:resource',		update_controller.addStudentToCourse() );
 
 	// delete 
 	app.delete(  root, 								update_controller.removeCourse() ); 
-	app.delete( root + '/:course_num/:resource' ,	update_controller.removeStudentFromCourse() );
+	app.delete( root + '/:course_id/:resource' ,	update_controller.removeStudentFromCourse() );
 	app.delete( root + '/:resource',				update_controller.removeStudent() );
 
 
@@ -58,7 +58,6 @@ module.exports = function(app){
         
         //Switch statement for three RI cases
         var obj = JSON.parse(message);
-        var call_number = 1234;
         var uni = obj.uni.toLowerCase();
 
 	/* Message takes the following form
@@ -77,18 +76,15 @@ module.exports = function(app){
 				//resourceQuery, 
 				//clientQuery;
 
-			var params = {};
-			params['course_num'] = obj.course_name;
+			var params = obj;
 			params['resource'] = resource;
-			params['service_action'] = obj.service_action;
-			params['datetime'] = obj.datetime;
-			params['sender'] = obj.sender;
 			
 		  // BUILD THE QUERY FOR THE COLLECTION
 		  //	Note: the collection identifier (/:collection_id/) == param_keys[0]
 			var collectionQuery = {};
 			var collection_keys = Object.keys(params);
-			collectionQuery[collection_keys[0]] = parseInt(params[collection_keys[0]]);
+			collectionQuery['course_id'] = parseInt(obj.course_id);
+
 			//   Note: parseInt() called for the collection query id
 
 			var clientQuery = {};

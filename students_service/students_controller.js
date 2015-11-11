@@ -225,15 +225,15 @@ exports.add_course = function(req, res, next) {
 	var db = req.app.locals.db;
 	var collection = db.collection('Students');
 	var ss_collection = db.collection('Students_courselist_snapshot');
-	var course = req.body.course_id;
+	var course_id = req.body.course_id;
 	var uni_param = req.params.uni;
-
-	if (course === undefined) {
-		var err = new Error('Must specify course to add ' + uni_param );
+ 
+	if (course_id === undefined) {
+		var err = new Error('Must specify course_id to add ' + uni_param );
 		err.status = 400;
 		next(err);
 	} else {
-		var callNumber = parseInt(course);
+		var callNumber = parseInt(course_id);
 		if (isNaN(callNumber)) {
 			var err = new Error('Invalid call number');
 			err.status = 400;
@@ -254,22 +254,22 @@ exports.add_course = function(req, res, next) {
 					}
 
 					if (_.indexOf(courseList, callNumber) != -1) {
-						var err = new Error('Student '+ uni_param +' is already registered for course '+ callNumber);
+						var err = new Error('Student '+ uni_param +' is already registered for course_id '+ callNumber);
 						err.status = 400;
 						next(err);
 					} else {
 						var datetime = new Date();
 						console.log(datetime.toISOString());
 						var ss_params = {
+							datetime : datetime.toISOString(),
 							uni : uni_param,
-							courseList : courseList,
-							datetime : datetime.toISOString()
+							courseList : courseList
 						}
 
-						console.log(JSON.stringify(ss_params));
+						console.log(ss_params);
 
 
-						ss_collection.insertOne(ss_params, function(error, result) {
+						ss_collection.insert(ss_params, function(error, result) {
 							console.log(error);
 							if (error !== null ) {
 								var err = new Error('Snapshot database error');
@@ -288,7 +288,7 @@ exports.add_course = function(req, res, next) {
 																				var event_message = {
 																					'sender' : 'students_micro_service',
 																					'service_action' : 'update course add student',
-																					'course_name': course,
+																					'course_id': course_id,
 																					'uni': uni_param,
 																					'datetime' : datetime.toISOString()
 																				}
@@ -311,15 +311,15 @@ exports.add_course = function(req, res, next) {
 exports.remove_course = function(req, res, next) {
 	var db = req.app.locals.db;
 	var collection = db.collection('Students');
-	var course = req.body.course_id;
+	var course_id = req.body.course_id;
 	var uni_param = req.params.uni;
 
-	if (course === undefined) {
-		var err = new Error('Must specify course to remove');
+	if (course_id === undefined) {
+		var err = new Error('Must specify course_id to remove');
 		err.status = 400;
 		next(err);
 	} else {
-		var callNumber = parseInt(course);
+		var callNumber = parseInt(course_id);
 		if (isNaN(callNumber)) {
 			var err = new Error('Invalid call number');
 			err.status = 400;
@@ -336,7 +336,7 @@ exports.remove_course = function(req, res, next) {
 					var index;
 					if (courseList == null || 
 							(index = _.indexOf(courseList, callNumber)) == -1) {
-						var err = new Error('Student is not registered for course specified');
+						var err = new Error('Student is not registered for course_id specified');
 						err.status = 400;
 						next(err);
 					} else {
@@ -351,7 +351,7 @@ exports.remove_course = function(req, res, next) {
 																		var event_message = {
 																			'sender' : 'students_micro_service',
 																			'service_action' : 'update course delete student',
-																			'course_name': course,
+																			'course_id': course_id,
 																			'uni': uni_param}
 																		clientRIPub.publish(pub_channel, JSON.stringify(event_message));
 
@@ -543,34 +543,32 @@ exports.ref_remove_course_on_all_students = function(callNumber, app, callback) 
 };
 
 
-exports.ref_rollback_course = function(uni_param, app, message, callback) {
+exports.ref_rollback_course = function(app, message, callback) {
 
 	var obj = JSON.parse(message);
-	var course_num = obj.course_num;
+	var uni_param = obj.uni.toLowerCase();
+	var datetime_param = obj.datetime;
 	console.log("In ref_rollback_course! " + message);
-
 
 	var db = app.locals.db;
 	var collection = db.collection('Students');
 	var ss_collection = db.collection('Students_courselist_snapshot');
 
-	collection.findOneAsync({uni: uni_param})
+	ss_collection.findOneAsync({uni: uni_param})
 	.then(function(student) {
+		console.log(student);
 		if (student == null) {
-			var err = new Error('Specified student not found');
+			var err = new Error('Specified datetime not found ' + datetime_param);
 			err.status = 404;
 			callback(err);
 		} else {
-			var courseList = student.courses;
-			var index;
-			if (courseList == null || 
-					(index = _.indexOf(courseList, callNumber)) == -1) {
-				var err = new Error('Student is not registered for course specified');
+			var courseList = student.courseList;
+			if (courseList == null) {
+				var err = new Error('Specified datetime not found ' + datetime_param);
 				err.status = 400;
 				callback(err);
 			} else {
-				var removed = courseList.splice(index, 1);
-				collection.updateOne({_id: student._id},
+				collection.updateOne({uni: uni_param},
 														 {$set: {courses: courseList}}, 
 														 function(error, result) {
 														 	if (error === null) {

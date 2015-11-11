@@ -62,12 +62,12 @@ POST http://<host>:<port>/courses
 ```
 
 URL Parameter Keys:
-* course_num { type: Number, min: 0000, max: 9999 } (required parameter)
+* course_id { type: Number, min: 0000, max: 9999 } (required parameter)
 * name { type: String } (required parameter)
 
 ```JSON
 {
-	"course_num" : <course_call_number>, 
+	"course_id" : <course_call_number>, 
 	"name"		 : <course_name>
 }
 ```
@@ -81,12 +81,12 @@ URL Parameter Keys:
 ```
 
 URL Parameter Keys:
-* course_num { type: Number, min: 0000, max: 9999 }
+* course_id { type: Number, min: 0000, max: 9999 }
 * name { type: String }
 
 ```JSON
 {
-	"course_num" :	<course_call_number>, 
+	"course_id" :	<course_call_number>, 
 	"name"		 :	<course_name>
 }
 ```
@@ -115,12 +115,12 @@ DELETE http://<host>:<port>/courses
 ```
 
 URL Parameter Key:
-* course_num { type: Number, min: 0000, max: 9999 }
+* course_id { type: Number, min: 0000, max: 9999 }
 
 
 ```JSON
 {
-	"course_num"	:	<course_call_number> 
+	"course_id"	:	<course_call_number> 
 }
 ```
 
@@ -231,13 +231,13 @@ URL Parameter Key:
 POST http://localhost:4000/courses
 
 {
-	course_num	:	9999,
+	course_id	:	9999,
 	name		:	"Microservices and APIs"
 }
 
 ```
 
-* URL: localhost:4000/courses?course_num=9999&name=Microservices and APIs
+* URL: localhost:4000/courses?course_id=9999&name=Microservices and APIs
 
 <br /> 
 
@@ -257,7 +257,7 @@ POST http://localhost:3000/courses/9999/students
 [
   {
     "_id": "5640cfbeb541a8043c41514f",
-    "course_num": 9999,
+    "course_id": 9999,
     "name": "Microservices and APIs",
     "updated_at": "2015-11-09T16:54:22.802Z",
     "instructor": null,
@@ -297,7 +297,7 @@ PUT http://localhost:3000/courses/9999
 [
   {
     "_id": "5640cfbeb541a8043c41514f",
-    "course_num": 9999,
+    "course_id": 9999,
     "name": "Microservices and APIs",
     "updated_at": "2015-11-09T16:54:22.802Z",
     "instructor": "Don Ferguson",
@@ -331,7 +331,7 @@ POST http://localhost:3000/courses/schema
 <br /> 
 
 ```
-PUT http://localhost:3000/courses?course_num=9999
+PUT http://localhost:3000/courses?course_id=9999
 ```
 
 ```JSON
@@ -348,7 +348,7 @@ PUT http://localhost:3000/courses?course_num=9999
 [
   {
     "_id": "5640d2748f0fc7243cbd74b3",
-    "course_num": 9999,
+    "course_id": 9999,
     "name": "Microservices and APIs",
     "updated_at": "2015-11-09T17:05:56.722Z",
     "instructor": "Don Ferguson",
@@ -396,7 +396,7 @@ DELETE http://localhost:3000/courses/9999/students
 [
   {
     "_id": "5640d3348f0fc7243cbd74b4",
-    "course_num": 9999,
+    "course_id": 9999,
     "name": "Microservices and APIs",
     "updated_at": "2015-11-09T17:09:08.285Z",
     "room": "428 Pupin",
