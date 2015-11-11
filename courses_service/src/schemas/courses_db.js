@@ -74,6 +74,7 @@ var Schema   = mongoose.Schema;
 
 
 	exports.getModel = courses_model;
+	exports.getModel2 = snapshot_courses_model;
 	exports.getdb = courses_db;
 //};
 
