@@ -17,13 +17,6 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
 
-// for (var i = 0; i <5; i++) {
-// 	if (i == 3) break;
-// };
-// console.log(i);
-// console.log(find_partition('ll2131', config.partitions));
-
-
 app.use('/students', students_routes);
 app.use('/courses', courses_routes);
 
