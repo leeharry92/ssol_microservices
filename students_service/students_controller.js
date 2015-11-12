@@ -242,6 +242,21 @@ exports.add_course = function(req, res, next) {
 			collection.findOneAsync({uni: uni_param})
 			.then(function(student) {
 				if (student == null) {
+
+					// Publish to RI channel for rollback on courses service, need to delete student from course
+					console.log("Student not found, sending rollback message to RI channel...")
+					var ri_message = {
+						'sender' : 'students_micro_service',
+						'service_action' : "update course add student dne",
+						'uni': uni_param,
+						'datetime': req.body.datetime,
+						'course_id': course_id
+					};
+
+					var message = JSON.stringify(ri_message).toLowerCase();
+					clientRI.publish(pub_channel, message);
+					console.log("Student not found, sent rollback message to RI channel.")
+
 					var err = new Error('Specified student not found : ' + uni_param);
 					err.status = 404;
 					next(err);
