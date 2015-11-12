@@ -83,7 +83,7 @@ buildQuery = function(query, params, iterations){
 }
 
 // subroutine to post a resource
-POSTresource = exports.POSTresource = function (ssmodel, model, res, params, collectionQuery, resource, resourceQuery, clientQuery, resmode){
+POSTresource = exports.POSTresource = function (SS_MODEL, model, res, params, collectionQuery, resource, resourceQuery, clientQuery, resmode){
 
   // First use the collection Query to query the db
 	model.findOne(collectionQuery, function(err, course_found){
@@ -139,27 +139,11 @@ POSTresource = exports.POSTresource = function (ssmodel, model, res, params, col
 
 							new SS_MODEL( snapshot ).save( function ( err, model, next ){
 								if( err ) return next( err );
+								console.log('-> Snapshot inserted!');
 								res.send(true);
 							}); // ends save
 
-/*
 
-							var snapshot = ssmodel({
-							  datetime: datetime,
-							  uni: uni,
-							  course_id: course_id
-							});
-
-							// save the user
-							snapshot.save(function(err) {
-							  if (err) throw err;
-
-							  console.log('Snapshot inserted!');
-
-							  
-							});
-							// End of inserting log into log collection
-*/
 							
 						}
 
@@ -199,7 +183,7 @@ POSTresource = exports.POSTresource = function (ssmodel, model, res, params, col
 
 
 // subroutine to DELETE a resource
-DELETEresource = exports.DELETEresource = function (ssmodel, model, res, params, collectionQuery, resource, resourceQuery, clientQuery,resmode){
+DELETEresource = exports.DELETEresource = function (SS_MODEL, model, res, params, collectionQuery, resource, resourceQuery, clientQuery,resmode){
 
   // First use the collection Query to query the db
 	model.findOne(collectionQuery, function(err, course_found){
@@ -274,7 +258,7 @@ DELETEresource = exports.DELETEresource = function (ssmodel, model, res, params,
 }
 
 
-DELETEresourceFromAll = exports.DELETEresourceFromAll = function(ssmodel, model, res, params, collectionQuery, resource, resourceQuery, clientQuery,resmode){
+DELETEresourceFromAll = exports.DELETEresourceFromAll = function(SS_MODEL, model, res, params, collectionQuery, resource, resourceQuery, clientQuery,resmode){
 	// First find the course in the db model
 	  model.find({}, function(err, course_found){
 
@@ -369,7 +353,7 @@ exports.removeStudent = function( ) {
 */
 
 	var resmode = true; // enables sending response to client
-	DELETEresourceFromAll(ssmodel, model, res, params, collectionQuery, resource, resourceQuery, clientQuery,resmode);
+	DELETEresourceFromAll(SS_MODEL, model, res, params, collectionQuery, resource, resourceQuery, clientQuery,resmode);
 
   }; // ends return
 
@@ -421,7 +405,7 @@ exports.removeStudentFromCourse = function( ) {
   // business logic
 	var resmode = true; // enables sending response to client
 	// update db - remove the student from the course
-		DELETEresource(ssmodel, model, res, params, collectionQuery, resource, resourceQuery, clientQuery, resmode);
+		DELETEresource(SS_MODEL, model, res, params, collectionQuery, resource, resourceQuery, clientQuery, resmode);
 
   } // ends return
 
@@ -477,7 +461,7 @@ exports.addStudentToCourse = function( ) {
 
 	var resmode = true; // enables sending response to client
 	// update db - post the student to the course
-		POSTresource(ssmodel, model, res, params, collectionQuery, resource, resourceQuery, clientQuery, resmode);
+		POSTresource(SS_MODEL, model, res, params, collectionQuery, resource, resourceQuery, clientQuery, resmode);
 
 	} // ends else
 

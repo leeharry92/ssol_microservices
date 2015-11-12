@@ -115,7 +115,7 @@ module.exports = function(app){
 			
         switch (obj.service_action) {
             case "update course add student":
-            update_controller.POSTresource(ssmodel, model, res, params, collectionQuery, resource, resourceQuery, clientQuery, resmode, 
+            update_controller.POSTresource(SS_MODEL, model, res, params, collectionQuery, resource, resourceQuery, clientQuery, resmode, 
 				function (err) {	
                     if (err != null) {
                         //error handling
@@ -126,7 +126,7 @@ module.exports = function(app){
                 break;
 
             case "update course delete student":
-            update_controller.DELETEresource(ssmodel, model, res, params, collectionQuery, resource, resourceQuery, clientQuery, resmode, 
+            update_controller.DELETEresource(SS_MODEL, model, res, params, collectionQuery, resource, resourceQuery, clientQuery, resmode, 
 				function(err) {	
                     if (err != null) {
                         //error handling
@@ -137,7 +137,7 @@ module.exports = function(app){
                 break;
 
             case "delete student":
-            update_controller.DELETEresourceFromAll(ssmodel, model, res, params, collectionQuery, resource, resourceQuery, clientQuery,resmode, 
+            update_controller.DELETEresourceFromAll(SS_MODEL, model, res, params, collectionQuery, resource, resourceQuery, clientQuery,resmode, 
 				function(err) {
                 
                     if (err != null) {
