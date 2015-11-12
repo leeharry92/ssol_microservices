@@ -7,6 +7,9 @@ var courses_model = requireDB.getModel;
  
 var model = courses_db.model('courses_model');
 
+var ssmodel = requireDB.getModel2;
+var SS_MODEL = courses_db.model('snapshot_courses_model');
+
 
 // require redis
 var redis = require("redis")
@@ -35,6 +38,7 @@ module.exports = function(app){
 
 	// read
 	app.get(  root,		            				update_controller.returnCourseInfo() );
+	app.get(  '/snapshot',							update_controller.returnSSinfo() );
 
 	// schema changes
 	app.post( root+'/schema',    					schema_controller.addKEY() );
@@ -111,7 +115,7 @@ module.exports = function(app){
 			
         switch (obj.service_action) {
             case "update course add student":
-            update_controller.POSTresource(model, res, params, collectionQuery, resource, resourceQuery, clientQuery, resmode, 
+            update_controller.POSTresource(ssmodel, model, res, params, collectionQuery, resource, resourceQuery, clientQuery, resmode, 
 				function (err) {	
                     if (err != null) {
                         //error handling
@@ -122,7 +126,7 @@ module.exports = function(app){
                 break;
 
             case "update course delete student":
-            update_controller.DELETEresource(model, res, params, collectionQuery, resource, resourceQuery, clientQuery, resmode, 
+            update_controller.DELETEresource(ssmodel, model, res, params, collectionQuery, resource, resourceQuery, clientQuery, resmode, 
 				function(err) {	
                     if (err != null) {
                         //error handling
@@ -133,7 +137,7 @@ module.exports = function(app){
                 break;
 
             case "delete student":
-            update_controller.DELETEresourceFromAll(model, res, params, collectionQuery, resource, resourceQuery, clientQuery,resmode, 
+            update_controller.DELETEresourceFromAll(ssmodel, model, res, params, collectionQuery, resource, resourceQuery, clientQuery,resmode, 
 				function(err) {
                 
                     if (err != null) {
@@ -145,7 +149,7 @@ module.exports = function(app){
 
             case "update course add student dne":
             //call funtion to rollback, need to delete student from course
-            update_controller.rollbackCourse(model, res, params, collectionQuery, resource, resourceQuery, clientQuery,resmode, 
+            update_controller.rollbackCourse(ssmodel, model, res, params, collectionQuery, resource, resourceQuery, clientQuery,resmode, 
 				function(err) {
                 
                     if (err != null) {

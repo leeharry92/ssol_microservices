@@ -3,13 +3,16 @@ var utils    = require( '../../utils' );
 // require the database, which has already been connected
 var requireDB = require('../schemas/courses_db.js');
 var courses_db = requireDB.getdb;
+
 var courses_model = requireDB.getModel;
 var model = courses_db.model('courses_model');
-var ssmodel = courses_db.model('snapshot_courses_model');
+
+var ssmodel = requireDB.getModel2;
+var SS_MODEL = courses_db.model('snapshot_courses_model');
+
 
 
 var root = '/courses/';
-
 
 
 // Redis RI
@@ -44,6 +47,30 @@ exports.returnCourseInfo = function () {
 
 }; // ends exports.
 
+// GET ss_model info based on the client's query
+exports.returnSSinfo = function () {
+	// need this return syntax because we are passing io from app.js
+	return function(req, res, next ){
+
+
+  // Read in the client query 	
+	var clientQuery = req.query;
+
+		SS_MODEL.find( clientQuery, function ( err, course_found ){
+			if ( err || (course_found.length == 0) ) {
+				console.log("-> Query not found : "+JSON.stringify(clientQuery));
+				res.send([]);
+			} else { 
+				console.log("-> Query found     : "+JSON.stringify(clientQuery));
+				res.json(course_found);
+			}
+
+		}); //ends findOne()
+
+	}; // ends return
+
+}; // ends exports.
+
 
 
 
@@ -56,7 +83,7 @@ buildQuery = function(query, params, iterations){
 }
 
 // subroutine to post a resource
-POSTresource = exports.POSTresource = function (model, res, params, collectionQuery, resource, resourceQuery, clientQuery, resmode){
+POSTresource = exports.POSTresource = function (ssmodel, model, res, params, collectionQuery, resource, resourceQuery, clientQuery, resmode){
 
   // First use the collection Query to query the db
 	model.findOne(collectionQuery, function(err, course_found){
@@ -99,13 +126,26 @@ POSTresource = exports.POSTresource = function (model, res, params, collectionQu
 								var message = JSON.stringify(ri_message).toLowerCase();
 								clientRI.publish(pub_channel, message);
 
-					
-							res.send(true);
 
 							
 							// Insert log into log collection
 							var date = new Date();
 							var datetime = date.toISOString().toLowerCase();
+
+
+							var snapshot = {};
+							snapshot['datetime'] = datetime;  
+							snapshot['uni'] = uni;
+							snapshot['course_id'] = course_id;
+
+
+
+						new SS_MODEL( snapshot ).save( function ( err, model, next ){
+							if( err ) return next( err );
+							res.send(true);
+						}); // ends save
+
+/*
 
 							var snapshot = ssmodel({
 							  datetime: datetime,
@@ -118,8 +158,11 @@ POSTresource = exports.POSTresource = function (model, res, params, collectionQu
 							  if (err) throw err;
 
 							  console.log('Snapshot inserted!');
+
+							  
 							});
 							// End of inserting log into log collection
+*/
 							
 						}
 
@@ -159,7 +202,7 @@ POSTresource = exports.POSTresource = function (model, res, params, collectionQu
 
 
 // subroutine to DELETE a resource
-DELETEresource = exports.DELETEresource = function (model, res, params, collectionQuery, resource, resourceQuery, clientQuery,resmode){
+DELETEresource = exports.DELETEresource = function (ssmodel, model, res, params, collectionQuery, resource, resourceQuery, clientQuery,resmode){
 
   // First use the collection Query to query the db
 	model.findOne(collectionQuery, function(err, course_found){
@@ -234,7 +277,7 @@ DELETEresource = exports.DELETEresource = function (model, res, params, collecti
 }
 
 
-DELETEresourceFromAll = exports.DELETEresourceFromAll = function(model, res, params, collectionQuery, resource, resourceQuery, clientQuery,resmode){
+DELETEresourceFromAll = exports.DELETEresourceFromAll = function(ssmodel, model, res, params, collectionQuery, resource, resourceQuery, clientQuery,resmode){
 	// First find the course in the db model
 	  model.find({}, function(err, course_found){
 
@@ -329,7 +372,7 @@ exports.removeStudent = function( ) {
 */
 
 	var resmode = true; // enables sending response to client
-	DELETEresourceFromAll(model, res, params, collectionQuery, resource, resourceQuery, clientQuery,resmode);
+	DELETEresourceFromAll(ssmodel, model, res, params, collectionQuery, resource, resourceQuery, clientQuery,resmode);
 
   }; // ends return
 
@@ -381,7 +424,7 @@ exports.removeStudentFromCourse = function( ) {
   // business logic
 	var resmode = true; // enables sending response to client
 	// update db - remove the student from the course
-		DELETEresource(model, res, params, collectionQuery, resource, resourceQuery, clientQuery, resmode);
+		DELETEresource(ssmodel, model, res, params, collectionQuery, resource, resourceQuery, clientQuery, resmode);
 
   } // ends return
 
@@ -437,7 +480,7 @@ exports.addStudentToCourse = function( ) {
 
 	var resmode = true; // enables sending response to client
 	// update db - post the student to the course
-		POSTresource(model, res, params, collectionQuery, resource, resourceQuery, clientQuery, resmode);
+		POSTresource(ssmodel, model, res, params, collectionQuery, resource, resourceQuery, clientQuery, resmode);
 
 	} // ends else
 

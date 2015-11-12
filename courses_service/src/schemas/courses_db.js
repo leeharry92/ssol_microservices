@@ -26,6 +26,10 @@ var Schema   = mongoose.Schema;
 
 	mongoose.model( 'courses_model', courses_model ); // model
 
+
+
+
+
 	var snapshot_courses_model = new Schema;
 
 	snapshot_courses_model.add({
@@ -35,6 +39,10 @@ var Schema   = mongoose.Schema;
 	});
 
     mongoose.model( 'snapshot_courses_model', snapshot_courses_model );
+
+
+
+
 
 
 // READ IN ATTRIBUTES FROM CONFIG FILE TO UPDATE SCHEMA
@@ -60,8 +68,6 @@ var Schema   = mongoose.Schema;
 
 
 
-
-
 // Set the connection to the db
 	var courses_db = mongoose.createConnection(mongoServer);
 	courses_db.on('error', function(err){
@@ -74,8 +80,12 @@ var Schema   = mongoose.Schema;
 
 
 	exports.getModel = courses_model;
-	exports.getModel2 = snapshot_courses_model;
 	exports.getdb = courses_db;
+
+	exports.getModel2 = snapshot_courses_model;
+
+
+
 //};
 
 
