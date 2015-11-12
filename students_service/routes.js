@@ -48,11 +48,15 @@ module.exports = function(app) {
             case "update student add course":
                 var uni = obj.uni.toLowerCase();
                 var firstChar = uni.charAt(0);
+
+                var datetime = obj.datetime;
+                
+                console.log("troublshoot, in first switch case.")
                 if (firstChar < config.starting_uni || firstChar > config.ending_uni) {
                     console.log("UNI received from MQ is out of bounds: Char " + firstChar + " bounds (" + config.starting_uni + "," + config.ending_uni + ")");
                     return;
                 }
-                students.ref_add_course(call_number, uni, app, function(err) {
+                students.ref_add_course(call_number, uni, datetime, app, function(err) {
                     if (err != null) {
                         console.log(err);
                     } else {
@@ -96,7 +100,7 @@ module.exports = function(app) {
                     }
                 });
                 break;
-                
+
             default :
                 console.log("Service action not found " + obj.service_action);
                 break;

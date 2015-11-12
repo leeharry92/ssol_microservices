@@ -18,7 +18,7 @@ var required_keys = ['first_name', 'last_name', 'uni'];
 var no_delete_keys = ['first_name', 'last_name', 'uni', 'courses'];
 var host = 'localhost';
 
-clientRIPub = redis.createClient(); // Publishes to ri channel
+//clientRIPub = redis.createClient(); // Publishes to ri channel
 
 exports.find = function(req, res, next) {
 	const db = req.app.locals.db;
@@ -466,8 +466,8 @@ exports.update = function(req, res, next) {
 	});
 };
 
-exports.ref_add_course = function(callNumber, uni_param, app, callback) {
-	console.log("In ref_add_course");
+exports.ref_add_course = function(callNumber, uni_param, datetime, app, callback) {
+	console.log("troubleshoot, in ref_add_course function");
 
 	var db = app.locals.db;
 	var collection = db.collection('Students');
@@ -477,18 +477,24 @@ exports.ref_add_course = function(callNumber, uni_param, app, callback) {
 		if (student == null) {
 
 			// Publish to RI channel for rollback on courses service, need to delete student from course
-			console.log("Student not found, sending rollback message to RI channel...")	
+			console.log("Student not found, sending rollback message to RI channel...");
+			console.log("datetime: " + datetime);
+			console.log("uni: " + uni_param);
+
 			var ri_message = {
 				'sender' : 'students_micro_service',
 				'service_action' : "update course add student dne",
 				'uni': uni_param,
-				'datetime': req.body.datetime,
-				'course_id': course_id
+				'datetime': datetime,
+				'course_id': datetime
 			};
-
+			console.log("troubleshoot, created ri_message");
 			var message = JSON.stringify(ri_message).toLowerCase();
-			clientRI.publish(pub_channel, message);
-			console.log("Student not found, sent rollback message to RI channel.")
+			console.log("troubleshoot 1");
+			clientRIpub.publish(pub_channel, message);
+			//clientRIPub.publish(pub_channel, JSON.stringify(event_message));
+			console.log("troubleshoot 2");
+			console.log("Student not found, sent rollback message to RI channel: " + message);
 
 			var err = new Error('Specified student not found |' + uni_param);
 			err.status = 404;
