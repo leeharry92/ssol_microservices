@@ -6,6 +6,7 @@ var config = require('./config/config');
 
 
 clientRISub = redis.createClient(); // Subscribes to ri channel
+clientRIPub = redis.createClient(); // Publishes to ri channel
 
 var subChannel = "students_micro_service";
 

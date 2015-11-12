@@ -491,7 +491,8 @@ exports.ref_add_course = function(callNumber, uni_param, datetime, app, callback
 			console.log("troubleshoot, created ri_message");
 			var message = JSON.stringify(ri_message).toLowerCase();
 			console.log("troubleshoot 1");
-			clientRIpub.publish(pub_channel, message);
+			console.log(clientRIPub);
+			clientRIPub.publish(pub_channel, message);
 			//clientRIPub.publish(pub_channel, JSON.stringify(event_message));
 			console.log("troubleshoot 2");
 			console.log("Student not found, sent rollback message to RI channel: " + message);
