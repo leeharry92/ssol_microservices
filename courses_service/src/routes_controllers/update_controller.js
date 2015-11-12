@@ -44,12 +44,7 @@ rollbackCourse = exports.rollbackCourse = function(model, obj, SS_MODEL){
 	resmode = false;
 
 
-	DELETEresource(SS_MODEL, model, res, params, collectionQuery, resource, resourceQuery, clientQuery,resmode, function (err){ 
-
-		console.log("-> DELETED student");
-	//	console.log("-> "+JSON.stringify()+" ");
-
-	});
+	DELETEresource(SS_MODEL, model, res, params, collectionQuery, resource, resourceQuery, clientQuery,resmode);
 
 
 }
@@ -239,8 +234,9 @@ DELETEresource = exports.DELETEresource = function (SS_MODEL, model, res, params
 					model.findOneAndUpdate( collectionQuery, {
 						$pull: deleteQuery
 					}, function (e, s){
-						if (s){
+						if (s) {
 
+							console.log('-> '+JSON.stringify(deleteQuery)+' DELETED from '+JSON.stringify(collectionQuery));
 
 							if (resmode){
 					  	// redis message
@@ -254,10 +250,9 @@ DELETEresource = exports.DELETEresource = function (SS_MODEL, model, res, params
 							clientRI.publish(pub_channel, message);
 
 
-							console.log('-> '+JSON.stringify(deleteQuery)+' DELETED from '+JSON.stringify(collectionQuery));
-
 							res.send(true);
 							}
+
 						} else {
 							console.log('-> '+JSON.stringify(deleteQuery)+' NOT DELETED from '+JSON.stringify(collectionQuery));
 							if (resmode)
