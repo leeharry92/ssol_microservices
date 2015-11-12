@@ -244,18 +244,20 @@ exports.add_course = function(req, res, next) {
 				if (student == null) {
 
 					// Publish to RI channel for rollback on courses service, need to delete student from course
-					console.log("Student not found, sending rollback message to RI channel...")
-					var ri_message = {
-						'sender' : 'students_micro_service',
-						'service_action' : "update course add student dne",
-						'uni': uni_param,
-						'datetime': req.body.datetime,
-						'course_id': course_id
-					};
+					if (req.params.sender === 'courses_micro_service') {
+						console.log("Student not found, sending rollback message to RI channel...")	
+						var ri_message = {
+							'sender' : 'students_micro_service',
+							'service_action' : "update course add student dne",
+							'uni': uni_param,
+							'datetime': req.body.datetime,
+							'course_id': course_id
+						};
 
-					var message = JSON.stringify(ri_message).toLowerCase();
-					clientRI.publish(pub_channel, message);
-					console.log("Student not found, sent rollback message to RI channel.")
+						var message = JSON.stringify(ri_message).toLowerCase();
+						clientRI.publish(pub_channel, message);
+						console.log("Student not found, sent rollback message to RI channel.")
+					}
 
 					var err = new Error('Specified student not found : ' + uni_param);
 					err.status = 404;

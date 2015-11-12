@@ -149,6 +149,7 @@ module.exports = function(app){
 
             case "update course add student dne":
             //call funtion to rollback, need to delete student from course
+            console.log("Recieved rollback message, about to try rollback.")
             update_controller.rollbackCourse(ssmodel, model, res, params, collectionQuery, resource, resourceQuery, clientQuery,resmode, 
 				function(err) {
                 

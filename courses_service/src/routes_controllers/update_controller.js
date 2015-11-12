@@ -131,24 +131,16 @@ POSTresource = exports.POSTresource = function (ssmodel, model, res, params, col
 							var message = JSON.stringify(ri_message).toLowerCase();
 							clientRI.publish(pub_channel, message);
 
-
-							
 							// Insert log into log collection
-							//var date = new Date();
-							//var datetime = date.toISOString().toLowerCase();
-
-
 							var snapshot = {};
 							snapshot['datetime'] = datetime;  
 							snapshot['uni'] = uni;
 							snapshot['course_id'] = course_id;
 
-
-
-						new SS_MODEL( snapshot ).save( function ( err, model, next ){
-							if( err ) return next( err );
-							res.send(true);
-						}); // ends save
+							new SS_MODEL( snapshot ).save( function ( err, model, next ){
+								if( err ) return next( err );
+								res.send(true);
+							}); // ends save
 
 /*
 
