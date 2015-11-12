@@ -22,8 +22,35 @@ var pub_channel = "referential_integrity";
 
 
 
-rollbackCourse = exports.rollbackCourse = function(SS_MODEL, model, res, params, collectionQuery, resource, resourceQuery, clientQuery,resmode){
+rollbackCourse = exports.rollbackCourse = function(model, obj, SS_MODEL){
 	console.log("entering rollbackCourse in updatecontroller.js");
+	// if uni and timestamp of obj match, then we do the rollback 
+	// use the ss model for the students
+
+	var uni = obj.uni;
+	var datetime = obj.datetime;
+	var course_id = obj.course_id;
+	
+	var res = {}, params = {}, collectionQuery = {}, resource = {}, resourceQuery = {}, clientQuery = {};
+
+	var resource = 'students';
+	resourceQuery = {};
+	resourceQuery[resource+"."+uni] = uni;
+
+	var collectionQuery = {};
+	collectionQuery['course_id'] =  course_id;
+
+
+	resmode = false;
+
+
+	DELETEresource(SS_MODEL, model, res, params, collectionQuery, resource, resourceQuery, clientQuery,resmode, function (err){ 
+
+		console.log("-> DELETED student");
+	//	console.log("-> "+JSON.stringify()+" ");
+
+	});
+
 
 }
 
