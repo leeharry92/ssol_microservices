@@ -22,6 +22,11 @@ var pub_channel = "referential_integrity";
 
 
 
+rollbackCourse = exports.rollbackCourse(SS_MODEL, model, res, params, collectionQuery, resource, resourceQuery, clientQuery,resmode){
+	console.log("entering rollbackCourse in updatecontroller.js");
+
+}
+
 
 // GET course info based on the client's query
 exports.returnCourseInfo = function () {
