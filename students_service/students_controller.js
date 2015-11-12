@@ -243,8 +243,9 @@ exports.add_course = function(req, res, next) {
 			.then(function(student) {
 				if (student == null) {
 
+					/*
 					// Publish to RI channel for rollback on courses service, need to delete student from course
-					if (req.params.sender === 'courses_micro_service') {
+					if (req.params.sender === 'courses_micro_service') { // Check if request was from the courses microservice before attempting rollback
 						console.log("Student not found, sending rollback message to RI channel...")	
 						var ri_message = {
 							'sender' : 'students_micro_service',
@@ -258,6 +259,7 @@ exports.add_course = function(req, res, next) {
 						clientRI.publish(pub_channel, message);
 						console.log("Student not found, sent rollback message to RI channel.")
 					}
+					*/
 
 					var err = new Error('Specified student not found : ' + uni_param);
 					err.status = 404;
@@ -473,6 +475,21 @@ exports.ref_add_course = function(callNumber, uni_param, app, callback) {
 	collection.findOneAsync({uni: uni_param})
 	.then(function(student) {
 		if (student == null) {
+
+			// Publish to RI channel for rollback on courses service, need to delete student from course
+			console.log("Student not found, sending rollback message to RI channel...")	
+			var ri_message = {
+				'sender' : 'students_micro_service',
+				'service_action' : "update course add student dne",
+				'uni': uni_param,
+				'datetime': req.body.datetime,
+				'course_id': course_id
+			};
+
+			var message = JSON.stringify(ri_message).toLowerCase();
+			clientRI.publish(pub_channel, message);
+			console.log("Student not found, sent rollback message to RI channel.")
+
 			var err = new Error('Specified student not found |' + uni_param);
 			err.status = 404;
 			callback(err);
