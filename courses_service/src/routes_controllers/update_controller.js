@@ -116,21 +116,26 @@ POSTresource = exports.POSTresource = function (ssmodel, model, res, params, col
 
 
 						if (resmode){
+
+							var date = new Date();
+							var datetime = date.toISOString().toLowerCase();
+
 						  	// redis message
-								var ri_message = {
-									'sender' : 'courses_micro_service',
-									'service_action' : 'update student add course',
-									'course_id': course_id,
-									'uni': uni };
-								
-								var message = JSON.stringify(ri_message).toLowerCase();
-								clientRI.publish(pub_channel, message);
+							var ri_message = {
+								'sender' : 'courses_micro_service',
+								'service_action' : 'update student add course',
+								'course_id': course_id,
+								'uni': uni,
+								'datetime': datetime };
+							
+							var message = JSON.stringify(ri_message).toLowerCase();
+							clientRI.publish(pub_channel, message);
 
 
 							
 							// Insert log into log collection
-							var date = new Date();
-							var datetime = date.toISOString().toLowerCase();
+							//var date = new Date();
+							//var datetime = date.toISOString().toLowerCase();
 
 
 							var snapshot = {};
