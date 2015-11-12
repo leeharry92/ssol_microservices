@@ -22,7 +22,7 @@ var pub_channel = "referential_integrity";
 
 
 
-rollbackCourse = exports.rollbackCourse(SS_MODEL, model, res, params, collectionQuery, resource, resourceQuery, clientQuery,resmode){
+rollbackCourse = exports.rollbackCourse = function(SS_MODEL, model, res, params, collectionQuery, resource, resourceQuery, clientQuery,resmode){
 	console.log("entering rollbackCourse in updatecontroller.js");
 
 }

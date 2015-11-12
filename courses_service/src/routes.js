@@ -155,7 +155,6 @@ module.exports = function(app){
                 	
                     if (err != null) {
                         //error handling
-console.log(obj);
 /*
 					date
 					time
@@ -165,6 +164,7 @@ console.log(obj);
 
                     } else {
                         //handle correct case
+                        console.log(obj);
                     }
                 });
                 break;
