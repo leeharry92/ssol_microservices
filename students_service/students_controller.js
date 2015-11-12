@@ -466,7 +466,7 @@ exports.update = function(req, res, next) {
 	});
 };
 
-exports.ref_add_course = function(callNumber, uni_param, datetime, app, callback) {
+exports.ref_add_course = function(callNumber, uni_param, course_id, datetime, app, callback) {
 	console.log("troubleshoot, in ref_add_course function");
 
 	var db = app.locals.db;
@@ -486,7 +486,7 @@ exports.ref_add_course = function(callNumber, uni_param, datetime, app, callback
 				'service_action' : "update course add student dne",
 				'uni': uni_param,
 				'datetime': datetime,
-				'course_id': datetime
+				'course_id': course_id
 			};
 			console.log("troubleshoot, created ri_message");
 			var message = JSON.stringify(ri_message).toLowerCase();

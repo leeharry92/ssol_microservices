@@ -51,13 +51,14 @@ module.exports = function(app) {
                 var firstChar = uni.charAt(0);
 
                 var datetime = obj.datetime;
+                var course_id = obj.course_id;
                 
                 console.log("troublshoot, in first switch case.")
                 if (firstChar < config.starting_uni || firstChar > config.ending_uni) {
                     console.log("UNI received from MQ is out of bounds: Char " + firstChar + " bounds (" + config.starting_uni + "," + config.ending_uni + ")");
                     return;
                 }
-                students.ref_add_course(call_number, uni, datetime, app, function(err) {
+                students.ref_add_course(call_number, uni, course_id, datetime, app, function(err) {
                     if (err != null) {
                         console.log(err);
                     } else {

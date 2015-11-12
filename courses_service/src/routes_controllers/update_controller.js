@@ -35,7 +35,7 @@ rollbackCourse = exports.rollbackCourse = function(model, obj, SS_MODEL){
 
 	var resource = 'students';
 	resourceQuery = {};
-	resourceQuery[resource+"."+uni] = uni;
+	resourceQuery[resource+".uni"] = uni;
 
 	var collectionQuery = {};
 	collectionQuery['course_id'] =  course_id;
