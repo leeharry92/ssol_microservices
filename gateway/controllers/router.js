@@ -48,13 +48,14 @@ exports.findStudent = function(req, res) {
         if (obj.hasOwnProperty('error')) {
             return res.status(obj.error.status).end(obj.message);
         } else {
-          res.writeHead(200, {
-              "Content-Type": "text/plain"
-          });
-      }
+            res.writeHead(200, {
+                "Content-Type": "text/plain"
+            });
+        }
         res.end(body);
     });
 };
+//TODO: Handle errors in a single partition
 exports.findStudentAll = function(req, res) {
     //console.log(config.partitions[1].port);
     async.map(config.partitions, function(item, callback) {
@@ -65,20 +66,21 @@ exports.findStudentAll = function(req, res) {
             // JSON body
             if (err) {
                 console.log(err);
-                callback(err);
+                callback(false);
                 return;
             }
             obj = JSON.parse(body);
             callback(false, obj);
         });
     }, function(err, results) {
-        if (err) {
-            console.log(err);
-            res.send(500, "Server Error");
+        console.log(results)
+        if (_.compact(results).length == 0) {
+            // console.log("Saw empty!");
+            res.status(500).send("Server Error, all databases offline!");
             return;
+        } else {
+            res.send(results.clean().make_single());
         }
-        //console.log(results);
-        res.send(results.clean().make_single());
     });
 };
 exports.createStudent = function(req, res) {
@@ -91,19 +93,20 @@ exports.createStudent = function(req, res) {
         url: fullUrl,
         form: req.body
     }, function(err, response, body) {
-        //console.log(response);
+        // console.log(response);
         if (err) {
             return res.status(500).end('Error');
         }
-        obj = JSON.parse(body);
-        if (obj.hasOwnProperty('error')) {
-            return res.status(obj.error.status).end(obj.message);
+        if (response.statusCode != 200) {
+            obj = JSON.parse(body);
+            if (obj.hasOwnProperty('error')) {
+                return res.status(obj.error.status).end(obj.message);
+            } else {
+                return res.status(response.statusCode).end(response.statusMessage);
+            }
         } else {
-          res.writeHead(200, {
-              "Content-Type": "text/plain"
-          });
-      }
-        res.end(body);
+            return res.status(response.statusCode).end(response.statusMessage);
+        }
     });
 };
 exports.addCourse = function(req, res) {
@@ -120,15 +123,16 @@ exports.addCourse = function(req, res) {
         if (err) {
             return res.status(500).end('Error');
         }
-        obj = JSON.parse(body);
-        if (obj.hasOwnProperty('error')) {
-            return res.status(obj.error.status).end(obj.message);
+        if (response.statusCode != 200) {
+            obj = JSON.parse(body);
+            if (obj.hasOwnProperty('error')) {
+                return res.status(obj.error.status).end(obj.message);
+            } else {
+                return res.status(response.statusCode).end(response.statusMessage);
+            }
         } else {
-          res.writeHead(200, {
-              "Content-Type": "text/plain"
-          });
-      }
-        res.end(body);
+            return res.status(response.statusCode).end(response.statusMessage);
+        }
     });
 };
 exports.removeCourse = function(req, res) {
@@ -145,15 +149,16 @@ exports.removeCourse = function(req, res) {
         if (err) {
             return res.status(500).end('Error');
         }
-        obj = JSON.parse(body);
-        if (obj.hasOwnProperty('error')) {
-            return res.status(obj.error.status).end(obj.message);
+        if (response.statusCode != 200) {
+            obj = JSON.parse(body);
+            if (obj.hasOwnProperty('error')) {
+                return res.status(obj.error.status).end(obj.message);
+            } else {
+                return res.status(response.statusCode).end(response.statusMessage);
+            }
         } else {
-          res.writeHead(200, {
-              "Content-Type": "text/plain"
-          });
-      }
-        res.end(body);
+            return res.status(response.statusCode).end(response.statusMessage);
+        }
     });
 };
 //#TODO: Better error handling
@@ -198,15 +203,16 @@ exports.deleteStudent = function(req, res) {
         if (err) {
             return res.status(500).end('Error');
         }
-        obj = JSON.parse(body);
-        if (obj.hasOwnProperty('error')) {
-            return res.status(obj.error.status).end(obj.message);
+        if (response.statusCode != 200) {
+            obj = JSON.parse(body);
+            if (obj.hasOwnProperty('error')) {
+                return res.status(obj.error.status).end(obj.message);
+            } else {
+                return res.status(response.statusCode).end(response.statusMessage);
+            }
         } else {
-          res.writeHead(200, {
-              "Content-Type": "text/plain"
-          });
-      }
-        res.end(body);
+            return res.status(response.statusCode).end(response.statusMessage);
+        }
     });
 };
 exports.deleteAttribute = function(req, res) {
@@ -251,47 +257,40 @@ exports.updateStudent = function(req, res) {
         if (err) {
             return res.status(500).end('Error');
         }
-        obj = JSON.parse(body);
-        if (obj.hasOwnProperty('error')) {
-            return res.status(obj.error.status).end(obj.message);
+        if (response.statusCode != 200) {
+            obj = JSON.parse(body);
+            if (obj.hasOwnProperty('error')) {
+                return res.status(obj.error.status).end(obj.message);
+            } else {
+                return res.status(response.statusCode).end(response.statusMessage);
+            }
         } else {
-          res.writeHead(200, {
-              "Content-Type": "text/plain"
-          });
-      }
-        res.end(body);
+            return res.status(response.statusCode).end(response.statusMessage);
+        }
     });
 };
 
 //Courses Microservice handling
 exports.findCourse = function(req, res) {
     //console.log(req);
-    async.parallel([
-            function(callback) {
-                //TODO: '/courses' should be removed later
-                var fullUrl = req.protocol + '://' + host + ':' + config.courses_port + '/courses' + req.url;
-                console.log(fullUrl);
-                request(fullUrl, function(err, response, body) {
-                    // JSON body
-                    if (err) {
-                        console.log(err);
-                        callback(true);
-                        return;
-                    }
-                    obj = JSON.parse(body);
-                    callback(false, obj);
-                });
-            },
-        ],
-        function(err, results) {
-            if (err) {
-                console.log(err);
-                res.send(500, "Server Error");
-                return;
-            }
-            res.send(results[0]);
+    var fullUrl = req.protocol + '://' + host + ':' + config.courses_port + '/courses' + req.url;
+    console.log(fullUrl);
+    request({
+        url: fullUrl,
+    }, function(err, response, body) {
+        if (err) {
+            return res.status(500).end('Error');
         }
-    );
+        obj = JSON.parse(body);
+        if (obj.hasOwnProperty('error')) {
+            return res.status(obj.error.status).end(obj.message);
+        } else {
+            res.writeHead(200, {
+                "Content-Type": "text/plain"
+            });
+        }
+        res.end(body);
+    });
 };
 exports.createCourse = function(req, res) {
     console.log('Inside createCourse');
