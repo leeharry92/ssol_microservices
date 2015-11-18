@@ -17,7 +17,7 @@ var Schema   = mongoose.Schema;
 
 	courses_model.add({
 		user_id    : String,
-	    course_num :  { type: Number, min: 0000, max: 9999 },
+	    course_id :  { type: Number, min: 0000, max: 9999 },
 		name	   : String,
 		students   : [students_model],
 		updated_at : Date
@@ -25,6 +25,21 @@ var Schema   = mongoose.Schema;
 
 
 	mongoose.model( 'courses_model', courses_model ); // model
+
+
+
+
+
+	var snapshot_courses_model = new Schema;
+
+	snapshot_courses_model.add({
+		datetime : String,
+	    uni :  String,
+	    course_id : String
+	});
+
+    mongoose.model( 'snapshot_courses_model', snapshot_courses_model );
+
 
 
 
@@ -53,8 +68,6 @@ var Schema   = mongoose.Schema;
 
 
 
-
-
 // Set the connection to the db
 	var courses_db = mongoose.createConnection(mongoServer);
 	courses_db.on('error', function(err){
@@ -68,6 +81,11 @@ var Schema   = mongoose.Schema;
 
 	exports.getModel = courses_model;
 	exports.getdb = courses_db;
+
+	exports.getModel2 = snapshot_courses_model;
+
+
+
 //};
 
 

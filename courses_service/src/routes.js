@@ -7,6 +7,9 @@ var courses_model = requireDB.getModel;
  
 var model = courses_db.model('courses_model');
 
+var ssmodel = requireDB.getModel2;
+var SS_MODEL = courses_db.model('snapshot_courses_model');
+
 
 // require redis
 var redis = require("redis")
@@ -35,18 +38,19 @@ module.exports = function(app){
 
 	// read
 	app.get(  root,		            				update_controller.returnCourseInfo() );
+	app.get(  '/snapshot',							update_controller.returnSSinfo() );
 
 	// schema changes
 	app.post( root+'/schema',    					schema_controller.addKEY() );
 	app.delete( root+'/schema',    					schema_controller.deleteKEY() );
 
 	// update
-	app.put(  root+'/:course_num',					update_controller.updateCourse() );
-	app.post(  root+'/:course_num/:resource',		update_controller.addStudentToCourse() );
+	app.put(  root+'/:course_id',					update_controller.updateCourse() );
+	app.post(  root+'/:course_id/:resource',		update_controller.addStudentToCourse() );
 
 	// delete 
 	app.delete(  root, 								update_controller.removeCourse() ); 
-	app.delete( root + '/:course_num/:resource' ,	update_controller.removeStudentFromCourse() );
+	app.delete( root + '/:course_id/:resource' ,	update_controller.removeStudentFromCourse() );
 	app.delete( root + '/:resource',				update_controller.removeStudent() );
 
 
@@ -58,7 +62,6 @@ module.exports = function(app){
         
         //Switch statement for three RI cases
         var obj = JSON.parse(message);
-        var call_number = 1234;
         var uni = obj.uni.toLowerCase();
 
 	/* Message takes the following form
@@ -77,18 +80,15 @@ module.exports = function(app){
 				//resourceQuery, 
 				//clientQuery;
 
-			var params = {};
-			params['course_num'] = obj.course_name;
+			var params = obj;
 			params['resource'] = resource;
-			params['service_action'] = obj.service_action;
-			params['datetime'] = obj.datetime;
-			params['sender'] = obj.sender;
 			
 		  // BUILD THE QUERY FOR THE COLLECTION
 		  //	Note: the collection identifier (/:collection_id/) == param_keys[0]
 			var collectionQuery = {};
 			var collection_keys = Object.keys(params);
-			collectionQuery[collection_keys[0]] = parseInt(params[collection_keys[0]]);
+			collectionQuery['course_id'] = parseInt(obj.course_id);
+
 			//   Note: parseInt() called for the collection query id
 
 			var clientQuery = {};
@@ -115,7 +115,7 @@ module.exports = function(app){
 			
         switch (obj.service_action) {
             case "update course add student":
-            update_controller.POSTresource(model, res, params, collectionQuery, resource, resourceQuery, clientQuery, resmode, 
+            update_controller.POSTresource(SS_MODEL, model, res, params, collectionQuery, resource, resourceQuery, clientQuery, resmode, 
 				function (err) {	
                     if (err != null) {
                         //error handling
@@ -126,7 +126,7 @@ module.exports = function(app){
                 break;
 
             case "update course delete student":
-            update_controller.DELETEresource(model, res, params, collectionQuery, resource, resourceQuery, clientQuery, resmode, 
+            update_controller.DELETEresource(SS_MODEL, model, res, params, collectionQuery, resource, resourceQuery, clientQuery, resmode, 
 				function(err) {	
                     if (err != null) {
                         //error handling
@@ -137,13 +137,34 @@ module.exports = function(app){
                 break;
 
             case "delete student":
-            update_controller.DELETEresourceFromAll(model, res, params, collectionQuery, resource, resourceQuery, clientQuery,resmode, 
+            update_controller.DELETEresourceFromAll(SS_MODEL, model, res, params, collectionQuery, resource, resourceQuery, clientQuery,resmode, 
 				function(err) {
                 
                     if (err != null) {
                         //error handling
                     } else {
                         //handle correct case
+                    }
+                });
+
+            case "update course add student dne":
+            //call funtion to rollback, need to delete student from course
+            console.log("Recieved rollback message, about to try rollback.")
+            update_controller.rollbackCourse(model, obj,SS_MODEL, 
+				function(err) {
+                	
+                    if (err != null) {
+                        //error handling
+/*
+					date
+					time
+					uni
+					course_id
+*/
+
+                    } else {
+                        //handle correct case
+                        console.log(obj);
                     }
                 });
                 break;

@@ -3,13 +3,16 @@ var utils    = require( '../../utils' );
 // require the database, which has already been connected
 var requireDB = require('../schemas/courses_db.js');
 var courses_db = requireDB.getdb;
+
 var courses_model = requireDB.getModel;
 var model = courses_db.model('courses_model');
+
+var ssmodel = requireDB.getModel2;
+var SS_MODEL = courses_db.model('snapshot_courses_model');
 
 
 
 var root = '/courses/';
-
 
 
 // Redis RI
@@ -18,6 +21,33 @@ clientRI = redis.createClient() // Publishes to ri channel
 var pub_channel = "referential_integrity";
 
 
+
+rollbackCourse = exports.rollbackCourse = function(model, obj, SS_MODEL){
+	console.log("entering rollbackCourse in updatecontroller.js");
+	// if uni and timestamp of obj match, then we do the rollback 
+	// use the ss model for the students
+
+	var uni = obj.uni;
+	var datetime = obj.datetime;
+	var course_id = obj.course_id;
+	
+	var res = {}, params = {}, collectionQuery = {}, resource = {}, resourceQuery = {}, clientQuery = {};
+
+	var resource = 'students';
+	resourceQuery = {};
+	resourceQuery[resource+".uni"] = uni;
+
+	var collectionQuery = {};
+	collectionQuery['course_id'] =  course_id;
+
+
+	resmode = false;
+
+
+	DELETEresource(SS_MODEL, model, res, params, collectionQuery, resource, resourceQuery, clientQuery,resmode);
+
+
+}
 
 
 // GET course info based on the client's query
@@ -44,6 +74,30 @@ exports.returnCourseInfo = function () {
 
 }; // ends exports.
 
+// GET ss_model info based on the client's query
+exports.returnSSinfo = function () {
+	// need this return syntax because we are passing io from app.js
+	return function(req, res, next ){
+
+
+  // Read in the client query 	
+	var clientQuery = req.query;
+
+		SS_MODEL.find( clientQuery, function ( err, course_found ){
+			if ( err || (course_found.length == 0) ) {
+				console.log("-> Query not found : "+JSON.stringify(clientQuery));
+				res.send([]);
+			} else { 
+				console.log("-> Query found     : "+JSON.stringify(clientQuery));
+				res.json(course_found);
+			}
+
+		}); //ends findOne()
+
+	}; // ends return
+
+}; // ends exports.
+
 
 
 
@@ -56,7 +110,7 @@ buildQuery = function(query, params, iterations){
 }
 
 // subroutine to post a resource
-POSTresource = exports.POSTresource = function (model, res, params, collectionQuery, resource, resourceQuery, clientQuery, resmode){
+POSTresource = exports.POSTresource = function (SS_MODEL, model, res, params, collectionQuery, resource, resourceQuery, clientQuery, resmode){
 
   // First use the collection Query to query the db
 	model.findOne(collectionQuery, function(err, course_found){
@@ -85,22 +139,39 @@ POSTresource = exports.POSTresource = function (model, res, params, collectionQu
 						console.log('-> '+JSON.stringify(clientQuery)+' was POSTED to '+JSON.stringify(collectionQuery));
 
 							  var uni = clientQuery.uni;
-							  var course_num = parseInt(params.course_num);
+							  var course_id = parseInt(params.course_id);
 
 
 						if (resmode){
-						  	// redis message
-								var ri_message = {
-									'sender' : 'courses_micro_service',
-									'service_action' : 'update student add course',
-									'course_num': course_num,
-									'uni': uni };
-								
-								var message = JSON.stringify(ri_message).toLowerCase();
-								clientRI.publish(pub_channel, message);
 
-					
-							res.send(true);
+							var date = new Date();
+							var datetime = date.toISOString().toLowerCase();
+
+						  	// redis message
+							var ri_message = {
+								'sender' : 'courses_micro_service',
+								'service_action' : 'update student add course',
+								'course_id': course_id,
+								'uni': uni,
+								'datetime': datetime };
+							
+							var message = JSON.stringify(ri_message).toLowerCase();
+							clientRI.publish(pub_channel, message);
+
+							// Insert log into log collection
+							var snapshot = {};
+							snapshot['datetime'] = datetime;  
+							snapshot['uni'] = uni;
+							snapshot['course_id'] = course_id;
+
+							new SS_MODEL( snapshot ).save( function ( err, model, next ){
+								if( err ) return next( err );
+								console.log('-> Snapshot inserted!');
+								res.send(true);
+							}); // ends save
+
+
+							
 						}
 
 					};
@@ -116,10 +187,9 @@ POSTresource = exports.POSTresource = function (model, res, params, collectionQu
 				var ri_message = {
 					'sender' : 'courses_micro_service',
 					'service_action' : "update student add course dne",
-					'course_num': params.uni,
 					'uni': params.uni,
 					'datetime': params.datetime,
-					'course_num': params.course_num
+					'course_id': params.course_id
 				};
 				var message = JSON.stringify(ri_message).toLowerCase();
 				clientRI.publish(pub_channel, message);
@@ -140,7 +210,7 @@ POSTresource = exports.POSTresource = function (model, res, params, collectionQu
 
 
 // subroutine to DELETE a resource
-DELETEresource = exports.DELETEresource = function (model, res, params, collectionQuery, resource, resourceQuery, clientQuery,resmode){
+DELETEresource = exports.DELETEresource = function (SS_MODEL, model, res, params, collectionQuery, resource, resourceQuery, clientQuery,resmode){
 
   // First use the collection Query to query the db
 	model.findOne(collectionQuery, function(err, course_found){
@@ -164,25 +234,25 @@ DELETEresource = exports.DELETEresource = function (model, res, params, collecti
 					model.findOneAndUpdate( collectionQuery, {
 						$pull: deleteQuery
 					}, function (e, s){
-						if (s){
+						if (s) {
 
+							console.log('-> '+JSON.stringify(deleteQuery)+' DELETED from '+JSON.stringify(collectionQuery));
 
 							if (resmode){
 					  	// redis message
 							var ri_message = {
 								'sender' : 'courses_micro_service',
 								'service_action' : 'update student delete course',
-								'course_num': params.course_num,
+								'course_id': params.course_id,
 								'uni': clientQuery.uni };
 		
 							var message = JSON.stringify(ri_message).toLowerCase();
 							clientRI.publish(pub_channel, message);
 
 
-							console.log('-> '+JSON.stringify(deleteQuery)+' DELETED from '+JSON.stringify(collectionQuery));
-
 							res.send(true);
 							}
+
 						} else {
 							console.log('-> '+JSON.stringify(deleteQuery)+' NOT DELETED from '+JSON.stringify(collectionQuery));
 							if (resmode)
@@ -215,7 +285,7 @@ DELETEresource = exports.DELETEresource = function (model, res, params, collecti
 }
 
 
-DELETEresourceFromAll = exports.DELETEresourceFromAll = function(model, res, params, collectionQuery, resource, resourceQuery, clientQuery,resmode){
+DELETEresourceFromAll = exports.DELETEresourceFromAll = function(SS_MODEL, model, res, params, collectionQuery, resource, resourceQuery, clientQuery,resmode){
 	// First find the course in the db model
 	  model.find({}, function(err, course_found){
 
@@ -225,7 +295,6 @@ DELETEresourceFromAll = exports.DELETEresourceFromAll = function(model, res, par
 		  function( coursedata ) {
 
 			coursedata.collection.aggregate( [
-				//{"$match"	: {course_num : parseInt(coursedata.course_num) } }
 				{"$unwind"	: "$"+resource }
 				,{"$match"	: resourceQuery }
 				//,{"$match"	: {"students.firstname": firstname} }
@@ -245,10 +314,10 @@ DELETEresourceFromAll = exports.DELETEresourceFromAll = function(model, res, par
 
 						}, function (e, s){
 							if (s){
-								console.log('-> '+JSON.stringify(resourceQuery)+' DELETED from '+JSON.stringify(coursedata.course_num));
+								console.log('-> '+JSON.stringify(resourceQuery)+' DELETED from '+JSON.stringify(coursedata.course_id));
 								//res.send(true);
 							} else {
-								console.log('-> '+JSON.stringify(resourceQuery)+' NOT DELETED from '+JSON.stringify(coursedata.course_num));
+								console.log('-> '+JSON.stringify(resourceQuery)+' NOT DELETED from '+JSON.stringify(coursedata.course_id));
 								//res.send(false);
 							}
 						});
@@ -311,7 +380,7 @@ exports.removeStudent = function( ) {
 */
 
 	var resmode = true; // enables sending response to client
-	DELETEresourceFromAll(model, res, params, collectionQuery, resource, resourceQuery, clientQuery,resmode);
+	DELETEresourceFromAll(SS_MODEL, model, res, params, collectionQuery, resource, resourceQuery, clientQuery,resmode);
 
   }; // ends return
 
@@ -327,7 +396,7 @@ exports.removeStudentFromCourse = function( ) {
   return function ( req, res, next ){
 
   // exported from:
-  // 	app.post(  root+'/:course_num/:resource' )
+  // 	app.post(  root+'/:course_id/:resource' )
 
   // Read in the params and client query 	
 	var params = req.params;
@@ -363,7 +432,7 @@ exports.removeStudentFromCourse = function( ) {
   // business logic
 	var resmode = true; // enables sending response to client
 	// update db - remove the student from the course
-		DELETEresource(model, res, params, collectionQuery, resource, resourceQuery, clientQuery, resmode);
+		DELETEresource(SS_MODEL, model, res, params, collectionQuery, resource, resourceQuery, clientQuery, resmode);
 
   } // ends return
 
@@ -377,7 +446,7 @@ exports.addStudentToCourse = function( ) {
   return function ( req, res, next ){
 
   // exported from:
-  // 	app.post(  root+'/:course_num/:resource' )
+  // 	app.post(  root+'/:course_id/:resource' )
 
   // Read in the params and client query 	
 	var params = req.params;
@@ -419,7 +488,7 @@ exports.addStudentToCourse = function( ) {
 
 	var resmode = true; // enables sending response to client
 	// update db - post the student to the course
-		POSTresource(model, res, params, collectionQuery, resource, resourceQuery, clientQuery, resmode);
+		POSTresource(SS_MODEL, model, res, params, collectionQuery, resource, resourceQuery, clientQuery, resmode);
 
 	} // ends else
 
@@ -454,7 +523,7 @@ exports.updateCourse = function( ) {
 
 
   // exported from:
-  // 	app.post(  root+'/:course_num/:resource' )
+  // 	app.post(  root+'/:course_id/:resource' )
 
   // Read in the params and client query 	
 	var params = req.params;
@@ -518,7 +587,7 @@ exports.removeCourse = function () {
 							var ri_message = {
 								'sender' : 'courses_micro_service',
 								'service_action' : 'delete course',
-								'course_num': collectionQuery.course_num
+								'course_id': collectionQuery.course_id
 							};
 		
 							var message = JSON.stringify(ri_message).toLowerCase();

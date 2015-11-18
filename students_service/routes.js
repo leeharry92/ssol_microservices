@@ -6,6 +6,7 @@ var config = require('./config/config');
 
 
 clientRISub = redis.createClient(); // Subscribes to ri channel
+clientRIPub = redis.createClient(); // Publishes to ri channel
 
 var subChannel = "students_micro_service";
 
@@ -48,11 +49,16 @@ module.exports = function(app) {
             case "update student add course":
                 var uni = obj.uni.toLowerCase();
                 var firstChar = uni.charAt(0);
+
+                var datetime = obj.datetime;
+                var course_id = obj.course_id;
+                
+                console.log("troublshoot, in first switch case.")
                 if (firstChar < config.starting_uni || firstChar > config.ending_uni) {
                     console.log("UNI received from MQ is out of bounds: Char " + firstChar + " bounds (" + config.starting_uni + "," + config.ending_uni + ")");
                     return;
                 }
-                students.ref_add_course(call_number, uni, app, function(err) {
+                students.ref_add_course(call_number, uni, course_id, datetime, app, function(err) {
                     if (err != null) {
                         console.log(err);
                     } else {
@@ -88,8 +94,7 @@ module.exports = function(app) {
                 break;
 
             case "update student add course dne":
-                var uni_param = obj.uni.toLowerCase();
-                students.ref_rollback_course(uni_param, app, message, function(err) {
+                students.ref_rollback_course(app, message, function(err) {
                     if (err != null) {
                         //error handling
                     } else {
@@ -97,6 +102,7 @@ module.exports = function(app) {
                     }
                 });
                 break;
+
             default :
                 console.log("Service action not found " + obj.service_action);
                 break;

@@ -6,7 +6,7 @@ var courses_db = requireDB.getdb;
 var courses_model = requireDB.getModel;
  
 var model = courses_db.model('courses_model');
-var paths = ["user_id","course_num","name", "students", "updated_at"];
+var paths = ["user_id","course_id","name", "students", "updated_at"];
 
 var root = '/courses/';
 
@@ -75,7 +75,7 @@ exports.deleteKEY = function( ){
 
 
 
-					var keyValues = [req.cookies.user_id, success[j].course_num, success[j].name, success[j].students, Date.now()];	
+					var keyValues = [req.cookies.user_id, success[j].course_id, success[j].name, success[j].students, Date.now()];	
 
 
 					keyValues = keyValues.concat(userKeyValues);
@@ -89,7 +89,7 @@ exports.deleteKEY = function( ){
 					createCourseHandler(model, paths, keyValues);
 
 					// Reset the paths variable for each iteration
-					paths = ["user_id","course_num","name", "students", "updated_at"];
+					paths = ["user_id","course_id","name", "students", "updated_at"];
 					
 			  } // ends for loop
 
@@ -176,7 +176,7 @@ exports.addKEY = function( ){
 				// find and return all keys and keyValues within model p
 					getKeysAndValues(success[j],userKeys,userKeyValues);
 
-					var keyValues = [req.cookies.user_id, success[j].course_num, success[j].name, success[j].students, Date.now()];	
+					var keyValues = [req.cookies.user_id, success[j].course_id, success[j].name, success[j].students, Date.now()];	
 					keyValues = keyValues.concat(userKeyValues);
 
 					//console.log(keyValues);
@@ -191,7 +191,7 @@ exports.addKEY = function( ){
 						createCourseHandler(model, paths, keyValues);
 
 					// Reset the paths variable for each iteration
-						paths = ["user_id","course_num","name", "students", "updated_at"];
+						paths = ["user_id","course_id","name", "students", "updated_at"];
 				
 			  } // ends for loop
 
@@ -230,12 +230,12 @@ exports.createCourse = function () {
 
 	var clientQuery = req.query;
 
-	var course_num = clientQuery.course_num;
+	var course_id = clientQuery.course_id;
 	var name = clientQuery.name;
 
 	// business logic
-	if ( (typeof course_num === 'undefined') && (typeof name === 'undefined') ) {
-	    console.log("-> invalid client queries - course_num || name is undefined");
+	if ( (typeof course_id === 'undefined') && (typeof name === 'undefined') ) {
+	    console.log("-> invalid client queries - course_id || name is undefined");
 		res.send(false);
 
 	} else {
@@ -247,7 +247,7 @@ exports.createCourse = function () {
 			if ( result == null ) {
 
 
-			  var keyValues = [req.cookies.user_id, course_num, name, req.body.students, Date.now()];
+			  var keyValues = [req.cookies.user_id, course_id, name, req.body.students, Date.now()];
 			  var attributes = nconf.get('courseAttributes');
 
 
@@ -266,15 +266,15 @@ exports.createCourse = function () {
 			  createCourseHandler(model, paths, keyValues);
 
 			// Reset the paths variable
-			  paths = ["user_id","course_num","name", "students", "updated_at"];
+			  paths = ["user_id","course_id","name", "students", "updated_at"];
 			
 			// Log and Return to User
-			  console.log('-> Course Number:'+course_num+' created');
+			  console.log('-> Course Number:'+course_id+' created');
 			  res.send( true );
 
 			} else {
 
-				console.log('-> course_num:'+course_num+' already exists');
+				console.log('-> course_id:'+course_id+' already exists');
 				res.send( false );
 
 			};
@@ -304,7 +304,7 @@ createCourseHandler = function(model, paths, keyValues){
 
 		{
 		  user_id    : req.cookies.user_id,
-		  course_num : Number,
+		  course_id : Number,
 		  name		 : name,
 		  students   : req.body.students,//["randcourse1","randcourse2"],
 		  updated_at : Date.now()
@@ -330,7 +330,7 @@ getKeysAndValues = function(p,userKeys,userKeyValues){
 			// Search for keys that are user defined
 				if ( (p2.hasOwnProperty(key2) ) &&
 					 (key2 != "name") && 
-					 (key2 != "course_num") && 
+					 (key2 != "course_id") && 
 					 (key2 != "students") && 
 					 (key2 != "updated_at") && 
 					 (key2 != "_id") && 
