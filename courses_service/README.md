@@ -30,7 +30,7 @@ To set up the database and insert "dummy data":
 2 -Run the courses_db_setup.sh script to setup the database (Be sure to get file permissions first)
 ```	
 	chmod u+x courses_db_setup.sh
-	mongo test_server ./courses_db_setup.sh
+	./courses_db_setup.sh
 ```	
 
 
