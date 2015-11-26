@@ -34,7 +34,10 @@ Run mongo to setup the database (Be sure to get file permissions first)
 	mongo test_server ../courses_db_setup.sh
 ```	
 
-All configurable parameters are accessible the following JSON file:
+
+<br />
+<br />
+All other configurable parameters are accessible the following JSON file:
    - /courses_service/config/config.json
 
 <br /> 
