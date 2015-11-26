@@ -7,8 +7,7 @@ db.createCollection('snapshot_courses_models', {});
 
 
 // COURSES DB
-db.courses_models.insert(
-	
+db.courses_models.insert(	
   {
     "_id": "56572018bf19f304248050f0",
     "course_id": 1111,
@@ -26,6 +25,79 @@ db.courses_models.insert(
 
   }
 );
+
+db.courses_models.insert(	
+  {
+    "_id": "56572018bf19f304248050f0",
+    "course_id": 2222,
+    "name": "Microservices",
+    "instructor": "Don Ferguson",
+    "__v": 2,
+    "students": [
+      {
+        "uni": "aa1111"
+      }
+    ]
+
+  }
+);
+
+
+db.courses_models.insert(	
+  {
+    "_id": "56572018bf19f304248050f0",
+    "course_id": 3333,
+    "name": "Computer Networks",
+    "instructor": "Vishal Misra",
+    "__v": 2,
+    "students": [
+      {
+        "uni": "aa1111"
+      },
+      {
+        "uni": "bb1111"
+      }
+    ]
+
+  }
+);
+
+
+db.courses_models.insert(	
+  {
+    "_id": "56572018bf19f304248050f0",
+    "course_id": 4444,
+    "name": "Advanced Logic Design",
+    "instructor": "Steven Nowick",
+    "__v": 2,
+    "students": [
+      {
+        "uni": "aa1111"
+      }
+    ]
+
+  }
+);
+
+
+db.courses_models.insert(	
+  {
+    "_id": "56572018bf19f304248050f0",
+    "course_id": 5555,
+    "name": "IoT Theory and Practice",
+    "instructor": "Zoran Kostic",
+    "__v": 2,
+    "students": [
+      {
+        "uni": "bb1111"
+      }
+    ]
+
+  }
+);
+
+
+
 
 
 
