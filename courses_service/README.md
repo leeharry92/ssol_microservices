@@ -23,7 +23,7 @@
 <br /> 
 
 ### 2. CONFIGURATION
-To set up the database:
+To set up the database and insert "dummy data":
 Run mongod on separate terminal window (This step is done only once)
 ```
 	mongod [--dbpath ./data/]
