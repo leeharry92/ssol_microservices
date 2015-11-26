@@ -9,7 +9,6 @@ db.createCollection('snapshot_courses_models', {});
 // COURSES DB
 db.courses_models.insert(	
   {
-    "_id": "56572018bf19f304248050f0",
     "course_id": 1111,
     "name": "Programming Languages and Translators",
     "instructor": "Stephen Edwards",
@@ -28,7 +27,6 @@ db.courses_models.insert(
 
 db.courses_models.insert(	
   {
-    "_id": "56572018bf19f304248050f0",
     "course_id": 2222,
     "name": "Microservices",
     "instructor": "Don Ferguson",
@@ -45,7 +43,6 @@ db.courses_models.insert(
 
 db.courses_models.insert(	
   {
-    "_id": "56572018bf19f304248050f0",
     "course_id": 3333,
     "name": "Computer Networks",
     "instructor": "Vishal Misra",
@@ -65,7 +62,6 @@ db.courses_models.insert(
 
 db.courses_models.insert(	
   {
-    "_id": "56572018bf19f304248050f0",
     "course_id": 4444,
     "name": "Advanced Logic Design",
     "instructor": "Steven Nowick",
@@ -82,7 +78,6 @@ db.courses_models.insert(
 
 db.courses_models.insert(	
   {
-    "_id": "56572018bf19f304248050f0",
     "course_id": 5555,
     "name": "IoT Theory and Practice",
     "instructor": "Zoran Kostic",
