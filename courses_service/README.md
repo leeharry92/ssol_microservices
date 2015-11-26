@@ -24,11 +24,10 @@
 
 ### 2. CONFIGURATION
 To set up the database and insert "dummy data":
-Run mongod on separate terminal window (This step is done only once)
-```
-	mongod [--dbpath ./data/]
-```	
-Navigate to the home directory (ssol_microservices/) and Run the courses_db_setup.sh script to setup the database (Be sure to get file permissions first)
+
+1 - Navigate to the home directory (ssol_microservices/) 
+<br />
+2 -Run the courses_db_setup.sh script to setup the database (Be sure to get file permissions first)
 ```	
 	chmod u+x courses_db_setup.sh
 	mongo test_server ./courses_db_setup.sh
