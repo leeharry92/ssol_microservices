@@ -23,6 +23,17 @@
 <br /> 
 
 ### 2. CONFIGURATION
+To set up the database:
+Run mongod on separate terminal window (This step is done only once)
+```
+	mongod [--dbpath ./data/]
+```	
+Run mongo to setup the database (Be sure to get permissions)
+```	
+	chmod u+x ../courses_db_setup.sh
+```	
+	mongo test_server ../courses_db_setup.sh
+
 All configurable parameters are accessible the following JSON file:
    - /courses_service/config/config.json
 
