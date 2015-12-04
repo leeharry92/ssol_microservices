@@ -23,7 +23,20 @@
 <br /> 
 
 ### 2. CONFIGURATION
-All configurable parameters are accessible the following JSON file:
+To set up the database and insert "dummy data":
+
+1 - Navigate to the home directory (ssol_microservices/) 
+<br />
+2 -Run the courses_db_setup.sh script to setup the database (Be sure to get file permissions first)
+```	
+	chmod u+x courses_db_setup.sh
+	./courses_db_setup.sh
+```	
+
+
+<br />
+<br />
+All other configurable parameters are accessible the following JSON file:
    - /courses_service/config/config.json
 
 <br /> 
