@@ -32,243 +32,243 @@ Array.prototype.make_single = function() {
     return single;
 };
 
-exports.findStudent = function(req, res) {
-    //console.log('Inside deleteStudent');
-    var uni = req.params.uni;
-    var index = find_partition(uni, config.partitions);
-    var fullUrl = req.protocol + '://' + host + ':' + config.partitions[index].port + '/students' + req.url;
-    console.log(fullUrl);
-    request({
-        url: fullUrl
-    }, function(err, response, body) {
-        if (err) {
-            return res.status(500).end('Error');
-        }
-        obj = JSON.parse(body);
-        if (obj.hasOwnProperty('error')) {
-            return res.status(obj.error.status).end(obj.message);
-        } else {
-            res.writeHead(200, {
-                "Content-Type": "text/plain"
-            });
-        }
-        res.end(body);
-    });
-};
-//TODO: Handle errors in a single partition
-exports.findStudentAll = function(req, res) {
-    //console.log(config.partitions[1].port);
-    async.map(config.partitions, function(item, callback) {
+// exports.findStudent = function(req, res) {
+//     //console.log('Inside deleteStudent');
+//     var uni = req.params.uni;
+//     var index = find_partition(uni, config.partitions);
+//     var fullUrl = req.protocol + '://' + host + ':' + config.partitions[index].port + '/students' + req.url;
+//     console.log(fullUrl);
+//     request({
+//         url: fullUrl
+//     }, function(err, response, body) {
+//         if (err) {
+//             return res.status(500).end('Error');
+//         }
+//         obj = JSON.parse(body);
+//         if (obj.hasOwnProperty('error')) {
+//             return res.status(obj.error.status).end(obj.message);
+//         } else {
+//             res.writeHead(200, {
+//                 "Content-Type": "text/plain"
+//             });
+//         }
+//         res.end(body);
+//     });
+// };
+// //TODO: Handle errors in a single partition
+// exports.findStudentAll = function(req, res) {
+//     //console.log(config.partitions[1].port);
+//     async.map(config.partitions, function(item, callback) {
 
-        var fullUrl = req.protocol + '://' + host + ':' + item.port + '/students' + req.url;
-        console.log(fullUrl);
-        request(fullUrl, function(err, response, body) {
-            // JSON body
-            if (err) {
-                console.log(err);
-                callback(false);
-                return;
-            }
-            obj = JSON.parse(body);
-            callback(false, obj);
-        });
-    }, function(err, results) {
-        console.log(results)
-        if (_.compact(results).length == 0) {
-            // console.log("Saw empty!");
-            res.status(500).send("Server Error, all databases offline!");
-            return;
-        } else {
-            res.send(results.clean().make_single());
-        }
-    });
-};
-exports.createStudent = function(req, res) {
-    var uni = req.body.uni;
-    // console.log(uni);
-    var index = find_partition(uni, config.partitions);
-    var fullUrl = req.protocol + '://' + host + ':' + config.partitions[index].port + '/students' + req.url;
-    console.log(fullUrl);
-    request.post({
-        url: fullUrl,
-        form: req.body
-    }, function(err, response, body) {
-        // console.log(response);
-        if (err) {
-            return res.status(500).end('Error');
-        }
-        if (response.statusCode != 200) {
-            obj = JSON.parse(body);
-            if (obj.hasOwnProperty('error')) {
-                return res.status(obj.error.status).end(obj.message);
-            } else {
-                return res.status(response.statusCode).end(response.statusMessage);
-            }
-        } else {
-            return res.status(response.statusCode).end(response.statusMessage);
-        }
-    });
-};
-exports.addCourse = function(req, res) {
-    var uni = req.params.uni;
-    // console.log(uni);
-    var index = find_partition(uni, config.partitions);
-    var fullUrl = req.protocol + '://' + host + ':' + config.partitions[index].port + '/students' + req.url;
-    console.log(fullUrl);
-    request.post({
-        url: fullUrl,
-        form: req.body
-    }, function(err, response, body) {
-        //console.log(response);
-        if (err) {
-            return res.status(500).end('Error');
-        }
-        if (response.statusCode != 200) {
-            obj = JSON.parse(body);
-            if (obj.hasOwnProperty('error')) {
-                return res.status(obj.error.status).end(obj.message);
-            } else {
-                return res.status(response.statusCode).end(response.statusMessage);
-            }
-        } else {
-            return res.status(response.statusCode).end(response.statusMessage);
-        }
-    });
-};
-exports.removeCourse = function(req, res) {
-    var uni = req.params.uni;
-    // console.log(uni);
-    var index = find_partition(uni, config.partitions);
-    var fullUrl = req.protocol + '://' + host + ':' + config.partitions[index].port + '/students' + req.url;
-    console.log(fullUrl);
-    request.del({
-        url: fullUrl,
-        form: req.body
-    }, function(err, response, body) {
-        //console.log(response);
-        if (err) {
-            return res.status(500).end('Error');
-        }
-        if (response.statusCode != 200) {
-            obj = JSON.parse(body);
-            if (obj.hasOwnProperty('error')) {
-                return res.status(obj.error.status).end(obj.message);
-            } else {
-                return res.status(response.statusCode).end(response.statusMessage);
-            }
-        } else {
-            return res.status(response.statusCode).end(response.statusMessage);
-        }
-    });
-};
-//#TODO: Better error handling
-exports.createStudentAll = function(req, res) {
-    //console.log(config.partitions[1].port);
-    async.map(config.partitions, function(item, callback) {
+//         var fullUrl = req.protocol + '://' + host + ':' + item.port + '/students' + req.url;
+//         console.log(fullUrl);
+//         request(fullUrl, function(err, response, body) {
+//             // JSON body
+//             if (err) {
+//                 console.log(err);
+//                 callback(false);
+//                 return;
+//             }
+//             obj = JSON.parse(body);
+//             callback(false, obj);
+//         });
+//     }, function(err, results) {
+//         console.log(results)
+//         if (_.compact(results).length == 0) {
+//             // console.log("Saw empty!");
+//             res.status(500).send("Server Error, all databases offline!");
+//             return;
+//         } else {
+//             res.send(results.clean().make_single());
+//         }
+//     });
+// };
+// exports.createStudent = function(req, res) {
+//     var uni = req.body.uni;
+//     // console.log(uni);
+//     var index = find_partition(uni, config.partitions);
+//     var fullUrl = req.protocol + '://' + host + ':' + config.partitions[index].port + '/students' + req.url;
+//     console.log(fullUrl);
+//     request.post({
+//         url: fullUrl,
+//         form: req.body
+//     }, function(err, response, body) {
+//         // console.log(response);
+//         if (err) {
+//             return res.status(500).end('Error');
+//         }
+//         if (response.statusCode != 200) {
+//             obj = JSON.parse(body);
+//             if (obj.hasOwnProperty('error')) {
+//                 return res.status(obj.error.status).end(obj.message);
+//             } else {
+//                 return res.status(response.statusCode).end(response.statusMessage);
+//             }
+//         } else {
+//             return res.status(response.statusCode).end(response.statusMessage);
+//         }
+//     });
+// };
+// exports.addCourse = function(req, res) {
+//     var uni = req.params.uni;
+//     // console.log(uni);
+//     var index = find_partition(uni, config.partitions);
+//     var fullUrl = req.protocol + '://' + host + ':' + config.partitions[index].port + '/students' + req.url;
+//     console.log(fullUrl);
+//     request.post({
+//         url: fullUrl,
+//         form: req.body
+//     }, function(err, response, body) {
+//         //console.log(response);
+//         if (err) {
+//             return res.status(500).end('Error');
+//         }
+//         if (response.statusCode != 200) {
+//             obj = JSON.parse(body);
+//             if (obj.hasOwnProperty('error')) {
+//                 return res.status(obj.error.status).end(obj.message);
+//             } else {
+//                 return res.status(response.statusCode).end(response.statusMessage);
+//             }
+//         } else {
+//             return res.status(response.statusCode).end(response.statusMessage);
+//         }
+//     });
+// };
+// exports.removeCourse = function(req, res) {
+//     var uni = req.params.uni;
+//     // console.log(uni);
+//     var index = find_partition(uni, config.partitions);
+//     var fullUrl = req.protocol + '://' + host + ':' + config.partitions[index].port + '/students' + req.url;
+//     console.log(fullUrl);
+//     request.del({
+//         url: fullUrl,
+//         form: req.body
+//     }, function(err, response, body) {
+//         //console.log(response);
+//         if (err) {
+//             return res.status(500).end('Error');
+//         }
+//         if (response.statusCode != 200) {
+//             obj = JSON.parse(body);
+//             if (obj.hasOwnProperty('error')) {
+//                 return res.status(obj.error.status).end(obj.message);
+//             } else {
+//                 return res.status(response.statusCode).end(response.statusMessage);
+//             }
+//         } else {
+//             return res.status(response.statusCode).end(response.statusMessage);
+//         }
+//     });
+// };
+// //#TODO: Better error handling
+// exports.createStudentAll = function(req, res) {
+//     //console.log(config.partitions[1].port);
+//     async.map(config.partitions, function(item, callback) {
 
-        var fullUrl = req.protocol + '://' + host + ':' + item.port + '/students' + req.url;
-        console.log(fullUrl);
-        request.post({
-            url: fullUrl,
-            form: req.body
-        }, function(err, response, body) {
-            // JSON body
-            if (err) {
-                console.log(err);
-                callback(err);
-                return;
-            }
-            //obj = JSON.parse(body);
-            callback(false, body);
-        });
-    }, function(err, results) {
-        if (err) {
-            console.log(err);
-            res.send(500, "Server Error");
-            return;
-        }
-        console.log(results);
-        res.send(results);
-    });
-};
-exports.deleteStudent = function(req, res) {
-    //console.log('Inside deleteStudent');
-    var uni = req.params.uni;
-    var index = find_partition(uni, config.partitions);
-    var fullUrl = req.protocol + '://' + host + ':' + config.partitions[index].port + '/students' + req.url;
-    console.log(fullUrl);
-    request.del({
-        url: fullUrl
-    }, function(err, response, body) {
-        if (err) {
-            return res.status(500).end('Error');
-        }
-        if (response.statusCode != 200) {
-            obj = JSON.parse(body);
-            if (obj.hasOwnProperty('error')) {
-                return res.status(obj.error.status).end(obj.message);
-            } else {
-                return res.status(response.statusCode).end(response.statusMessage);
-            }
-        } else {
-            return res.status(response.statusCode).end(response.statusMessage);
-        }
-    });
-};
-exports.deleteAttribute = function(req, res) {
-    //console.log('Inside deleteAttribute');
-    async.map(config.partitions, function(item, callback) {
+//         var fullUrl = req.protocol + '://' + host + ':' + item.port + '/students' + req.url;
+//         console.log(fullUrl);
+//         request.post({
+//             url: fullUrl,
+//             form: req.body
+//         }, function(err, response, body) {
+//             // JSON body
+//             if (err) {
+//                 console.log(err);
+//                 callback(err);
+//                 return;
+//             }
+//             //obj = JSON.parse(body);
+//             callback(false, body);
+//         });
+//     }, function(err, results) {
+//         if (err) {
+//             console.log(err);
+//             res.send(500, "Server Error");
+//             return;
+//         }
+//         console.log(results);
+//         res.send(results);
+//     });
+// };
+// exports.deleteStudent = function(req, res) {
+//     //console.log('Inside deleteStudent');
+//     var uni = req.params.uni;
+//     var index = find_partition(uni, config.partitions);
+//     var fullUrl = req.protocol + '://' + host + ':' + config.partitions[index].port + '/students' + req.url;
+//     console.log(fullUrl);
+//     request.del({
+//         url: fullUrl
+//     }, function(err, response, body) {
+//         if (err) {
+//             return res.status(500).end('Error');
+//         }
+//         if (response.statusCode != 200) {
+//             obj = JSON.parse(body);
+//             if (obj.hasOwnProperty('error')) {
+//                 return res.status(obj.error.status).end(obj.message);
+//             } else {
+//                 return res.status(response.statusCode).end(response.statusMessage);
+//             }
+//         } else {
+//             return res.status(response.statusCode).end(response.statusMessage);
+//         }
+//     });
+// };
+// exports.deleteAttribute = function(req, res) {
+//     //console.log('Inside deleteAttribute');
+//     async.map(config.partitions, function(item, callback) {
 
-        var fullUrl = req.protocol + '://' + host + ':' + item.port + '/students' + req.url;
-        console.log(fullUrl);
-        request.del({
-            url: fullUrl,
-            form: req.body
-        }, function(err, response, body) {
-            // JSON body
-            if (err) {
-                console.log(err);
-                callback(err);
-                return;
-            }
-            //obj = JSON.parse(body);
-            callback(false, body);
-        });
-    }, function(err, results) {
-        if (err) {
-            console.log(err);
-            res.send(500, "Server Error");
-            return;
-        }
-        console.log(results);
-        res.send(results);
-    });
-};
-exports.updateStudent = function(req, res) {
-    //console.log('Inside updateStudent');
-    var uni = req.params.uni;
-    var index = find_partition(uni, config.partitions);
-    var fullUrl = req.protocol + '://' + host + ':' + config.partitions[index].port + '/students' + req.url;
-    console.log(fullUrl);
-    request.put({
-        url: fullUrl,
-        form: req.body
-    }, function(err, response, body) {
-        if (err) {
-            return res.status(500).end('Error');
-        }
-        if (response.statusCode != 200) {
-            obj = JSON.parse(body);
-            if (obj.hasOwnProperty('error')) {
-                return res.status(obj.error.status).end(obj.message);
-            } else {
-                return res.status(response.statusCode).end(response.statusMessage);
-            }
-        } else {
-            return res.status(response.statusCode).end(response.statusMessage);
-        }
-    });
-};
+//         var fullUrl = req.protocol + '://' + host + ':' + item.port + '/students' + req.url;
+//         console.log(fullUrl);
+//         request.del({
+//             url: fullUrl,
+//             form: req.body
+//         }, function(err, response, body) {
+//             // JSON body
+//             if (err) {
+//                 console.log(err);
+//                 callback(err);
+//                 return;
+//             }
+//             //obj = JSON.parse(body);
+//             callback(false, body);
+//         });
+//     }, function(err, results) {
+//         if (err) {
+//             console.log(err);
+//             res.send(500, "Server Error");
+//             return;
+//         }
+//         console.log(results);
+//         res.send(results);
+//     });
+// };
+// exports.updateStudent = function(req, res) {
+//     //console.log('Inside updateStudent');
+//     var uni = req.params.uni;
+//     var index = find_partition(uni, config.partitions);
+//     var fullUrl = req.protocol + '://' + host + ':' + config.partitions[index].port + '/students' + req.url;
+//     console.log(fullUrl);
+//     request.put({
+//         url: fullUrl,
+//         form: req.body
+//     }, function(err, response, body) {
+//         if (err) {
+//             return res.status(500).end('Error');
+//         }
+//         if (response.statusCode != 200) {
+//             obj = JSON.parse(body);
+//             if (obj.hasOwnProperty('error')) {
+//                 return res.status(obj.error.status).end(obj.message);
+//             } else {
+//                 return res.status(response.statusCode).end(response.statusMessage);
+//             }
+//         } else {
+//             return res.status(response.statusCode).end(response.statusMessage);
+//         }
+//     });
+// };
 
 //Courses Microservice handling
 exports.findCourse = function(req, res) {
